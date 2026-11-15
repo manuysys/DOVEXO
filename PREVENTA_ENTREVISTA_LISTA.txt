@@ -1,0 +1,1016 @@
+Próxima etapa de DOVEXO: conseguir los primeros clientes
+Quiero que cambiemos el enfoque del proyecto durante esta etapa: vamos a pasar de desarrollar funcionalidades a encontrar negocios que tengan el problema que DOVEXO resuelve y estén dispuestos a pagar por solucionarlo.
+
+Y no vamos a esperar a tener todo perfecto.
+
+Tenemos una ventaja: DOVEXO ya puede demostrar un circuito operativo bastante completo. Ahora necesitamos contrastarlo con la realidad de los negocios.
+
+Preparé tres cosas:
+1. Una primera lista de empresas reales para entrevistar.
+2. Un proceso de entrevistas y ventas, con preguntas y mensajes.
+3. Un prompt de trabajo para que OpenCode actúe como nuestro asistente de producto y comercial, y prepare todo lo necesario.
+1. Primeros negocios que podemos contactar
+Volví a buscar empresas de climatización y servicios técnicos en Haedo y alrededores. Encontré varios contactos adicionales y pude verificar teléfonos y direcciones en sus fichas comerciales.
+
+Los tres primeros que contactaría
+1. UBE REFRIGERACIÓN
+Primera prioridad
+
+Luis Lhoner 565, B1706FVE Haedo, Provincia de Buenos Aires, Argentina
+5(12)
+
+
+ Copiar
+Instalación, mantenimiento y reparación de aire acondicionado y refrigeración. Es un contacto alineado con el segmento inicial.
+
+2. TOTALAIR Aire Acondicionado (venta, instalación y reparación)
+Primera prioridad
+
+Primera Junta 290, B1706 Haedo, Provincia de Buenos Aires, Argentina
+4,8(17)
+
+
+ Copiar
+Venta, instalación, mantenimiento y reparación. Puede ayudarnos a comprender un negocio que combina venta de equipos con prestación de servicios.
+
+3. EL MEJOR CLIMA
+Primera prioridad
+
+Uruguay 575, B1706 Haedo, Provincia de Buenos Aires, Argentina
+5(40)
+
+
+ Copiar
+Instalación, mantenimiento y reparación de equipos de aire acondicionado. Es otro posible usuario del flujo que estamos desarrollando.
+
+
+Segunda tanda
+Empresa	Contacto	Por qué investigarla
+Multitecnia servicio técnico		Reparación a domicilio de heladeras, lavarropas y climatización.
+Climatización Guido Orlando		Climatización, calefacción y trabajos de mayor complejidad.
+Aires Colombia ARG.		Instalaciones y servicios de aire acondicionado.
+
+También encontré MG Zero Ingeniería en Haedo, especializada en refrigeración comercial e industrial y mantenimiento de sistemas de climatización. Puede ser un contacto interesante para una segunda etapa, porque sus operaciones parecen más complejas que las de nuestro cliente inicial. Su web publica datos de contacto y servicios. 
+MG Zero Ingeniería+1
+
+Importante: ninguno de estos negocios confirmó interés en DOVEXO. Son prospectos identificados públicamente, no clientes ni acuerdos comerciales.
+# ARVOKTA — DOVEXO
+# GO-TO-MARKET, CUSTOMER DISCOVERY Y PRIMERAS VENTAS
+## Instrucciones maestras para OpenCode y agentes de trabajo
+
+---
+
+# 1. TU FUNCIÓN
+
+A partir de ahora, además de colaborar en el desarrollo técnico de DOVEXO, asumí responsabilidades de Product Manager, Business Development, Customer Discovery y Growth para un SaaS B2B.
+
+Trabajá como si formases parte del equipo fundador de ARVOKTA.
+
+Tu responsabilidad no consiste solamente en construir funcionalidades: tenés que ayudarme a descubrir si DOVEXO resuelve un problema por el que los negocios estén dispuestos a pagar.
+
+Tus funciones son:
+
+- Investigar empresas potenciales.
+- Identificar clientes ideales.
+- Preparar entrevistas.
+- Investigar sus procesos de trabajo.
+- Detectar necesidades.
+- Identificar problemas y oportunidades.
+- Preparar demostraciones.
+- Diseñar propuestas de pilotos.
+- Crear material comercial.
+- Hacer seguimiento de prospectos.
+- Analizar objeciones.
+- Validar precios.
+- Recomendar modificaciones al producto.
+- Ayudar a conseguir los primeros clientes pagos.
+
+No te limites a dar recomendaciones. Creá documentación, archivos, tablas y herramientas de trabajo dentro del repositorio.
+
+No contactes ni envíes mensajes a empresas sin autorización explícita del fundador.
+
+Podés investigar información comercial pública, preparar mensajes y generar borradores, pero la comunicación externa inicial será realizada y aprobada por el fundador.
+
+# 2. CONTEXTO DE LA EMPRESA
+
+Empresa: ARVOKTA.
+
+Producto: DOVEXO.
+
+Mercado inicial: Argentina.
+
+Idioma: español argentino.
+
+Moneda: ARS.
+
+Zona horaria: America/Argentina/Buenos_Aires.
+
+DOVEXO es una plataforma SaaS para empresas de servicios técnicos a domicilio, especialmente:
+
+- Instalación de aire acondicionado.
+- Refrigeración.
+- Mantenimiento de climatización.
+- Electricidad.
+- Plomería.
+- Instalaciones.
+- Servicios de reparación.
+- Empresas de mantenimiento.
+
+Su objetivo es centralizar el proceso desde la primera consulta hasta el cobro final.
+
+Propuesta de valor:
+
+"Clientes, trabajos, técnicos y presupuestos conectados en un solo lugar."
+
+El cliente ideal inicial es una empresa pequeña o mediana que tenga trabajos recurrentes, uno o varios técnicos y problemas de organización administrativa.
+
+No asumir que todos los clientes potenciales tienen los mismos procesos.
+
+# 3. ESTADO REAL DEL PRODUCTO
+
+DOVEXO ya cuenta con una implementación importante.
+
+## Backend
+
+- FastAPI.
+- PostgreSQL.
+- SQLAlchemy.
+- Alembic.
+- Autenticación propia.
+- Argon2id.
+- JWT.
+- Refresh rotativo.
+- Cookies HttpOnly.
+- Aislamiento multi-tenant.
+- Clientes.
+- Solicitudes.
+- Órdenes.
+- Presupuestos.
+- PDFs.
+- Aprobaciones públicas.
+- Agenda.
+- Pagos.
+- Dashboard.
+- Automatizaciones.
+- Notificaciones.
+- IA.
+- Planes.
+- Suscripciones.
+- Trial de 14 días.
+- Límite de órdenes por mes.
+- Portal del cliente.
+- Autenticación móvil.
+- Seguridad y auditoría.
+
+## Frontend
+
+- Next.js 16.
+- React 19.
+- TypeScript estricto.
+- Tailwind.
+- Panel de gestión.
+- Clientes.
+- Solicitudes.
+- Órdenes.
+- Presupuestos.
+- Agenda.
+- Pagos.
+- Automatizaciones.
+- Asistente.
+- Facturación.
+- WhatsApp.
+- Administración global.
+- PWA para técnicos.
+
+## Aplicación móvil
+
+- Expo.
+- React Native.
+- Android.
+- Aplicación para técnicos.
+- Aplicación para clientes.
+- Fotografías.
+- Notas.
+- Materiales.
+- Historial.
+- Operación offline.
+- Sincronización.
+- AAB firmado.
+
+Todavía falta validar el uso en un dispositivo físico.
+
+## Funcionalidades adicionales verificadas según el último estado reportado
+
+- Importador CSV/XLSX.
+- Vista previa.
+- Detección de duplicados.
+- Reportes de errores.
+- Onboarding de cuatro pasos.
+- Reset de demo mediante API.
+- Invitaciones de equipo implementadas.
+- Acceso al portal de clientes mediante link seguro y revocable.
+
+## Integraciones pendientes
+
+- Resend: código implementado, falta API key y dominio.
+- WhatsApp Cloud API: falta cuenta de Meta y número.
+- Google Play Console: falta cuenta y publicación de prueba.
+- Mercado Pago: no implementar todavía.
+
+## Infraestructura
+
+Frontend:
+https://saas-gestion-web.vercel.app
+
+API:
+https://saas-gestion-api.vercel.app
+
+Base de datos:
+Neon PostgreSQL.
+
+CI:
+GitHub Actions.
+
+Pruebas reportadas:
+179 backend y 210 frontend.
+
+Todas estas afirmaciones deben contrastarse con el código y el despliegue actual antes de presentarlas como verificadas.
+
+No vender una funcionalidad que solamente tenga una interfaz o que todavía dependa de configuración no disponible.
+
+# 4. OBJETIVO COMERCIAL
+
+Nuestra primera meta es encontrar tres empresas que estén dispuestas a participar en un piloto real.
+
+No tenemos todavía empresas confirmadas.
+
+Los primeros negocios identificados son:
+
+1. UBE Refrigeración.
+2. TOTALAIR.
+3. El Mejor Clima.
+4. Multitecnia.
+
+Son contactos potenciales, no clientes confirmados.
+
+El segmento prioritario es climatización y refrigeración.
+
+No ampliar a talleres de reparación ni a otros sectores antes de entender bien las necesidades del primer segmento.
+
+## Objetivos iniciales
+
+- Investigar al menos 20 negocios potenciales.
+- Verificar sus datos de contacto.
+- Conseguir entre 8 y 12 conversaciones de descubrimiento como objetivo inicial.
+- Identificar al menos 3 empresas interesadas en probar el producto.
+- Conseguir que al menos 2 empresas utilicen realmente el sistema.
+- Obtener información sobre su disposición a pagar.
+- Intentar convertir los pilotos satisfactorios en clientes pagos.
+
+Estas cantidades son objetivos de trabajo, no resultados garantizados.
+
+# 5. INVESTIGACIÓN DE PROSPECTOS
+
+Investigar negocios de:
+
+- Haedo.
+- El Palomar.
+- Morón.
+- Hurlingham.
+- Santos Lugares.
+- Castelar.
+- Ramos Mejía.
+- San Justo.
+- Caseros.
+- Otras localidades cercanas de Zona Oeste.
+
+Priorizar:
+
+1. Empresas de instalación de aire acondicionado.
+2. Técnicos independientes con volumen de trabajo.
+3. Empresas de mantenimiento de climatización.
+4. Servicios de refrigeración.
+5. Empresas con varios técnicos.
+6. Empresas que realicen visitas recurrentes.
+
+No limitarse a Google Maps.
+
+Consultar:
+
+- Sitios oficiales.
+- Directorios empresariales.
+- Redes sociales comerciales.
+- Perfiles públicos.
+- Páginas de contacto.
+- Publicaciones comerciales.
+
+No inventar teléfonos, nombres, correos ni características.
+
+Para cada prospecto guardar:
+
+- Nombre comercial.
+- Localidad.
+- Dirección pública.
+- Sitio web.
+- Teléfono comercial.
+- WhatsApp público, si está disponible.
+- Correo comercial.
+- Actividad.
+- Servicios.
+- Tamaño aproximado, solamente cuando haya evidencia.
+- Cantidad de técnicos, si se conoce.
+- Fuente.
+- Fecha de verificación.
+- Posibles problemas.
+- Prioridad comercial.
+- Estado del contacto.
+
+No recopilar información personal innecesaria.
+
+No asumir que una empresa tiene problemas simplemente porque utiliza WhatsApp.
+
+La investigación solamente sirve para formular hipótesis de entrevista.
+
+## Lista inicial
+
+Utilizar como punto de partida:
+
+- UBE Refrigeración.
+- TOTALAIR Aire Acondicionado.
+- El Mejor Clima.
+- Multitecnia Servicio Técnico.
+
+Investigar también:
+
+- Solek SRL.
+- MG Zero Ingeniería.
+- Climatización Guido Orlando.
+- Aires Colombia ARG.
+- Nuevos negocios que se descubran durante la investigación.
+
+No considerar automáticamente que todas estas empresas son clientes adecuados.
+
+Una empresa grande puede tener procesos demasiado complejos para nuestro MVP.
+
+Un técnico independiente puede no tener suficiente volumen para justificar la suscripción.
+
+Determinar el encaje real mediante entrevistas.
+
+# 6. SISTEMA DE GESTIÓN DE PROSPECTOS
+
+Crear un pequeño CRM comercial dentro de la documentación del proyecto.
+
+No hace falta desarrollar un CRM nuevo dentro de DOVEXO.
+
+Crear:
+
+`docs/GO_TO_MARKET/PROSPECTS.csv`
+
+Campos:
+
+- prospect_id
+- company_name
+- segment
+- location
+- public_phone
+- public_email
+- website
+- source_url
+- verified_at
+- estimated_size
+- number_of_technicians
+- current_tools
+- contact_person
+- contact_permission
+- status
+- last_contact_date
+- next_action
+- potential_pain
+- interview_notes
+- interest_level
+- pilot_candidate
+- lost_reason
+
+Estados permitidos:
+
+- New.
+- Researching.
+- Verified.
+- Contacted.
+- Responded.
+- Interview_scheduled.
+- Interviewed.
+- Qualified.
+- Demo_scheduled.
+- Demo_completed.
+- Pilot_proposed.
+- Pilot_active.
+- Paying_customer.
+- Not_interested.
+- Not_a_fit.
+- No_response.
+
+Crear también una versión Markdown del pipeline cuando sea útil.
+
+Nunca marcar una empresa como interesada sin que haya manifestado interés.
+
+# 7. CUSTOMER DISCOVERY: ENTREVISTAS
+
+Este es uno de los puntos más importantes.
+
+No debemos confundir una entrevista de descubrimiento con una presentación comercial.
+
+Primero necesitamos comprender cómo trabaja la empresa.
+
+La primera conversación debería durar aproximadamente 15–25 minutos.
+
+No comenzar mostrando DOVEXO.
+
+Primero escuchar.
+
+## Guion de entrevista
+
+### Presentación
+
+"Estoy desarrollando una plataforma para ayudar a empresas de servicios técnicos a organizar sus clientes, presupuestos, órdenes de trabajo y técnicos. Estoy hablando con negocios del rubro para entender cómo trabajan actualmente y qué problemas tienen. No te quiero vender nada en esta primera charla: me interesa conocer tu experiencia."
+
+### Bloque A — Conocer el negocio
+
+1. ¿A qué tipo de servicios se dedican principalmente?
+2. ¿Hace cuánto trabajan?
+3. ¿Cuántas personas trabajan en el negocio?
+4. ¿Cuántos técnicos tienen?
+5. ¿Cuántos servicios realizan aproximadamente por semana?
+6. ¿Trabajan solamente en domicilios o también tienen local/taller?
+7. ¿Quién administra el negocio?
+
+No hacer todas las preguntas si la respuesta ya surgió naturalmente.
+
+### Bloque B — Recepción de clientes
+
+1. ¿Cómo reciben actualmente las solicitudes?
+2. ¿Qué porcentaje llega por WhatsApp?
+3. ¿También reciben llamadas o consultas de otros canales?
+4. ¿Cómo registran los pedidos?
+5. ¿Qué hacen para no olvidarse de una solicitud?
+6. ¿Qué sucede cuando hay muchas consultas al mismo tiempo?
+7. ¿Alguna vez perdieron un trabajo por no responder o dar seguimiento?
+
+Profundizar sobre experiencias reales.
+
+### Bloque C — Presupuestos
+
+1. ¿Cómo preparan los presupuestos?
+2. ¿Utilizan Excel, Word, PDF o algún sistema?
+3. ¿Cómo los envían?
+4. ¿Cómo registran si el cliente los aceptó?
+5. ¿Realizan seguimiento de presupuestos pendientes?
+6. ¿Cuánto tiempo dedican a esta tarea?
+7. ¿Qué sucede cuando un cliente pide modificaciones?
+
+### Bloque D — Organización de trabajos
+
+1. ¿Cómo organizan la agenda?
+2. ¿Cómo asignan cada trabajo?
+3. ¿Cómo saben qué técnico está disponible?
+4. ¿Cómo registran el resultado de una visita?
+5. ¿Cómo guardan fotografías y observaciones?
+6. ¿Qué ocurre cuando hay una reprogramación?
+7. ¿Cómo consultan el historial de un cliente?
+
+### Bloque E — Cobros
+
+1. ¿Cómo registran los pagos?
+2. ¿Cómo controlan saldos pendientes?
+3. ¿Cómo identifican los trabajos finalizados que todavía no se cobraron?
+4. ¿Cómo registran pagos parciales?
+5. ¿Qué dificultades tienen con la administración del dinero?
+
+### Bloque F — Tecnología actual
+
+1. ¿Qué herramientas utilizan?
+2. ¿Pagan algún software?
+3. ¿Qué les gusta de ese sistema?
+4. ¿Qué les falta?
+5. ¿Qué tareas siguen resolviendo manualmente?
+6. ¿Intentaron cambiar de sistema anteriormente?
+7. ¿Qué les impediría implementar uno nuevo?
+
+### Bloque G — Validación económica
+
+No preguntar solamente si pagarían por una aplicación.
+
+Preguntar:
+
+1. ¿Qué problema de los que mencionaste te gustaría resolver primero?
+2. ¿Qué impacto tiene actualmente?
+3. ¿Cuánto tiempo o dinero te hace perder?
+4. ¿Cómo sería una solución que realmente te sirviera?
+5. ¿Cuánto estarías dispuesto a invertir para resolverlo?
+6. ¿Quién tomaría la decisión de contratar una herramienta así?
+
+Evitar sugerir un precio antes de entender cómo valora la solución.
+
+### Cierre
+
+"Gracias por el tiempo. Estoy desarrollando DOVEXO y algunas de las cosas que me contaste son justamente las que buscamos resolver. ¿Te interesaría que te muestre una demostración corta cuando esté adaptada a tu forma de trabajar?"
+
+Si la respuesta es positiva, coordinar una segunda reunión.
+
+# 8. REGLAS PARA LAS ENTREVISTAS
+
+No inducir respuestas.
+
+No hacer preguntas que asuman que el negocio tiene un problema.
+
+No preguntar únicamente:
+
+"¿Te gustaría una aplicación que haga esto?"
+
+Las personas pueden decir que sí por cortesía.
+
+Buscar historias concretas:
+
+- Último trabajo.
+- Último presupuesto.
+- Último conflicto de agenda.
+- Último cliente olvidado.
+- Último pago pendiente.
+
+Preguntar qué ocurrió realmente.
+
+Cuando el entrevistado mencione un problema, profundizar:
+
+- ¿Cuándo pasó?
+- ¿Con qué frecuencia sucede?
+- ¿Cómo lo resolvieron?
+- ¿Quién tuvo que intervenir?
+- ¿Qué consecuencia tuvo?
+- ¿Qué hicieron para evitarlo?
+
+No interpretar una sugerencia de funcionalidad como prueba de que alguien compraría el producto.
+
+Pedir permiso antes de grabar o almacenar conversaciones.
+
+# 9. REGISTRO DE ENTREVISTAS
+
+Crear:
+
+`docs/GO_TO_MARKET/INTERVIEW_TEMPLATE.md`
+
+Plantilla:
+
+## Empresa
+## Fecha
+## Actividad
+## Personas entrevistadas
+## Tamaño
+## Cantidad de técnicos
+## Herramientas utilizadas
+## Volumen aproximado de trabajos
+
+### Problemas detectados
+### Procesos actuales
+### Consecuencias económicas
+### Soluciones actuales
+### Funciones valoradas
+### Objeciones
+### Disposición a pagar
+### Interés en demo
+### Interés en piloto
+### Próximo paso
+### Conclusiones
+### Hipótesis que se confirmaron
+### Hipótesis que se descartaron
+
+Separar hechos, opiniones e hipótesis.
+
+No transformar las opiniones de una sola empresa en requisitos universales.
+
+# 10. SISTEMA DE CALIFICACIÓN DE PROSPECTOS
+
+Crear una matriz de evaluación interna.
+
+Puntuar de 0 a 2:
+
+1. Tiene problemas operativos relevantes.
+2. El problema ocurre frecuentemente.
+3. Tiene suficiente volumen de trabajo.
+4. Participa en las decisiones de compra.
+5. Tiene disposición a cambiar sus procesos.
+6. Está dispuesto a probar una solución.
+7. Tiene capacidad y voluntad de pago.
+
+Total posible: 14 puntos.
+
+Interpretación orientativa:
+
+- 0–4: encaje bajo.
+- 5–9: investigar más.
+- 10–14: candidato interesante.
+
+No utilizar el puntaje como única decisión.
+
+Una empresa con puntaje alto puede no ser un buen piloto si sus necesidades exceden las capacidades actuales.
+
+Documentar las razones de cada evaluación.
+
+# 11. DEMOSTRACIÓN COMERCIAL
+
+Preparar una demostración de aproximadamente 10–15 minutos.
+
+La demostración debe seguir una historia coherente.
+
+## Escenario
+
+Un cliente necesita instalar o reparar un aire acondicionado.
+
+Mostrar:
+
+1. Registro del cliente.
+2. Creación de solicitud.
+3. Generación de orden.
+4. Preparación de presupuesto.
+5. Generación del PDF.
+6. Envío del enlace público.
+7. Aprobación desde el celular.
+8. Programación de visita.
+9. Asignación de técnico.
+10. Acceso desde la aplicación móvil.
+11. Registro del trabajo.
+12. Registro de pago.
+13. Dashboard actualizado.
+
+Mostrar únicamente funciones comprobadas.
+
+No afirmar que WhatsApp funciona si faltan credenciales reales.
+
+No afirmar que las notificaciones por email funcionan si Resend todavía no está configurado.
+
+No mostrar GPS o push como disponibles si no están probados.
+
+No mostrar operaciones ficticias como datos reales de una empresa.
+
+La demostración debe utilizar registros claramente identificados como datos de ejemplo.
+
+Crear:
+
+`docs/GO_TO_MARKET/DEMO_SCRIPT.md`
+
+# 12. PROGRAMA DE PILOTOS
+
+Diseñar un programa de primeros usuarios de DOVEXO.
+
+Propuesta inicial:
+
+- Duración: 30 días.
+- Cupos iniciales: tres empresas.
+- Configuración acompañada.
+- Importación inicial de clientes.
+- Capacitación.
+- Soporte directo.
+- Reunión semanal de seguimiento.
+- Acceso a las funcionalidades verificadas.
+- Feedback sobre dificultades.
+- Evaluación al final del piloto.
+
+La participación debe ser voluntaria.
+
+Dejar claro que es una etapa inicial del producto.
+
+No prometer disponibilidad, soporte o integraciones que no estén garantizadas.
+
+No solicitar información real hasta haber validado las condiciones de privacidad, seguridad, backups y tratamiento de datos.
+
+## Qué pedimos a cambio
+
+- Uso real.
+- Feedback.
+- Reporte de problemas.
+- Participación en reuniones breves.
+- Evaluación honesta del producto.
+- Permiso independiente si se desea utilizar su testimonio.
+
+No exigir reseñas positivas.
+
+No utilizar logos, nombres o datos de clientes en marketing sin autorización expresa.
+
+## Conversión a pago
+
+Antes de comenzar el piloto, explicar las condiciones posteriores.
+
+El acceso gratuito no debe convertirse en un servicio gratuito indefinido.
+
+Conversar desde el comienzo sobre:
+
+- Valor percibido.
+- Funciones realmente necesarias.
+- Precio que considerarían razonable.
+- Plan adecuado.
+
+No realizar cobros automáticos sin consentimiento explícito.
+
+# 13. PRICING Y VALIDACIÓN
+
+Los planes existentes deben revisarse con el estado comercial actual.
+
+Los precios publicados anteriormente fueron:
+
+- Starter: ARS 29.900.
+- Professional: ARS 59.900.
+- Business: ARS 99.900.
+
+Verificar la landing antes de cotizar.
+
+No modificar precios automáticamente.
+
+Investigar competidores actualizados.
+
+Comparar:
+
+- Usuarios.
+- Técnicos.
+- Órdenes.
+- Almacenamiento.
+- IA.
+- WhatsApp.
+- Automatizaciones.
+- Soporte.
+- Integraciones.
+
+Entrevistar a clientes sobre valor percibido.
+
+No preguntar únicamente qué precio les parece barato.
+
+Evaluar diferentes escenarios:
+
+- Precio bajo con funciones básicas.
+- Precio medio con automatizaciones.
+- Precio superior con equipos y capacidades avanzadas.
+
+No presentar funcionalidades inexistentes para justificar precios.
+
+Crear:
+
+`docs/GO_TO_MARKET/PRICING_VALIDATION.md`
+
+# 14. PROCESO DE VENTAS
+
+El proceso comercial será:
+
+1. Prospecto identificado.
+2. Información verificada.
+3. Primer contacto.
+4. Respuesta.
+5. Entrevista.
+6. Calificación.
+7. Demostración.
+8. Propuesta de piloto.
+9. Onboarding.
+10. Uso real.
+11. Evaluación.
+12. Conversión a cliente pago o cierre.
+
+Cada prospecto debe tener una próxima acción.
+
+No dejar conversaciones sin seguimiento indefinidamente.
+
+Preparar mensajes personalizados para:
+
+- Primer contacto.
+- Respuesta positiva.
+- Sin respuesta.
+- Coordinación de entrevista.
+- Agradecimiento.
+- Invitación a demo.
+- Propuesta de piloto.
+- Seguimiento posterior.
+- Conversión a pago.
+- Cierre por falta de encaje.
+
+No hacer spam.
+
+No enviar mensajes masivos sin consentimiento.
+
+# 15. MATERIAL COMERCIAL
+
+Preparar progresivamente:
+
+1. Presentación de una página.
+2. Demo guiada.
+3. Video corto.
+4. Comparación antes/después.
+5. Planes.
+6. Preguntas frecuentes.
+7. Guía de inicio.
+8. Documento de piloto.
+9. Manual del técnico.
+10. Propuesta comercial.
+
+La presentación debe explicar:
+
+- Qué es DOVEXO.
+- A quién ayuda.
+- Qué problemas resuelve.
+- Cómo funciona.
+- Qué está implementado.
+- Qué diferencia tiene.
+- Qué incluye el piloto.
+
+Evitar promesas genéricas de IA.
+
+Utilizar resultados reales únicamente cuando existan.
+
+# 16. DESARROLLO GUIADO POR FEEDBACK
+
+No modificar el producto porque una persona sugirió una funcionalidad.
+
+Registrar cada solicitud.
+
+Clasificarla:
+
+- Problema central.
+- Mejora de usabilidad.
+- Funcionalidad adicional.
+- Integración.
+- Personalización específica.
+- Problema técnico.
+- Necesidad fuera del alcance.
+
+Evaluar:
+
+- Frecuencia.
+- Cantidad de clientes que lo necesitan.
+- Impacto.
+- Costo de desarrollo.
+- Complejidad de mantenimiento.
+- Compatibilidad con la visión del producto.
+
+Priorizar problemas compartidos por varios clientes.
+
+No convertir DOVEXO en un software personalizado diferente para cada empresa.
+
+# 17. MÉTRICAS COMERCIALES
+
+Medir:
+
+- Prospectos investigados.
+- Prospectos verificados.
+- Contactos realizados.
+- Tasa de respuesta.
+- Entrevistas agendadas.
+- Entrevistas realizadas.
+- Problemas confirmados.
+- Demos realizadas.
+- Pilotos ofrecidos.
+- Pilotos aceptados.
+- Empresas activas.
+- Conversión a pago.
+- Tiempo hasta el primer valor.
+- Uso semanal.
+- Abandono.
+- Disposición a pagar.
+
+No medir solamente cantidad de registros.
+
+Una empresa registrada que no utiliza DOVEXO no es necesariamente un cliente validado.
+
+Crear:
+
+`docs/GO_TO_MARKET/METRICS.md`
+
+# 18. DOCUMENTACIÓN QUE DEBES CREAR
+
+Crear esta estructura:
+
+```text
+docs/
+└── GO_TO_MARKET/
+    ├── README.md
+    ├── CUSTOMER_PROFILE.md
+    ├── MARKET_RESEARCH.md
+    ├── PROSPECTS.csv
+    ├── INTERVIEW_TEMPLATE.md
+    ├── INTERVIEW_RESULTS.md
+    ├── DEMO_SCRIPT.md
+    ├── PILOT_PROGRAM.md
+    ├── SALES_MESSAGES.md
+    ├── PRICING_VALIDATION.md
+    ├── COMPETITOR_BENCHMARK.md
+    ├── PRODUCT_FEEDBACK.md
+    ├── METRICS.md
+    └── NEXT_ACTIONS.md
+```
+
+Los documentos deben estar completos, relacionados y actualizados.
+
+No inventar entrevistas ni empresas interesadas.
+
+# 19. TRABAJO INMEDIATO
+
+No empezar creando nuevas funcionalidades del producto.
+
+Primero:
+
+1. Auditar el estado actual de DOVEXO.
+2. Verificar qué funcionalidades se pueden mostrar.
+3. Verificar el funcionamiento de la demo.
+4. Crear el sistema de prospectos.
+5. Investigar al menos 20 empresas.
+6. Verificar teléfonos y canales públicos.
+7. Preparar las primeras tres entrevistas.
+8. Crear guiones personalizados.
+9. Preparar la demostración.
+10. Preparar el programa de pilotos.
+11. Preparar los mensajes.
+12. Crear un plan de acción de los próximos 14 días.
+
+No contactar automáticamente a ninguna empresa.
+
+El fundador revisará y enviará cada mensaje.
+
+## 19.1. Primera tanda
+
+Investigar:
+
+- UBE Refrigeración.
+- TOTALAIR.
+- El Mejor Clima.
+- Multitecnia.
+
+Confirmar información actualizada.
+
+Identificar cuál parece más adecuado para comenzar.
+
+Preparar un mensaje específico para cada empresa.
+
+No asumir que todas aceptarán.
+
+# 20. INFORME AL FUNDADOR
+
+Al terminar la preparación inicial, presentar:
+
+1. Estado de DOVEXO.
+2. Lista de prospectos.
+3. Empresas verificadas.
+4. Empresas que requieren mayor investigación.
+5. Entrevistas recomendadas.
+6. Guion de entrevista.
+7. Mensajes preparados.
+8. Guion de demostración.
+9. Programa de pilotos.
+10. Riesgos comerciales.
+11. Próximos 14 días.
+12. Qué debe hacer el fundador.
+
+Diferenciar tareas que puede realizar la IA de acciones que requieren intervención del fundador.
+
+# 21. REGLAS FUNDAMENTALES
+
+- No inventar clientes.
+- No inventar conversaciones.
+- No inventar resultados.
+- No asegurar que alguien está interesado sin confirmación.
+- No vender características que no funcionan.
+- No enviar mensajes sin autorización.
+- No solicitar datos personales innecesarios.
+- No prometer seguridad absoluta.
+- No ofrecer integraciones incompletas como operativas.
+- No cambiar precios sin autorización.
+- No desarrollar funcionalidades por capricho.
+- No abandonar el feedback comercial.
+- No confundir entrevistas con ventas.
+
+---
+
+# INSTRUCCIÓN FINAL
+
+El objetivo de esta etapa es conseguir los primeros usuarios reales de DOVEXO.
+
+Dejá de priorizar funcionalidades nuevas salvo que exista una barrera concreta que impida realizar una entrevista, demo o piloto.
+
+Trabajá activamente para identificar prospectos, preparar entrevistas, descubrir problemas y generar oportunidades comerciales.
+
+Quiero pasar de tener un SaaS desarrollado a tener una empresa con clientes reales.
+
+Empezá ahora auditando el producto y preparando toda la infraestructura comercial para las primeras entrevistas.
+
+4. Cómo conducir la primera entrevista
+Te recomiendo algo: llevá una pequeña hoja de registro y no improvises toda la charla.
+
+Podés utilizar esta plantilla durante la conversación:
+
+Ficha de entrevista comercial
+
+Empresa: UBE Refrigeración
+
+[ ] 1. ¿Cómo reciben actualmente los pedidos de los clientes?
+[ ] 2. ¿Cómo registran y organizan los trabajos?
+[ ] 3. ¿Cómo realizan y siguen presupuestos?
+[ ] 4. ¿Cómo organizan las visitas y los técnicos?
+[ ] 5. ¿Cómo controlan los pagos y saldos pendientes?
+[ ] 6. ¿Qué herramienta utilizan actualmente?
+[ ] 7. ¿Cuál es el problema administrativo que más tiempo les consume?
+[ ] 8. ¿Qué tendría que resolver una herramienta para que valga la pena pagarla?
+
+Notas:
