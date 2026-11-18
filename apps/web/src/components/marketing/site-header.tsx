@@ -27,14 +27,14 @@ export function SiteHeader() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 border-b text-white transition-[background-color,border-color,backdrop-filter] duration-300",
         scrolled
-          ? "border-white/10 bg-ink/85 backdrop-blur-md"
+          ? "border-white/10 bg-deep/85 backdrop-blur-md"
           : "border-transparent bg-transparent",
       )}
     >
       <a
         href="#contenido"
         className={cn(
-          "sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:rounded-lg focus:bg-amber focus:px-3 focus:py-2 focus:font-semibold focus:text-ink",
+          "sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:rounded-lg focus:bg-primary focus:px-3 focus:py-2 focus:font-semibold focus:text-white",
           focusDark,
         )}
       >
@@ -48,9 +48,9 @@ export function SiteHeader() {
         >
           <span
             aria-hidden="true"
-            className="grid size-8 place-items-center rounded-lg border border-white/15 bg-mk-ink-2 font-display text-sm font-semibold text-amber"
+            className="grid size-8 place-items-center rounded-lg border border-white/15 bg-primary font-display text-sm font-semibold text-white"
           >
-            A
+            D
           </span>
           <span className="font-display text-lg font-semibold tracking-tight">{brand.name}</span>
         </Link>
@@ -83,7 +83,7 @@ export function SiteHeader() {
           <Link
             href="/register"
             className={cn(
-              "hidden rounded-lg bg-amber px-4 py-2 text-sm font-semibold text-ink hover:brightness-105 md:inline-flex",
+              "hidden rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110 md:inline-flex",
               focusDark,
             )}
           >

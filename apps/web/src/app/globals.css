@@ -252,6 +252,28 @@ body {
     0 12px 40px -12px rgb(245 158 11 / 0.7);
 }
 
+.mk-glow-primary {
+  box-shadow:
+    0 0 0 1px rgb(49 94 251 / 0.5),
+    0 14px 40px -14px rgb(49 94 251 / 0.8);
+}
+
+@keyframes mk-route-dash {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+.mk-route-dash {
+  animation: mk-route-dash 2.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-route-dash {
+    animation: none;
+  }
+}
+
 @keyframes mk-rise {
   from {
     opacity: 0;
