@@ -37,6 +37,7 @@ type TechTokens = { accessToken: string; refreshToken: string };
 
 let techTokens: TechTokens | null = null;
 let techTokensRefreshedHandler: ((tokens: TechTokens) => void) | null = null;
+let refreshPromise: Promise<TechTokens> | null = null;
 
 export function setTechTokens(tokens: TechTokens | null) {
   techTokens = tokens;
@@ -88,21 +89,43 @@ async function rawRequest<T>(
   return parseResponse<T>(response);
 }
 
-async function refreshTechTokens(): Promise<TechTokens> {
-  if (!techTokens?.refreshToken) {
-    throw new ApiError(401, "Sesión vencida");
-  }
+async function performTechRefresh(refreshToken: string): Promise<TechTokens> {
   const data = await rawRequest<{
     access_token: string;
     refresh_token: string;
   }>("/api/v1/auth/mobile/refresh", {
     method: "POST",
-    body: JSON.stringify({ refresh_token: techTokens.refreshToken }),
+    body: JSON.stringify({ refresh_token: refreshToken }),
   });
   const next = { accessToken: data.access_token, refreshToken: data.refresh_token };
   techTokens = next;
   techTokensRefreshedHandler?.(next);
   return next;
+}
+
+/*
+ * Single-flight: si dos requests reciben 401 a la vez, comparten una sola
+ * rotación. Sin esto, la segunda usa un refresh ya rotado y puede cerrar la
+ * sesión aunque la primera haya renovado bien.
+ */
+function refreshTechTokens(): Promise<TechTokens> {
+  const current = techTokens;
+  if (!current?.refreshToken) {
+    return Promise.reject(new ApiError(401, "Sesión vencida"));
+  }
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  const pending = performTechRefresh(current.refreshToken);
+  refreshPromise = pending;
+  const clear = () => {
+    if (refreshPromise === pending) {
+      refreshPromise = null;
+    }
+  };
+  void pending.then(clear, clear);
+  return pending;
 }
 
 async function techRequest<T>(
@@ -114,11 +137,17 @@ async function techRequest<T>(
   if (tenantId) {
     headers.set("X-Tenant-ID", tenantId);
   }
+  const usedAccessToken = techTokens?.accessToken;
   try {
-    return await rawRequest<T>(path, { ...init, headers }, techTokens?.accessToken);
+    return await rawRequest<T>(path, { ...init, headers }, usedAccessToken);
   } catch (error) {
     if (error instanceof ApiError && error.status === 401 && techTokens?.refreshToken) {
-      const next = await refreshTechTokens();
+      // Si otra request ya rotó el token mientras esta volaba, reintentar con
+      // el vigente en vez de disparar una segunda rotación.
+      const next =
+        techTokens.accessToken !== usedAccessToken
+          ? techTokens
+          : await refreshTechTokens();
       return rawRequest<T>(path, { ...init, headers }, next.accessToken);
     }
     throw error;
