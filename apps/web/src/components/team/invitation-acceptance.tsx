@@ -187,6 +187,7 @@ export function InvitationAcceptance({ token }: { token: string }) {
         </div>
       ) : (
         <form
+          method="post"
           onSubmit={handleSubmit((values) => acceptMutation.mutate(values))}
           className="mt-6 space-y-4"
           noValidate

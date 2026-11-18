@@ -2,13 +2,15 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { api, errorMessage, type WorkOrderMaterialInput } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { ApiError, api, errorMessage, type WorkOrderMaterialInput } from "@/lib/api";
 import { MATERIAL_UNITS, normalizeQuantity } from "@/lib/technician";
-import { formatDate, formatNumber } from "@/lib/utils";
+import { cn, formatDate, formatNumber } from "@/lib/utils";
 
 const materialSchema = z.object({
   description: z
@@ -33,6 +35,15 @@ type Props = {
   orderId: string;
 };
 
+function materialErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    if (error.status === 401) return "Tu sesión venció. Volvé a iniciar sesión.";
+    if (error.status === 403) return "No tenés permiso para registrar materiales en este trabajo.";
+    if (error.status === 422) return "Revisá la descripción y la cantidad.";
+  }
+  return errorMessage(error, "No pudimos registrar el material. Reintentá.");
+}
+
 export function TechnicianMaterials({ tenantId, orderId }: Props) {
   const queryClient = useQueryClient();
   const [added, setAdded] = useState(false);
@@ -49,26 +60,34 @@ export function TechnicianMaterials({ tenantId, orderId }: Props) {
     handleSubmit,
     reset,
     setError,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<MaterialFormValues>({
     resolver: zodResolver(materialSchema),
-    defaultValues: { description: "", quantity: "", unit: "u" },
+    defaultValues: { description: "", quantity: "1", unit: "u" },
   });
 
   const createMutation = useMutation({
     mutationFn: (input: WorkOrderMaterialInput) =>
       api.technicianWorkOrders.materials.create(tenantId, orderId, input),
     onSuccess: () => {
-      reset({ description: "", quantity: "", unit: "u" });
+      reset({ description: "", quantity: "1", unit: "u" });
       setAdded(true);
       void queryClient.invalidateQueries({ queryKey: materialsKey });
     },
   });
 
   const materials = materialsQuery.data ?? [];
-  const serverError = createMutation.isError
-    ? errorMessage(createMutation.error, "No se pudo registrar el material")
-    : null;
+  const serverError = createMutation.isError ? materialErrorMessage(createMutation.error) : null;
+  const selectedUnit = watch("unit");
+
+  function adjustQuantity(delta: number) {
+    const current = normalizeQuantity(watch("quantity"));
+    const base = current ? Number(current) : 0;
+    const next = Math.max(0.5, Math.round((base + delta) * 1000) / 1000);
+    setValue("quantity", String(next).replace(".", ","), { shouldValidate: false });
+  }
 
   function onSubmit(values: MaterialFormValues) {
     const quantity = normalizeQuantity(values.quantity);
@@ -84,114 +103,173 @@ export function TechnicianMaterials({ tenantId, orderId }: Props) {
   return (
     <section
       aria-labelledby="tech-materials-title"
-      className="rounded-2xl border border-zinc-200 bg-white p-4"
+      className="rounded-ds-lg border border-border bg-surface p-4 shadow-card"
     >
-      <h2 id="tech-materials-title" className="text-base font-semibold">
-        Materiales usados
-      </h2>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 id="tech-materials-title" className="text-h4 text-text">
+            Materiales usados
+          </h2>
+          <p className="text-caption mt-0.5 text-text-2">Registrá rápido lo que usaste.</p>
+        </div>
+        <span className="text-caption text-text-2">
+          {materials.length === 1 ? "1 material" : `${materials.length} materiales`}
+        </span>
+      </div>
 
       <form className="mt-3 space-y-3" onSubmit={handleSubmit(onSubmit)}>
         <div>
-          <label
-            htmlFor="material-description"
-            className="mb-1 block text-sm font-medium text-zinc-800"
-          >
-            Descripción
+          <label htmlFor="material-description" className="text-label mb-1 block text-text-2">
+            Material
           </label>
           <input
             id="material-description"
             type="text"
             placeholder="Ej.: Caño de cobre 1/4"
             aria-invalid={errors.description ? true : undefined}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-900"
+            className="min-h-12 w-full rounded-ds-md border border-border bg-surface px-3 text-base text-text outline-none placeholder:text-text-2/70 focus:border-primary focus:ring-2 focus:ring-primary/20"
             {...register("description")}
           />
           {errors.description && (
-            <p className="mt-1 text-sm text-red-700">{errors.description.message}</p>
+            <p className="text-small mt-1 text-danger-strong">{errors.description.message}</p>
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label
-              htmlFor="material-quantity"
-              className="mb-1 block text-sm font-medium text-zinc-800"
+        <div>
+          <label htmlFor="material-quantity" className="text-label mb-1 block text-text-2">
+            Cantidad
+          </label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => adjustQuantity(-0.5)}
+              aria-label="Restar cantidad"
+              className="inline-flex min-h-12 min-w-12 shrink-0 items-center justify-center rounded-ds-md border border-border bg-surface text-text transition-colors hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
             >
-              Cantidad
-            </label>
+              <Minus className="h-5 w-5" aria-hidden="true" />
+            </button>
             <input
               id="material-quantity"
               type="text"
               inputMode="decimal"
               placeholder="1"
               aria-invalid={errors.quantity ? true : undefined}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-900"
+              aria-describedby={
+                errors.quantity ? "material-quantity-error" : "material-quantity-hint"
+              }
+              className="numeric min-h-12 w-full rounded-ds-md border border-border bg-surface px-2 text-center text-base text-text outline-none placeholder:text-text-2/70 focus:border-primary focus:ring-2 focus:ring-primary/20"
               {...register("quantity")}
             />
-            {errors.quantity && (
-              <p className="mt-1 text-sm text-red-700">{errors.quantity.message}</p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="material-unit" className="mb-1 block text-sm font-medium text-zinc-800">
-              Unidad
-            </label>
-            <select
-              id="material-unit"
-              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base"
-              {...register("unit")}
+            <button
+              type="button"
+              onClick={() => adjustQuantity(0.5)}
+              aria-label="Sumar cantidad"
+              className="inline-flex min-h-12 min-w-12 shrink-0 items-center justify-center rounded-ds-md border border-border bg-surface text-text transition-colors hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
             >
-              {MATERIAL_UNITS.map((unit) => (
-                <option key={unit} value={unit}>
-                  {unit}
-                </option>
-              ))}
-            </select>
-            {errors.unit && <p className="mt-1 text-sm text-red-700">{errors.unit.message}</p>}
+              <Plus className="h-5 w-5" aria-hidden="true" />
+            </button>
           </div>
+          {errors.quantity ? (
+            <p id="material-quantity-error" className="text-small mt-1 text-danger-strong">
+              {errors.quantity.message}
+            </p>
+          ) : (
+            <p id="material-quantity-hint" className="text-caption mt-1 text-text-2">
+              Podés usar decimales con coma: 1,5.
+            </p>
+          )}
         </div>
 
+        <fieldset>
+          <legend className="text-label text-text-2">Unidad</legend>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {MATERIAL_UNITS.map((unit) => {
+              const active = selectedUnit === unit;
+              return (
+                <button
+                  key={unit}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setValue("unit", unit, { shouldValidate: true })}
+                  className={cn(
+                    "text-small min-h-11 min-w-11 rounded-ds-md border px-3 font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none",
+                    active
+                      ? "border-primary bg-primary text-white"
+                      : "border-border bg-surface text-text hover:bg-surface-2",
+                  )}
+                >
+                  {unit}
+                </button>
+              );
+            })}
+          </div>
+          {errors.unit && (
+            <p className="text-small mt-1 text-danger-strong">{errors.unit.message}</p>
+          )}
+        </fieldset>
+
         {serverError && (
-          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p
+            role="alert"
+            className="text-small rounded-ds-sm bg-danger-soft px-3 py-2 text-danger-strong"
+          >
             {serverError}
           </p>
         )}
         {added && !serverError && (
-          <p role="status" className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+          <p
+            role="status"
+            className="text-small rounded-ds-sm bg-success-soft px-3 py-2 text-success-strong"
+          >
             Material registrado.
           </p>
         )}
-        <button
+        <Button
           type="submit"
+          size="lg"
+          className="w-full"
           disabled={isSubmitting || createMutation.isPending}
-          className="min-h-12 w-full rounded-lg border border-zinc-900 px-4 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 disabled:opacity-60"
         >
-          {createMutation.isPending ? "Registrando..." : "Agregar material"}
-        </button>
+          {createMutation.isPending ? "Registrando…" : "Agregar material"}
+        </Button>
       </form>
 
-      <div className="mt-5">
+      <div className="mt-4">
         {materialsQuery.isLoading ? (
-          <p className="text-sm text-zinc-500">Cargando materiales...</p>
+          <p className="text-small text-text-2">Cargando materiales…</p>
         ) : materialsQuery.isError ? (
-          <p role="alert" className="text-sm text-red-700">
-            No se pudieron cargar los materiales.
-          </p>
+          <div className="rounded-ds-sm bg-danger-soft px-3 py-2">
+            <p role="alert" className="text-small text-danger-strong">
+              No pudimos cargar los materiales.
+            </p>
+            <button
+              type="button"
+              onClick={() => void materialsQuery.refetch()}
+              className="text-small mt-2 min-h-11 rounded-ds-sm border border-border bg-surface px-3 font-semibold text-text"
+            >
+              Reintentar
+            </button>
+          </div>
         ) : materials.length === 0 ? (
-          <p className="text-sm text-zinc-500">Todavía no registraste materiales.</p>
+          <div className="rounded-ds-md border border-dashed border-border bg-surface-2/40 px-3 py-3">
+            <p className="text-small font-medium text-text">Todavía no registraste materiales.</p>
+            <p className="text-caption mt-0.5 text-text-2">
+              Anotá lo que usaste con la cantidad para que quede en el trabajo.
+            </p>
+          </div>
         ) : (
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-border">
             {materials.map((material) => (
               <li key={material.id} className="flex items-start justify-between gap-3 py-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium break-words text-zinc-900">
+                  <p className="text-small font-medium break-words text-text">
                     {material.description}
                   </p>
-                  <p className="text-xs text-zinc-500">{formatDate(material.created_at)}</p>
+                  <p className="text-caption text-text-2">{formatDate(material.created_at)}</p>
                 </div>
-                <p className="shrink-0 text-sm font-semibold text-zinc-800">
+                <span className="numeric text-caption shrink-0 rounded-full bg-surface-2 px-2.5 py-1 font-semibold text-text">
                   {formatNumber(material.quantity)} {material.unit}
-                </p>
+                </span>
               </li>
             ))}
           </ul>

@@ -46,7 +46,7 @@ export default function LoginPage() {
       <h1 className="font-display text-text mt-2 text-2xl font-semibold tracking-tight">Ingresar</h1>
       <p className="text-text-2 mt-2 text-sm">Accedé al panel de tu empresa.</p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <form method="post" onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         <div>
           <label htmlFor="email" className="text-text mb-1 block text-sm font-medium">
             Email

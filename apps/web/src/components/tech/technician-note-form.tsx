@@ -6,7 +6,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { api, errorMessage } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { ApiError, api, errorMessage } from "@/lib/api";
 
 const noteSchema = z.object({
   notes: z
@@ -22,6 +23,14 @@ type Props = {
   tenantId: string;
   orderId: string;
 };
+
+function noteErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    if (error.status === 401) return "Tu sesión venció. Volvé a iniciar sesión.";
+    if (error.status === 403) return "No tenés permiso para agregar notas en este trabajo.";
+  }
+  return errorMessage(error, "No pudimos guardar la nota. Reintentá.");
+}
 
 export function TechnicianNoteForm({ tenantId, orderId }: Props) {
   const [saved, setSaved] = useState(false);
@@ -43,18 +52,17 @@ export function TechnicianNoteForm({ tenantId, orderId }: Props) {
     },
   });
 
-  const serverError = noteMutation.isError
-    ? errorMessage(noteMutation.error, "No se pudo guardar la nota")
-    : null;
+  const serverError = noteMutation.isError ? noteErrorMessage(noteMutation.error) : null;
 
   return (
     <section
       aria-labelledby="tech-note-title"
-      className="rounded-2xl border border-zinc-200 bg-white p-4"
+      className="rounded-ds-lg border border-border bg-surface p-4 shadow-card"
     >
-      <h2 id="tech-note-title" className="text-base font-semibold">
-        Agregar nota
+      <h2 id="tech-note-title" className="text-h4 text-text">
+        Notas del trabajo
       </h2>
+      <p className="text-caption mt-0.5 text-text-2">Se guarda en el historial con fecha y hora.</p>
       <form
         className="mt-3 space-y-3"
         onSubmit={handleSubmit((values) => {
@@ -64,40 +72,48 @@ export function TechnicianNoteForm({ tenantId, orderId }: Props) {
         })}
       >
         <div>
-          <label htmlFor="tech-note" className="mb-1 block text-sm font-medium text-zinc-800">
-            Nota del trabajo
+          <label htmlFor="tech-note" className="text-label mb-1 block text-text-2">
+            Nota
           </label>
           <textarea
             id="tech-note"
             rows={3}
+            placeholder="Ej.: Se reemplazó el capacitor y se probó el equipo."
             aria-invalid={errors.notes ? true : undefined}
             aria-describedby={errors.notes ? "tech-note-error" : undefined}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-base outline-none focus:border-zinc-900"
+            className="min-h-24 w-full rounded-ds-md border border-border bg-surface px-3 py-2 text-base text-text outline-none placeholder:text-text-2/70 focus:border-primary focus:ring-2 focus:ring-primary/20"
             {...register("notes")}
           />
           {errors.notes && (
-            <p id="tech-note-error" className="mt-1 text-sm text-red-700">
+            <p id="tech-note-error" className="text-small mt-1 text-danger-strong">
               {errors.notes.message}
             </p>
           )}
         </div>
         {serverError && (
-          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p
+            role="alert"
+            className="text-small rounded-ds-sm bg-danger-soft px-3 py-2 text-danger-strong"
+          >
             {serverError}
           </p>
         )}
         {saved && !serverError && (
-          <p role="status" className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+          <p
+            role="status"
+            className="text-small rounded-ds-sm bg-success-soft px-3 py-2 text-success-strong"
+          >
             Nota guardada.
           </p>
         )}
-        <button
+        <Button
           type="submit"
+          size="lg"
+          className="w-full"
           disabled={isSubmitting || noteMutation.isPending}
-          className="min-h-12 w-full rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-60"
         >
-          {noteMutation.isPending ? "Guardando..." : "Guardar nota"}
-        </button>
+          {noteMutation.isPending ? "Guardando…" : "Guardar nota"}
+        </Button>
       </form>
     </section>
   );

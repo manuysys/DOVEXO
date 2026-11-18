@@ -52,7 +52,7 @@ export default function RegisterPage() {
         Registrá tu empresa y empezá a ordenar la operación.
       </p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <form method="post" onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         <div>
           <label htmlFor="full_name" className="text-text mb-1 block text-sm font-medium">
             Nombre y apellido
