@@ -1,8 +1,9 @@
 # Rediseño de la landing — Fase 1 (hero + base visual)
 
 **Fecha:** 2026-11-18
-**Estado:** implementado en local, **no desplegado**. Producción sigue mostrando
-la landing anterior.
+**Estado:** implementado en local en la fase 1. **Actualización 2026-11-18:** la
+landing v2 se desplegó a producción; ver la sección 9 ("Implementación final"). Las
+afirmaciones de "no desplegado" de esta cabecera quedan obsoletas.
 **Alcance de esta fase:** tokens del design system en `apps/web` y rediseño del
 hero de la landing. El resto de las secciones queda para fases siguientes.
 
@@ -150,19 +151,14 @@ sistema (`#D69B28`).
 - Libera geometrías, materiales, renderer y contexto WebGL al desmontar.
 - Si WebGL falla, queda `HeroFallback` (SVG con la misma geometría).
 
-### Spline (estado: no integrado)
+### Spline (obsoleto: publicado e integrado el 2026-11-18, ver §9)
 
-Se creó un diorama de servicio en Spline (oficina DOVEXO, casa, van, técnico y
-nodos) y se verificó con captura live del editor:
+En la fase 1 se creó un diorama de servicio en Spline (oficina DOVEXO, casa, van,
+técnico y nodos). El archivo del editor fue
+`https://app.spline.design/file/836805d9-4a49-4108-96af-0215c8ebb17b`.
 
-- Archivo: `https://app.spline.design/file/836805d9-4a49-4108-96af-0215c8ebb17b`
-- **No publicado.**
-- **No integrado al frontend.**
-
-**Decisión pendiente:** definir si se usa como embed (`iframe`/runtime de Spline)
-o como render estático (imagen o video). El criterio es performance: peso,
-impacto en LCP/CLS y comportamiento en mobile. No hay medición todavía, así que
-no se elige una opción en este documento.
+Esta sección describía la decisión como pendiente ("no publicado, no integrado").
+Queda **obsoleta**: la decisión final está en ADR-018 y en la sección 9.
 
 ---
 
@@ -224,7 +220,8 @@ pnpm build
 
 ### Qué no se verificó
 
-- **No hay despliegue:** producción sigue con la landing anterior.
+- ~~**No hay despliegue:** producción sigue con la landing anterior.~~ Obsoleto desde
+  el 2026-11-18: la landing v2 está desplegada (sección 9).
 - No se corrió Lighthouse ni se midieron Core Web Vitals.
 - No se corrió una auditoría automática de accesibilidad (axe u otra).
 - No se revisó el hero en 360 px ni en tablet.
@@ -236,7 +233,7 @@ pnpm build
 
 | Sección / pieza | Estado | Qué falta |
 |---|---|---|
-| Hero | Implementado en local | Revisión visual final en 1440/390, corregir overflow y contraste, desplegar |
+| Hero | Desplegado el 2026-11-18 (sección 9) | Revisión visual final en 1440/390 y contraste AA; medición de peso y LCP |
 | Header | Ajustado a tokens nuevos | Verificar con el build final y en mobile |
 | `Marquee` | Sin cambios | Definir si se mantiene, se acorta o se reemplaza |
 | `TrustStrip` | Sin cambios | Alinear copy y estilo con la fila de confianza del hero |
@@ -254,8 +251,9 @@ pnpm build
    contraste antes de cualquier deploy.
 2. Ejecutar `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build` sobre el
    estado final del header.
-3. Desplegar el hero a Vercel y comparar contra producción.
-4. Decidir Spline (embed vs. render estático) con una medición de peso y LCP.
+3. ~~Desplegar el hero a Vercel y comparar contra producción.~~ Hecho el 2026-11-18.
+4. ~~Decidir Spline (embed vs. render estático) con una medición de peso y LCP.~~
+   Obsoleto: Spline se integró el 2026-11-18 (ADR-018). Falta la medición.
 5. Fase 2: tabs de demo y beneficios.
 6. Fase 3: precios, FAQ y footer.
 7. Auditar contraste AA y correr Lighthouse al cerrar la fase.
@@ -273,7 +271,71 @@ pnpm build
 | Alias legacy | Pueden ocultar usos incorrectos de color | Migrar mockups y secciones en fases; retirar alias al final |
 | Copy de prueba | "14 días sin tarjeta" depende de que el cobro siga desactivado | Actualizar el copy si se habilita facturación |
 | Deriva de datos de demo | `demo-data.ts` debe seguir siendo coherente con el producto | Tests de integridad existentes; revisar al cambiar estados o IDs |
-| Spline sin publicar | El archivo vive en el editor, no en el repo | Documentar el enlace y no referenciarlo desde la app hasta decidir |
+| ~~Spline sin publicar~~ (obsoleto desde 2026-11-18) | La escena ya está publicada e integrada (ADR-018) | Riesgos vigentes de la integración: sección 9 |
+
+---
+
+## 9. Implementación final (2026-11-18)
+
+Estado: **desplegada en producción** el 2026-11-18 (deployment
+`saas-gestion-evispxp11`, alias `https://saas-gestion-web.vercel.app`). Commit de la
+landing v2: `4ed02eb`. Decisión: ADR-018.
+
+### Héroe 3D con Spline
+
+| Elemento | Valor |
+|---|---|
+| Viewer publicado | `https://my.spline.design/dovexoheroservice-Vy1dJ8IKuodt02Zjwk4P0sbI/` |
+| Runtime | `https://prod.spline.design/4zymsRJr14mnwaEJ/scene.splinecode` |
+| Paquete | `@splinetool/react-spline` ^4.2.0 |
+| Componente | `apps/web/src/components/marketing/spline-hero.tsx` |
+| Poster estático | `apps/web/public/spline-hero-clean.webp` |
+
+**Reglas de fallback (implementadas):**
+
+1. En mobile (menos de 1024 px) no se carga Spline. Se muestra el poster estático.
+2. Mientras la escena carga, se muestra el poster.
+3. En desktop (`min-width: 1024px`) la escena se carga de forma dinámica.
+
+**Regla de movimiento (implementada):** la escena se condiciona a
+`(min-width: 1024px) and (prefers-reduced-motion: no-preference)`. Con reduced
+motion se muestra el poster estático, igual que en mobile.
+
+**Badge:** "Built with Spline" visible por la licencia del plan Free. Costos (precios
+informados como oficiales el 2026-11-18): Hobby $15/mes con facturación mensual o
+$12/mes con anual. Pro $30/$25 y Max $70/$60. Detalle en `COSTS_2026-11-18.md`.
+Mientras el plan sea Free, el badge es visible en el hero.
+
+### Tour de producto y secciones
+
+- Tour con capturas reales del tenant demo, en `apps/web/public/product-tour/*.webp`
+  (dashboard, órdenes, presupuestos, agenda, técnico, portal y presupuesto público),
+  generadas desde `servicios-demo`. Componente `product-tour.tsx`, con `next/image` y
+  marcos de navegador y teléfono.
+- El frame del tour dice "DOVEXO · panel". No se usa un dominio que todavía no existe.
+- `journey.tsx` usa GSAP ScrollTrigger (línea con scrub y stagger). Respeta
+  `prefers-reduced-motion`.
+- Se eliminaron `Marquee` y la scanline `mk-scan` de la landing.
+
+### Verificación (2026-11-18)
+
+- `scripts/verify.ps1`: Todo OK, código de salida 0. Vitest 281 pruebas y build de
+  28 rutas.
+- Producción (HTTP y navegador): `/` 200 con Spline y tour; `/login` 200; login demo
+  con redirección a `/dashboard` sin errores de consola; `/privacy` y `/terms` 200.
+
+**No verificado:** peso del bundle y de la escena, LCP, CLS, Lighthouse, auditoría de
+contraste AA, comportamiento ante caída del runtime de Spline y QA visual en las 8
+resoluciones.
+
+### Riesgos vigentes
+
+| Riesgo | Mitigación actual | Pendiente |
+|---|---|---|
+| Dependencia de `prod.spline.design` | Poster estático en mobile y en la carga | Probar el comportamiento ante caída |
+| Badge en plan Free | Ninguna (es la licencia) | Decidir plan |
+| Movimiento sin reduced motion | Ninguna en la escena de Spline | Condicionar por la preferencia |
+| Peso no medido | Carga dinámica solo en desktop | Medir peso y LCP |
 
 ---
 

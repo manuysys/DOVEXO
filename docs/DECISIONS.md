@@ -171,7 +171,8 @@ Mercado Pago quedan para una etapa posterior.
 ## ADR-012 — WhatsApp Cloud API oficial con secretos cifrados
 
 **Fecha:** 2026-11-08
-**Estado:** aceptada
+**Estado:** aceptada. La verificación del webhook (secreto y comportamiento sin
+secreto) queda reemplazada por ADR-019 (2026-11-18). El resto de la decisión sigue vigente.
 
 **Decisión:** usar la API oficial de WhatsApp Business. Los tokens y secretos
 por tenant se cifran con Fernet usando `WHATSAPP_ENCRYPTION_KEY`. El webhook
@@ -293,5 +294,89 @@ XLSX comprimido de forma abusiva o filas que dupliquen clientes existentes.
 - El commit se hace en una sola transacción: si falla a mitad, no queda ningún
   cliente creado a medias.
 - `openpyxl` y `defusedxml` deben estar en `requirements.txt` para el deploy en
-  Vercel. Hasta entonces, XLSX solo funciona en desarrollo local.
+  Vercel. Resuelto el 2026-11-11: ambas están en `apps/api/requirements.txt` y
+  el preview XLSX respondió 200 en producción.
 - No se importan órdenes. Queda para una iteración posterior.
+
+## ADR-018 — Héroe 3D con Spline publicado y fallback estático
+
+**Fecha:** 2026-11-18
+**Estado:** aceptada. Reemplaza la decisión pendiente de `LANDING_REDESIGN.md` §5
+("definir si se usa como embed o render estático; no integrado").
+
+**Contexto:** la fase 1 del rediseño de la landing dejó Spline sin decidir: la
+escena existía en el editor, no estaba publicada y no había medición de peso ni
+de LCP. El héroe necesitaba un recurso 3D sin penalizar mobile ni el primer render.
+
+**Decisión:**
+
+- Escena publicada en Spline:
+  - Viewer: `https://my.spline.design/dovexoheroservice-Vy1dJ8IKuodt02Zjwk4P0sbI/`
+  - Runtime: `https://prod.spline.design/4zymsRJr14mnwaEJ/scene.splinecode`
+- Integración con `@splinetool/react-spline` ^4.2.0 en
+  `apps/web/src/components/marketing/spline-hero.tsx`, con carga dinámica.
+- Solo en desktop (`min-width: 1024px`). En mobile y mientras carga se muestra el
+  poster estático `apps/web/public/spline-hero-clean.webp`.
+
+**Consecuencias:**
+
+- **Badge "Built with Spline" visible** por la licencia del plan Free. No se oculta.
+  El plan Hobby lo quita: $15/mes con facturación mensual o $12/mes con anual
+  (precios informados como oficiales el 2026-11-18). La contratación queda a
+  decisión del fundador.
+- **Dependencia de terceros:** el runtime se sirve desde `prod.spline.design`. No se
+  documentó ni probó el comportamiento si el servicio cae; queda pendiente.
+- **Sin medición registrada:** no hay medición de peso ni de LCP en el repositorio
+  al cierre de esta decisión. La condición "medir antes de integrar" de
+  `LANDING_REDESIGN.md` §8 queda abierta.
+- **`prefers-reduced-motion`:** la escena **sí** se condiciona. `spline-hero.tsx` usa
+  `(min-width: 1024px) and (prefers-reduced-motion: no-preference)`; con reduced
+  motion se muestra solo el poster estático. (El reporte inicial de esta sesión
+  decía lo contrario por un error de lectura; corregido el 2026-11-18.)
+- Las decisiones anteriores de Spline (no integrar, no publicar) quedan obsoletas.
+
+## ADR-019 — Confianza de proxy explícita y webhook de WhatsApp fail-closed
+
+**Fecha:** 2026-11-18
+**Estado:** aceptada. Reemplaza el comportamiento de confianza en `X-Real-IP` y
+`X-Forwarded-For` descrito en el changelog del 2026-11-11, y reemplaza parcialmente
+la verificación del webhook de ADR-012.
+
+**Contexto:** la auditoría de backend del 2026-11-18 encontró (entre otros) IP
+falseable por cabeceras sin proxy confiable, comparación de `Origin` por prefijo,
+webhook de WhatsApp sin secreto global y sin tope de tamaño. Detalle en
+`SECURITY_AUDIT.md` §8.
+
+**Decisión:**
+
+- `apps/api/app/core/client_ip.py`: `X-Real-IP` y `X-Forwarded-For` se leen solo si
+  `TRUST_PROXY_HEADERS=true`. Valor por defecto: `false`. En el entorno Production de
+  Vercel de la API se configuró `true`.
+- `Origin` se compara de forma exacta por esquema, host y puerto (`urlparse`).
+- Webhook de WhatsApp:
+  - `WHATSAPP_APP_SECRET` global es obligatorio. Sin él, el POST responde 503.
+  - `GET` con `WHATSAPP_VERIFY_TOKEN` vacío responde 503.
+  - El HMAC se calcula sobre los bytes crudos antes de parsear; el cuerpo tiene tope de
+    1 MB.
+  - La verificación por tenant (`app_secret` por tenant) se mantiene como defensa en
+    profundidad.
+- Refresh de sesión: `SELECT ... FOR UPDATE` en la rotación y ventana de gracia
+  `REFRESH_REUSE_GRACE_SECONDS=10` para rotaciones concurrentes legítimas. Un
+  reuso fuera de la ventana revoca la familia completa, como antes.
+
+**Consecuencias:**
+
+- Si `TRUST_PROXY_HEADERS=true` y no hay un proxy de confianza delante de la API,
+  cualquier cliente puede falsear su IP. Si queda en `false` detrás de Vercel, el rate
+  limit por IP se aplica sobre la IP del proxy. Ambas configuraciones tienen un
+  riesgo; por eso la variable es explícita.
+- **El webhook de WhatsApp responde 503 en producción** hasta configurar
+  `WHATSAPP_APP_SECRET` en Vercel. Es intencional (fail-closed) y no indica un fallo
+  de deploy.
+- **Secreto global:** un solo `WHATSAPP_APP_SECRET` sirve para todos los tenants.
+  Si se compromete, afecta a todos. Riesgo residual abierto: no hay decisión
+  registrada para pasar a un secreto por tenant verificado.
+- **Ventana de gracia de 10 s:** una rotación concurrente legítima no cierra la
+  sesión. Un token rotado y reusado dentro de esa ventana tampoco dispara la
+  revocación. Faltan tests de reuso fuera de la ventana.
+- `revoke_refresh_token` (logout) todavía no toma lock. Pendiente.

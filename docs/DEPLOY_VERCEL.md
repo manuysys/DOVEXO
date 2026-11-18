@@ -90,6 +90,8 @@ COOKIE_SAMESITE=none
 AI_PROVIDER=deterministic
 WHATSAPP_ENCRYPTION_KEY=<32 bytes base64>
 WHATSAPP_VERIFY_TOKEN=<token aleatorio>
+WHATSAPP_APP_SECRET=<app secret de la app de Meta>
+TRUST_PROXY_HEADERS=true
 PLATFORM_ADMIN_EMAILS=["fundador@tu-dominio.com"]
 RATE_LIMIT_ENABLED=true
 ```
@@ -143,6 +145,29 @@ El frontend y la API están en dominios distintos (`*.vercel.app`). Por eso:
 
 Si se usa un dominio propio para ambos (por ejemplo `app.midominio.com` y
 `api.midominio.com`), se puede volver a `SameSite=Lax` si son same-site.
+
+## 5.1. IP real detrás del proxy de Vercel
+
+Desde el 2026-11-18 la API lee `X-Real-IP` y `X-Forwarded-For` solo si
+`TRUST_PROXY_HEADERS=true`. El valor por defecto es `false` (ADR-019).
+
+- En Vercel (API, Production) debe estar en `true`. Si no, el rate limit por IP
+  se aplica sobre la IP del proxy y todos los clientes comparten el límite.
+- Activarla fuera de un proxy de confianza permite falsear la IP. No activarla en
+  entornos locales sin proxy.
+
+## 5.2. Webhook de WhatsApp: `WHATSAPP_APP_SECRET` obligatorio
+
+- `POST /api/v1/webhooks/whatsapp` valida `X-Hub-Signature-256` con
+  `WHATSAPP_APP_SECRET`. Sin esa variable responde **503** (fail-closed). Es
+  intencional.
+- `GET` de verificación con `WHATSAPP_VERIFY_TOKEN` vacío responde 503.
+- Estado al 2026-11-18: `WHATSAPP_APP_SECRET` **no está configurada** en
+  producción. El webhook no procesa eventos hasta cargarla.
+- El cuerpo tiene tope de 1 MB y la firma se calcula sobre los bytes crudos.
+
+Verificación tras configurar la variable: `POST` sin firma válida debe responder
+403 (no 503), y con firma válida debe procesar el evento.
 
 ## 6. Verificación
 
@@ -201,7 +226,18 @@ PLATFORM_ADMIN_EMAILS=["fundador@tu-dominio.com"]
 RATE_LIMIT_ENABLED=true
 RATE_LIMIT_AUTH_PER_MINUTE=10
 RATE_LIMIT_PUBLIC_PER_MINUTE=30
+RATE_LIMIT_AI_CHAT_PER_MINUTE=20
+REFRESH_REUSE_GRACE_SECONDS=10
+TRUST_PROXY_HEADERS=true
+WHATSAPP_APP_SECRET=<app secret de Meta; obligatorio para el webhook>
 ```
+
+Notas (2026-11-18):
+
+- `TRUST_PROXY_HEADERS` vale `false` por defecto. Ver la sección 5.1.
+- `WHATSAPP_APP_SECRET` no tiene valor por defecto. Sin él, el webhook responde 503.
+- `REFRESH_REUSE_GRACE_SECONDS` define la ventana de gracia de la rotación del refresh
+  token (ADR-019).
 
 ### Web
 

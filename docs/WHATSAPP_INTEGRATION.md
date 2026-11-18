@@ -37,6 +37,10 @@ comando interno.
   `hub.verify_token` y `hub.challenge`.
 - `POST /api/v1/webhooks/whatsapp`: validar `X-Hub-Signature-256` con HMAC
   SHA-256, rechazar duplicados por `message.id`, normalizar y encolar.
+  Desde 2026-11-18 (ADR-019): el HMAC se calcula sobre los bytes crudos antes de
+  parsear, el cuerpo tiene tope de 1 MB y la verificación usa el secreto global
+  `WHATSAPP_APP_SECRET`. Sin ese secreto el POST responde 503 (fail-closed).
+  `GET` con `WHATSAPP_VERIFY_TOKEN` vacío también responde 503.
 - Responder 200 rápido; procesar de forma asíncrona.
 
 ## Funcionalidades previstas

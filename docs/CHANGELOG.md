@@ -1,5 +1,59 @@
 # Changelog
 
+## 2026-11-18 — Landing v2, hardening de seguridad y deploy a producción
+
+- Landing v2 (commit `4ed02eb`): escena 3D de Spline publicada e integrada en
+  `apps/web/src/components/marketing/spline-hero.tsx` (`@splinetool/react-spline`
+  ^4.2.0). Solo desktop (`min-width: 1024px`), carga dinámica; mobile y estado de
+  carga usan el poster `public/spline-hero-clean.webp`. El badge "Built with
+  Spline" queda visible por la licencia del plan Free.
+- Tour de producto con capturas reales del tenant demo en
+  `public/product-tour/*.webp` (dashboard, órdenes, presupuestos, agenda, técnico,
+  portal y presupuesto público), con `next/image` y marcos de navegador/teléfono.
+  El frame dice "DOVEXO · panel".
+- `journey.tsx` usa GSAP ScrollTrigger (línea con scrub y stagger) y respeta
+  `prefers-reduced-motion`. Se eliminaron `Marquee` y la scanline `mk-scan`.
+- Hardening backend (commits `859e3a7` y `440737c`), 10 hallazgos de auditoría
+  (detalle en `SECURITY_AUDIT.md`, sección 8):
+  - Fix de `/ai/usage` (commit `85239e0`): `AIUsageItem` con `from_attributes`;
+    producción responde 200.
+  - IP real solo con `TRUST_PROXY_HEADERS=true` (nuevo `app/core/client_ip.py`).
+  - Comparación exacta de `Origin` (esquema, host y puerto).
+  - `/ai/chat` solo para `owner`, `admin` y `dispatcher`; rate limit por
+    `tenant_id:user_id`.
+  - Webhook de WhatsApp: tope de 1 MB, HMAC sobre bytes crudos y
+    `WHATSAPP_APP_SECRET` obligatorio (fail-closed).
+  - `POST /tenants` crea suscripción trial; sin suscripción se usa el plan `starter`.
+  - Device tokens scopeados por `(tenant_id, user_id, token)`.
+  - Adjuntos del técnico: lectura en chunks de 64 KiB, tope de 5 MB, nombre
+    saneado y `X-Content-Type-Options: nosniff`.
+  - `/ai/usage` calcula totales con `SUM` sobre todo el tenant.
+  - Refresh con `SELECT ... FOR UPDATE` y ventana de gracia de 10 s; el cliente
+    móvil usa single-flight en `apps/mobile/src/lib/api.ts`.
+- Tests: nuevo `apps/api/tests/test_security_hardening.py` (21 pruebas) y
+  actualizaciones en `test_security.py` y `test_whatsapp.py`.
+- Verificación: `scripts/verify.ps1` con **Todo OK** y código de salida 0 (608 s):
+  ruff OK, format OK (160 archivos), basedpyright 0 errores, pytest 203 pasadas,
+  ESLint OK, TypeScript OK, Vitest 281 pasadas, build de 28 rutas y `tsc` móvil OK.
+- Configuración de producción: `TRUST_PROXY_HEADERS=true` agregado al entorno
+  Production de la API en Vercel.
+- Deploy a producción (2026-11-18):
+  - API: deployment `saas-gestion-gc9224fim`, alias `saas-gestion-api.vercel.app`.
+  - Web: deployment `saas-gestion-evispxp11`, alias `saas-gestion-web.vercel.app`.
+  - Evidencia de la API: `/health/live` y `/health/ready` 200, login demo 200,
+    `/ai/usage` 200, `/ai/chat` con técnico 403, `POST /webhooks/whatsapp` sin
+    secreto 503 (esperado), dashboard, equipo, clientes, presupuestos,
+    suscripción, notificaciones y PDF 200.
+  - Evidencia de la web: `/` 200 con Spline y tour, `/login` 200, login demo con
+    redirección a `/dashboard` sin errores de consola, `/tech`, `/portal/servicios-demo`,
+    `/privacy`, `/terms`, `/onboarding` y `/settings/import` 200.
+- Documentación: ADR-018 y ADR-019 en `DECISIONS.md`; `COSTS_2026-11-18.md`;
+  `KNOWN_ISSUES.md`, `LANDING_REDESIGN.md`, `SECURITY_AUDIT.md`, `DEPLOY_VERCEL.md`,
+  `WHATSAPP_INTEGRATION.md` y `FEATURE_TRUTH_MATRIX.md` actualizados.
+- Pendiente tras este bloque: badge de Spline, `WHATSAPP_APP_SECRET` sin
+  configurar en producción, lock en `revoke_refresh_token`, APK nuevo con el
+  cliente móvil corregido y backups sin verificar.
+
 ## 2026-11-18 — Rediseño visual integral del frontend
 
 - Design system DOVEXO: tokens nuevos (primary `#315EFB`, deep, teal, violet,
@@ -19,7 +73,8 @@
 - Fix backend aislado: `AIUsageItem` acepta objetos ORM (`from_attributes`);
   `/api/v1/ai/usage` deja de devolver 500.
 - Verificación: `verify.ps1` OK (backend y frontend), 281 Vitest, build de 28
-  rutas, Storybook build OK y `tsc` móvil OK. Producción sin desplegar.
+  rutas, Storybook build OK y `tsc` móvil OK. En ese momento producción no se
+  había desplegado; el deploy se hizo el mismo día (ver la entrada anterior).
 
 ## 2026-11-17 — Decisión P0-D: aviso de demo
 

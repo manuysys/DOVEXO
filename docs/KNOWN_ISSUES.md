@@ -25,6 +25,9 @@
 - **IA externa con Groq en producción.** El proveedor OpenAI-compatible está
   configurado con Groq (`openai/gpt-oss-120b`) y fallback determinista si se
   agota la cuota. Ollama local no se probó con el modelo grande por RAM.
+- **Webhook de WhatsApp responde 503 sin `WHATSAPP_APP_SECRET` (2026-11-18).** Es
+  intencional (fail-closed, ADR-019). En producción el secreto todavía no está
+  configurado: el webhook no procesa eventos hasta cargarlo en Vercel.
 - **Mercado Pago sin credenciales.** No hay cobros reales ni webhooks.
 - **Sin correo transaccional.** Las notificaciones son solo in-app y el magic
   link del portal no se envía por email ni WhatsApp: en la demo se devuelve un
@@ -173,3 +176,46 @@
   UTC: si la demo se resetea después de las 21:00 de Argentina, el turno "de mañana"
   cae pasado mañana a las 10:00 ARG. Impacto cosmético en la demo; no afecta datos ni
   seguridad. Si molesta, calcularlo con `America/Argentina/Buenos_Aires`.
+
+## Landing v2, hardening y deploy (2026-11-18)
+
+Estado al cierre del día. Detalle en `CHANGELOG.md` y `PROJECT_STATUS.md`.
+
+- **`/api/v1/ai/usage` devolvía 500: cerrado.** La causa era `AIUsageItem` sin
+  `from_attributes`. Corregido (commit `85239e0`), deployado y verificado en
+  producción con 200.
+- **Badge "Built with Spline" (abierto).** La escena de la landing muestra el badge
+  por la licencia del plan Free. Solo se quita con el plan Hobby ($15/mes mensual o
+  $12/mes anual, precios informados el 2026-11-18). Decisión pendiente del fundador.
+  Ver ADR-018 y `COSTS_2026-11-18.md`.
+- **Spline y `prefers-reduced-motion` (cerrado).** `spline-hero.tsx` solo monta la
+  escena con `(min-width: 1024px) and (prefers-reduced-motion: no-preference)`; con
+  reduced motion se muestra el poster. El reporte inicial de esta sesión decía lo
+  contrario por un error de lectura.
+- **Spline sin medición (abierto).** No hay medición de peso, LCP ni Lighthouse de la
+  landing v2. Tampoco se probó qué pasa si el runtime de `prod.spline.design` no
+  responde.
+- **`WHATSAPP_APP_SECRET` sin configurar en producción (abierto).** El webhook de
+  WhatsApp responde 503 a propósito. Acción: cargar el secreto de la app de Meta en
+  Vercel (API, Production). Ver ADR-019 y `DEPLOY_VERCEL.md`.
+- **Secreto global del webhook (riesgo residual).** Un solo `WHATSAPP_APP_SECRET` para
+  todos los tenants. Si se compromete, afecta a todos. No hay decisión registrada para
+  pasar a un secreto por tenant verificado.
+- **`revoke_refresh_token` sin lock (abierto).** Solo la rotación de refresh toma
+  `SELECT ... FOR UPDATE`. El logout no. Pendiente de revisión.
+- **Ventana de gracia de refresh (riesgo aceptado en código, sin test).** La ventana de
+  10 s (`REFRESH_REUSE_GRACE_SECONDS`) no revoca la familia si el token ya fue
+  rotado dentro de ese plazo. Faltan tests de reuso fuera de la ventana.
+- **CORS con `API_CORS_ORIGINS=["*"]` (verificar).** El reporte de hardening menciona
+  esa configuración. Con `*` no se habilitan endpoints con cookie, que requieren
+  orígenes exactos. Confirmar el valor en el entorno Production de Vercel y usar la
+  lista explícita del frontend.
+- **Backups: sigue sin verificarse (abierto).** `NEON_DATABASE_URL` no está configurada
+  en GitHub al 2026-11-18. No hay backup verificado con restauración. Ver la sección
+  "Auditoría externa (2026-11-14) y backups".
+- **Cliente móvil sin APK nuevo (abierto).** El single-flight de refresh de
+  `apps/mobile/src/lib/api.ts` está en `main`, pero el APK publicado
+  (`mobile-apk-5`) no lo incluye.
+- **Corrección de nota vieja.** Las notas que decían que `openpyxl` y `defusedxml`
+  no estaban en `requirements.txt` quedaron desactualizadas. Ambas están en
+  `apps/api/requirements.txt` desde el 2026-11-11 (ver ADR-017 y `PROJECT_STATUS.md`).

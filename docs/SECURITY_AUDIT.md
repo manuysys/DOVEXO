@@ -163,4 +163,52 @@ No se propone cambiar contraseñas ni datos en producción sin autorización, se
 - Pruebas de intrusión, fuerza bruta real o análisis dinámico.
 - Contenido completo de `privacy` y `terms`.
 - Visibilidad pública del repositorio.
+
+## 8. Auditoría 2026-11-18 (hardening del backend)
+
+Auditoría interna de backend con 10 hallazgos. Corregidos en código con tests, en
+los commits `859e3a7` y `440737c` (rama `main`), y desplegados a producción el
+2026-11-18 salvo que se indique lo contrario. Decisiones asociadas: ADR-019.
+
+Esta sección **no cierra** los hallazgos S-01 a S-20 de las secciones 2 a 6. Siguen
+abiertos según su tabla, salvo los que se mencionan aquí.
+
+| # | Hallazgo | Corrección | Estado |
+|---|---|---|---|
+| 1 | `GET /ai/usage` devolvía 500: `AIUsageItem` no leía objetos ORM | `from_attributes` en el esquema (commit `85239e0`) | Corregido y desplegado. Producción 200 |
+| 2 | Confianza implícita en `X-Real-IP` y `X-Forwarded-For` | Nuevo `app/core/client_ip.py`: solo con `TRUST_PROXY_HEADERS=true` (default `false`) | Corregido y desplegado. Variable en `true` en Vercel (API, Production) |
+| 3 | Comparación de `Origin` por prefijo (`http://localhost:3000.evil.example` pasaba) | Comparación exacta por esquema, host y puerto con `urlparse` | Corregido y desplegado |
+| 4 | Control de acceso y rate limit insuficientes en `/ai/chat` (detalle previo no documentado en el reporte) | Solo `owner`, `admin`, `dispatcher`; rate limit por `tenant_id:user_id` (`RATE_LIMIT_AI_CHAT_PER_MINUTE=20`) | Corregido y desplegado. Técnico recibe 403 |
+| 5 | Webhook de WhatsApp: sin tope de tamaño, HMAC tras parsear, sin secreto global | Tope de 1 MB (Content-Length y chunks); HMAC sobre bytes crudos; `WHATSAPP_APP_SECRET` obligatorio (503 si falta); `GET` con verify token vacío responde 503 | Corregido y desplegado. **Secreto no configurado en producción**: el POST responde 503 |
+| 6 | `POST /tenants` sin suscripción: límites nulos | Crea suscripción trial; sin suscripción se usa el plan mínimo `starter` | Corregido y desplegado |
+| 7 | Device tokens reasignables entre usuarios o tenants | Scope por `(tenant_id, user_id, token)`; commit en la rama existente | Corregido y desplegado |
+| 8 | Adjuntos del técnico: descarga sin saneo completo del nombre ni cabeceras de descarga endurecidas (detalle previo no documentado en el reporte) | Lectura en chunks de 64 KiB con tope de 5 MB; nombre `[A-Za-z0-9._-]` de hasta 120 caracteres; `Content-Disposition` con `filename*=UTF-8''` y `X-Content-Type-Options: nosniff` | Corregido y desplegado |
+| 9 | `/ai/usage` sumaba solo los últimos 50 registros | Totales con `SUM` SQL sobre todo el tenant | Corregido y desplegado |
+| 10 | Refresh: rotaciones concurrentes revocaban la familia completa | `SELECT ... FOR UPDATE` en la rotación; ventana de gracia `REFRESH_REUSE_GRACE_SECONDS=10`; cliente móvil con single-flight en `apps/mobile/src/lib/api.ts` | Backend corregido y desplegado. **Cliente móvil corregido en `main`, sin APK nuevo publicado** |
+
+**Tests:** nuevo `apps/api/tests/test_security_hardening.py` (21 pruebas en el
+archivo), y actualizaciones en `test_security.py` y `test_whatsapp.py`.
+`scripts/verify.ps1` incluye el archivo nuevo. Resultado: "Todo OK", código 0,
+pytest 203 pasadas.
+
+**Verificación en producción (2026-11-18):** `/api/v1/health/live` y `/ready` 200;
+login demo 200; `/ai/usage` 200; `/ai/chat` con técnico 403; `POST
+/api/v1/webhooks/whatsapp` sin secreto 503 (esperado); dashboard, equipo, clientes,
+presupuestos, suscripción, notificaciones y PDF 200.
+
+### Observaciones residuales (revisión del reviewer)
+
+| Observación | Riesgo | Estado |
+|---|---|---|
+| Ventana de gracia de 10 s en el refresh | Un token rotado y reusado dentro de la ventana no revoca la familia | Aceptado como trade-off en ADR-019. Sin decisión formal de cambiarlo |
+| Falta de tests de reuso fuera de la ventana | No se prueba que el reuso real sí revoque la familia tras la ventana | Pendiente |
+| Secreto global `WHATSAPP_APP_SECRET` | Si se compromete, afecta a todos los tenants | Abierto. La verificación por tenant queda como defensa en profundidad |
+| `revoke_refresh_token` (logout) sin lock | Concurrencia entre logout y rotación no cubierta por el lock | Pendiente |
+| `API_CORS_ORIGINS=["*"]` | Con `*` no se habilitan endpoints con cookie (requieren orígenes exactos) | Verificado en producción: el origen web pasa (401 sin token), `evil.example` y el prefijo reciben 403 |
+| `WHATSAPP_APP_SECRET` sin configurar | El webhook no procesa eventos | Pendiente de configuración en Vercel |
+
+**Fuera de alcance de esta auditoría:** RLS, 2FA, recuperación de contraseña,
+verificación de email, validación de firma binaria de fotos (S-05), enforcement de
+límites de plan (S-13) y rate limit en POST de aprobación pública (S-04). Siguen
+abiertos según las secciones 2 a 6.
 </content>

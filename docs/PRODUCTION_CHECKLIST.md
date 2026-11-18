@@ -63,6 +63,10 @@ AI_MODEL=openai/gpt-oss-120b
 AI_API_KEY=<secreto>
 WHATSAPP_ENCRYPTION_KEY=<secreto>
 WHATSAPP_VERIFY_TOKEN=<secreto>
+# WHATSAPP_APP_SECRET es obligatorio para el webhook; sin él responde 503.
+WHATSAPP_APP_SECRET=<secreto>
+# TRUST_PROXY_HEADERS=true solo detrás de un proxy de confianza (Vercel).
+TRUST_PROXY_HEADERS=true
 RESEND_API_KEY=<secreto>
 MP_ACCESS_TOKEN=<secreto>
 MP_WEBHOOK_SECRET=<secreto>

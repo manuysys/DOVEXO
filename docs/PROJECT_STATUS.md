@@ -1,8 +1,9 @@
 # Estado del proyecto
 
 **Última actualización:** 2026-11-18
-**Fase:** preventa / customer discovery activa (GO_TO_MARKET) + rediseño visual
-integral del frontend (rama `feat/frontend-redesign`). Base técnica: Hito 2
+**Fase:** preventa / customer discovery activa (GO_TO_MARKET) + landing v2 con
+héroe 3D de Spline y hardening de seguridad del backend (desplegados el
+2026-11-18; `main`, commit `440737c`). Base técnica: Hito 2
 completo + PWA, app móvil Android DOVEXO, portal del cliente, dashboard
 operativo, automatizaciones, IA con Groq, suscripciones, panel global, WhatsApp,
 importador CSV/XLSX, onboarding y reset de demo (pilot-ready).
@@ -96,7 +97,9 @@ propio está pendiente.
   liberan cupo.
 - [x] Validación de `Origin` al aceptar invitaciones y `Referrer-Policy:
   no-referrer` en el portal.
-- [x] Rate limiting con `X-Real-IP` y último hop de `X-Forwarded-For`.
+- [x] IP real para rate limiting: `X-Real-IP` y `X-Forwarded-For` solo se leen
+  con `TRUST_PROXY_HEADERS=true` (default `false`; desde 2026-11-18, ADR-019).
+  Reemplaza la confianza implícita en ambas cabeceras descrita antes.
 - [x] Direcciones de cliente expuestas al técnico.
 - [x] Push con Expo para asignación y cambio de estado, sin revertir la
   operación si falla el envío.
@@ -154,16 +157,19 @@ propio está pendiente.
   - Seed versionado en `apps/api/app/seed/demo.py`, idempotente, con un turno
     futuro: mañana a las 10:00 hora argentina (13:00 UTC), según `_tomorrow_at`.
   - Rate limit: 10 resets por ventana. Lock de la fila del tenant demo.
-- [x] 179 pruebas pytest (reportadas; ver "Verificación del bloque 2026-11-11").
+- [x] 179 pruebas pytest al cierre del bloque 2026-11-11. La cifra vigente es
+  203 (2026-11-18; ver "Landing v2, hardening y deploy").
 
 ### Frontend
 
 - [x] Next.js 16.4.5 + React 19 + TypeScript estricto + Tailwind 4.
-- [x] Landing pública de producto con marca provisional **Arreglo**.
+- [x] Landing pública de producto con identidad **DOVEXO** (nombre histórico: Arreglo; ADR-016).
 - [x] Hero oscuro full-bleed con Three.js isométrico lazy, scanlines, tarjetas
-  flotantes y contadores.
+  flotantes y contadores. _(Estado del 2026-11-09. Desde 2026-11-18 la landing v2
+  quitó scanlines y Marquee y usa Spline en desktop; ver la sección nueva.)_
 - [x] GSAP ScrollTrigger con recorrido fijado, Lenis smooth scroll, marquee,
-  tilt 3D y Motion para microinteracciones.
+  tilt 3D y Motion para microinteracciones. _(Marquee eliminado el 2026-11-18;
+  `journey.tsx` usa ScrollTrigger con scrub y stagger.)_
 - [x] Design system inicial: Button, Card, Badge, Input, PageHeader, EmptyState,
   Skeleton, StatCard, ProgressRing, Dialog, Tabs, Tooltip y DropdownMenu.
 - [x] Panel con command palette (`⌘K`), notificaciones en popover y dashboard
@@ -174,7 +180,7 @@ propio está pendiente.
 - [x] Pagos con métricas de total, cantidad y ticket promedio.
 - [x] Agenda con cabecera de día, timeline y estados.
 - [x] Solicitudes con métricas, prioridad, origen y conversión a orden.
-- [x] Registro, login y cierre de sesión con identidad Arreglo.
+- [x] Registro, login y cierre de sesión con identidad DOVEXO.
 - [x] Contexto de autenticación con refresh automático y selector de empresa.
 - [x] Dashboard con métricas reales y centro de operaciones accionable.
 - [x] Clientes, solicitudes, órdenes y detalle con historial.
@@ -200,12 +206,12 @@ propio está pendiente.
 - [x] Onboarding en `/onboarding`: asistente de cuatro pasos (empresa, servicios
   y horarios, equipo, primeros datos) con progreso guardado y reanudable.
 - [x] Checklist de inicio en el dashboard (`OnboardingChecklist`).
-- [x] Vitest con 210 pruebas (reportadas; ver "Verificación del bloque 2026-11-11").
+- [x] Vitest con 281 pruebas al 2026-11-18 (210 al cierre del bloque 2026-11-11).
 
 ### App móvil
 
 - [x] Expo SDK 58 + React Native 0.88 + Expo Router + TypeScript estricto.
-- [x] Android primero, package `com.arreglo.mobile`, scheme `arreglo`.
+- [x] Android primero, package `com.dovexo.mobile`, scheme `dovexo` (histórico: `com.arreglo.mobile`).
 - [x] Experiencia de técnico: login, trabajos, filtros, detalle, transiciones,
   llamada, dirección, notas, materiales, fotos, historial y logout.
 - [x] Experiencia de cliente: login por email o teléfono, demo, resumen,
@@ -420,9 +426,73 @@ Documentos: `DESIGN_AUDIT.md`, `DESIGN_SYSTEM.md`, `LANDING_REDESIGN.md`,
 - **Verificación:** `scripts/verify.ps1` (backend ruff/basedpyright/pytest,
   frontend lint/typecheck/tests/build, móvil tsc) y `build-storybook` OK.
   Vitest: 281 pruebas en 35 archivos. Build: 28 rutas.
-- **Producción no se actualizó.** Pendiente: deploy, QA visual de las 8
-  resoluciones en todas las rutas, auditoría formal de a11y/performance y
-  prueba en Android físico.
+- **Producción:** en esta entrada no se había desplegado. El deploy se hizo el
+  2026-11-18 (ver "Landing v2, hardening y deploy"). Siguen pendientes el QA
+  visual de las 8 resoluciones en todas las rutas, la auditoría formal de
+  a11y/performance y la prueba en Android físico.
+
+## Landing v2, hardening y deploy (2026-11-18)
+
+Detalle completo en `CHANGELOG.md` (entrada del mismo día). Resumen con el
+estado de cada punto:
+
+| Punto | Estado | Evidencia |
+|---|---|---|
+| Héroe 3D con Spline (desktop, poster estático en mobile) | Implementado y desplegado | Commit `4ed02eb`; ADR-018; `LANDING_REDESIGN.md` §9 |
+| Badge "Built with Spline" visible | Vigente (plan Free) | Se oculta solo con plan pago; no contratado |
+| Tour de producto con capturas reales del tenant demo | Implementado y desplegado | `apps/web/public/product-tour/*.webp` |
+| GSAP ScrollTrigger en `journey.tsx` con reduced motion | Implementado; stagger verificado en producción | Commit `4ed02eb`; pasos con `opacity 0 → 1` al hacer scroll |
+| 10 hallazgos de auditoría de backend | Corregidos y desplegados (API); el cliente móvil corregido está en `main` sin APK nuevo | `SECURITY_AUDIT.md` §8 |
+| `/ai/usage` devolvía 500 | Corregido (commit `85239e0`); producción 200 | Evidencia de la API abajo |
+| `TRUST_PROXY_HEADERS` en producción | Configurado en Vercel (API) | ADR-019 |
+| `WHATSAPP_APP_SECRET` en producción | **No configurado**: webhook responde 503 a propósito | ADR-019; `KNOWN_ISSUES.md` |
+
+**Verificación de `scripts/verify.ps1` (2026-11-18):** salida "Todo OK",
+código 0, duración 608 s. ruff OK; format OK (160 archivos); basedpyright 0
+errores; pytest **203 pasadas** (incluye `test_security_hardening.py`, 21
+pruebas); ESLint OK; TypeScript OK; Vitest **281 pasadas**; build de **28
+rutas**; `tsc` móvil OK.
+
+**Deploy a producción (2026-11-18):**
+
+| Proyecto | Deployment | Target | Alias |
+|---|---|---|---|
+| API | `saas-gestion-gc9224fim` | Production (Ready) | `https://saas-gestion-api.vercel.app` |
+| Web | `saas-gestion-evispxp11` | Production (Ready) | `https://saas-gestion-web.vercel.app` |
+
+Evidencia de la API (HTTP):
+
+```text
+GET  /api/v1/health/live                       -> 200
+GET  /api/v1/health/ready                      -> 200
+POST /api/v1/auth/login (demo)                 -> 200
+GET  /api/v1/ai/usage                          -> 200
+POST /api/v1/ai/chat (técnico)                 -> 403
+POST /api/v1/auth/refresh (Origin web)         -> 401 (origen permitido, sin token)
+POST /api/v1/auth/refresh (Origin evil/prefijo)-> 403
+POST /api/v1/webhooks/whatsapp (sin secreto)   -> 503 (esperado, fail-closed)
+GET  /api/v1/dashboard/operations              -> 200
+GET  /api/v1/team, /customers, /quotes,
+     /subscription, /notifications             -> 200
+GET  /api/v1/quotes/{id}/pdf                   -> 200
+```
+
+Evidencia de la web (HTTP y navegador):
+
+```text
+GET  /                                  -> 200 (Spline y product-tour presentes)
+GET  /login                             -> 200
+Login demo -> /dashboard                -> OK, sin errores de consola
+GET  /tech                              -> 200
+GET  /portal/servicios-demo             -> 200
+GET  /privacy, /terms, /onboarding,
+     /settings/import                   -> 200
+```
+
+**No verificado en esta entrada:** medición de peso y LCP de Spline, Lighthouse,
+auditoría de a11y, comportamiento ante caída del runtime de Spline, prueba del
+APK con el cliente de refresh corregido, y flujo WhatsApp end-to-end (sigue sin
+credenciales de Meta).
 
 ## Demo pública
 
@@ -459,13 +529,22 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
   restauración (hoy no hay ningún backup; ver "Verificación de la auditoría externa").
 - [ ] Comprar dominio (investigación en `docs/GO_TO_MARKET/BRAND_DOMAIN_RESEARCH.md`),
   configurar Resend y política de privacidad.
+- [ ] Configurar `WHATSAPP_APP_SECRET` en Vercel (API, Production). Sin él, el
+  webhook de WhatsApp responde 503 (ADR-019).
+- [ ] Decidir el badge de Spline: aceptarlo con plan Free o contratar Hobby
+  (costos en `COSTS_2026-11-18.md`).
+- [ ] Agregar lock en `revoke_refresh_token` (logout), que hoy solo se bloquea
+  en la rotación.
+- [ ] Agregar test de reuso de refresh fuera de la ventana de gracia de 10 s.
+- [ ] Compilar un APK nuevo para incluir el single-flight de refresh de
+  `apps/mobile/src/lib/api.ts`.
 
 ## Próximo paso concreto
 
 1. Autorizar y enviar los primeros mensajes (El Mejor Clima, TOTALAIR, UBE) y
    coordinar las primeras entrevistas.
 2. Probar el APK `mobile-apk-5` en un dispositivo Android real y corregir lo que
-   falle.
+   falle. Antes, compilar un APK nuevo con el cliente de refresh corregido.
 3. Configurar `NEON_DATABASE_URL` en GitHub y verificar un backup real con
    restauración.
 4. Registrar `dovexo.com.ar` (libre según RDAP 2026-11-15), verificarlo en Resend
@@ -496,8 +575,15 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
   disponible solo para `servicios-demo`.
 - Push requiere `eas projectId` y un development build; no se probó en
   dispositivo.
-- El importador XLSX depende de `openpyxl` y `defusedxml`, que todavía no están en
-  `requirements.txt` (ver "Verificación del bloque 2026-11-11").
+- El importador XLSX usa `openpyxl` y `defusedxml`, ya presentes en
+  `apps/api/requirements.txt` (resuelto el 2026-11-11; ver "Verificación del bloque 2026-11-11").
+- El webhook de WhatsApp está cerrado sin `WHATSAPP_APP_SECRET` (503). Eso es
+  intencional, pero significa que WhatsApp no recibe eventos hasta configurar el
+  secreto.
+- El badge "Built with Spline" aparece en la landing mientras el plan sea Free.
+- `revoke_refresh_token` (logout) no toma lock; solo la rotación lo hace.
+- La ventana de gracia de refresh (10 s) acepta un token ya rotado dentro de ese
+  plazo sin revocar la familia (ADR-019).
 - El reset de demo solo lo ejecuta un platform admin. `demo@saasgestion.com` no es
   platform admin, así que no puede resetear la demo. No hay botón en la UI; el reset
   es solo por API.
