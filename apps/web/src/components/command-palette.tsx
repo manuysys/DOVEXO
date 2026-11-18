@@ -37,12 +37,12 @@ export function CommandPalette({ items }: CommandPaletteProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="border-mist text-slate hover:bg-paper hidden items-center gap-2 rounded-xl border bg-white px-3 py-2 text-xs font-medium md:flex"
+        className="border-border text-text-2 hover:bg-surface-2 rounded-ds-md bg-surface hidden items-center gap-2 border px-3 py-2 text-xs font-medium md:flex"
         aria-label="Abrir búsqueda rápida"
       >
         <Search className="h-3.5 w-3.5" aria-hidden="true" />
         Buscar
-        <kbd className="bg-mist/70 text-ink rounded px-1.5 py-0.5 font-mono text-[10px]">⌘K</kbd>
+        <kbd className="bg-surface-2 text-text rounded px-1.5 py-0.5 font-mono text-[10px]">⌘K</kbd>
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -50,18 +50,18 @@ export function CommandPalette({ items }: CommandPaletteProps) {
           <DialogTitle className="sr-only">Búsqueda rápida</DialogTitle>
           <Command
             loop
-            className="[&_[cmdk-group-heading]]:text-slate [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase"
+            className="[&_[cmdk-group-heading]]:text-text-2 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase"
           >
-            <div className="border-mist flex items-center gap-2 border-b px-4">
-              <Search className="text-slate h-4 w-4" aria-hidden="true" />
+            <div className="border-border flex items-center gap-2 border-b px-4">
+              <Search className="text-text-2 h-4 w-4" aria-hidden="true" />
               <Command.Input
                 autoFocus
                 placeholder="Ir a un módulo o buscar una acción..."
-                className="text-ink placeholder:text-slate/70 h-12 w-full bg-transparent text-sm outline-none"
+                className="text-text placeholder:text-text-2/70 h-12 w-full bg-transparent text-sm outline-none"
               />
             </div>
             <Command.List className="max-h-80 overflow-y-auto p-2">
-              <Command.Empty className="text-slate px-3 py-6 text-center text-sm">
+              <Command.Empty className="text-text-2 px-3 py-6 text-center text-sm">
                 No encontré resultados.
               </Command.Empty>
               <Command.Group heading="Módulos">
@@ -72,11 +72,11 @@ export function CommandPalette({ items }: CommandPaletteProps) {
                       key={item.href}
                       value={`${item.label} ${item.href}`}
                       onSelect={() => go(item.href)}
-                      className="data-[selected=true]:bg-mist/60 text-ink flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm"
+                      className="data-[selected=true]:bg-surface-2 text-text flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm"
                     >
-                      <Icon className="text-slate h-4 w-4" aria-hidden="true" />
+                      <Icon className="text-text-2 h-4 w-4" aria-hidden="true" />
                       {item.label}
-                      <ArrowRight className="text-slate/50 ml-auto h-3.5 w-3.5" aria-hidden="true" />
+                      <ArrowRight className="text-text-2/50 ml-auto h-3.5 w-3.5" aria-hidden="true" />
                     </Command.Item>
                   );
                 })}

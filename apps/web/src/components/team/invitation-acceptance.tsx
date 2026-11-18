@@ -79,7 +79,7 @@ export function InvitationAcceptance({ token }: { token: string }) {
   if (previewQuery.isLoading || authLoading) {
     return (
       <StateCard title="Cargando invitación">
-        <p className="mt-2 text-sm text-slate">Un momento, estamos verificando el enlace.</p>
+        <p className="mt-2 text-sm text-text-2">Un momento, estamos verificando el enlace.</p>
       </StateCard>
     );
   }
@@ -88,7 +88,7 @@ export function InvitationAcceptance({ token }: { token: string }) {
     if (previewQuery.error instanceof ApiError && previewQuery.error.status === 404) {
       return (
         <StateCard title="Invitación no válida">
-          <p className="mt-2 text-sm text-slate">
+          <p className="mt-2 text-sm text-text-2">
             El enlace no existe o está incompleto. Pedí a tu empresa que te envíe una nueva
             invitación.
           </p>
@@ -97,7 +97,7 @@ export function InvitationAcceptance({ token }: { token: string }) {
     }
     return (
       <StateCard title="No pudimos cargar la invitación">
-        <p className="mt-2 text-sm text-slate">Revisá tu conexión y volvé a intentar.</p>
+        <p className="mt-2 text-sm text-text-2">Revisá tu conexión y volvé a intentar.</p>
         <Button variant="outline" className="mt-5" onClick={() => void previewQuery.refetch()}>
           Reintentar
         </Button>
@@ -109,7 +109,7 @@ export function InvitationAcceptance({ token }: { token: string }) {
   if (!invitation) {
     return (
       <StateCard title="Cargando invitación">
-        <p className="mt-2 text-sm text-slate">Un momento, estamos verificando el enlace.</p>
+        <p className="mt-2 text-sm text-text-2">Un momento, estamos verificando el enlace.</p>
       </StateCard>
     );
   }
@@ -119,7 +119,7 @@ export function InvitationAcceptance({ token }: { token: string }) {
   if (!status) {
     return (
       <StateCard title="No pudimos validar la invitación">
-        <p className="mt-2 text-sm text-slate">
+        <p className="mt-2 text-sm text-text-2">
           Pedí a tu empresa que te envíe una nueva invitación.
         </p>
       </StateCard>
@@ -129,10 +129,10 @@ export function InvitationAcceptance({ token }: { token: string }) {
   if (status !== "pending") {
     return (
       <StateCard title={STATUS_TITLES[status]}>
-        <p className="mt-2 text-sm text-slate">{publicInvitationMessage(status)}</p>
+        <p className="mt-2 text-sm text-text-2">{publicInvitationMessage(status)}</p>
         <Link
           href="/login"
-          className="mt-5 inline-block text-sm font-medium text-teal hover:underline"
+          className="mt-5 inline-block text-sm font-medium text-primary hover:underline"
         >
           Ir a ingresar
         </Link>
@@ -141,30 +141,30 @@ export function InvitationAcceptance({ token }: { token: string }) {
   }
 
   const sessionErrorBlock = serverError && (
-    <p role="alert" className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+    <p role="alert" className="bg-danger-soft text-danger-strong mt-4 rounded-xl px-3 py-2 text-sm">
       {serverError}
     </p>
   );
 
   return (
     <Card className="w-full max-w-md p-8">
-      <p className="text-xs font-semibold tracking-[0.14em] text-teal uppercase">Invitación</p>
-      <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ink">
+      <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase">Invitación</p>
+      <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight text-text">
         Te invitaron a {invitation.tenant_name}
       </h1>
-      <dl className="mt-5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-xl border border-mist bg-paper px-4 py-3 text-sm">
-        <dt className="text-slate">Rol</dt>
-        <dd className="font-medium text-ink">{roleLabel(invitation.role)}</dd>
-        <dt className="text-slate">Email</dt>
-        <dd className="font-medium break-all text-ink">{invitation.email_masked}</dd>
-        <dt className="text-slate">Vence</dt>
-        <dd className="font-medium text-ink">{formatDate(invitation.expires_at)}</dd>
+      <dl className="border-border bg-surface-2 mt-5 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-xl border px-4 py-3 text-sm">
+        <dt className="text-text-2">Rol</dt>
+        <dd className="font-medium text-text">{roleLabel(invitation.role)}</dd>
+        <dt className="text-text-2">Email</dt>
+        <dd className="font-medium break-all text-text">{invitation.email_masked}</dd>
+        <dt className="text-text-2">Vence</dt>
+        <dd className="font-medium text-text">{formatDate(invitation.expires_at)}</dd>
       </dl>
 
       {user ? (
         <div className="mt-6 space-y-4">
-          <p className="text-sm text-slate">
-            Estás ingresado como <span className="font-medium text-ink">{user.email}</span>. Si ese
+          <p className="text-sm text-text-2">
+            Estás ingresado como <span className="font-medium text-text">{user.email}</span>. Si ese
             email no es el de la invitación, no vas a poder aceptarla.
           </p>
           {sessionErrorBlock}
@@ -179,7 +179,7 @@ export function InvitationAcceptance({ token }: { token: string }) {
           </Button>
           <button
             type="button"
-            className="w-full text-sm font-medium text-slate underline-offset-4 hover:text-ink hover:underline"
+            className="w-full text-sm font-medium text-text-2 underline-offset-4 hover:text-text hover:underline"
             onClick={() => void logout()}
           >
             Usar otra cuenta
@@ -192,18 +192,18 @@ export function InvitationAcceptance({ token }: { token: string }) {
           noValidate
         >
           <div>
-            <label htmlFor="invite-accept-name" className="mb-1 block text-sm font-medium text-ink">
+            <label htmlFor="invite-accept-name" className="mb-1 block text-sm font-medium text-text">
               Nombre y apellido
             </label>
             <Input id="invite-accept-name" autoComplete="name" {...register("full_name")} />
             {errors.full_name && (
-              <p className="mt-1 text-xs text-red-600">{errors.full_name.message}</p>
+              <p className="mt-1 text-xs text-danger">{errors.full_name.message}</p>
             )}
           </div>
           <div>
             <label
               htmlFor="invite-accept-password"
-              className="mb-1 block text-sm font-medium text-ink"
+              className="mb-1 block text-sm font-medium text-text"
             >
               Contraseña
             </label>
@@ -214,9 +214,9 @@ export function InvitationAcceptance({ token }: { token: string }) {
               {...register("password")}
             />
             {errors.password ? (
-              <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
+              <p className="mt-1 text-xs text-danger">{errors.password.message}</p>
             ) : (
-              <p className="mt-1 text-xs text-slate">Mínimo 8 caracteres.</p>
+              <p className="mt-1 text-xs text-text-2">Mínimo 8 caracteres.</p>
             )}
           </div>
           {sessionErrorBlock}
@@ -228,9 +228,9 @@ export function InvitationAcceptance({ token }: { token: string }) {
           >
             {acceptMutation.isPending ? "Creando tu acceso..." : "Aceptar invitación"}
           </Button>
-          <p className="text-center text-xs text-slate">
+          <p className="text-center text-xs text-text-2">
             ¿Ya tenés cuenta?{" "}
-            <Link href="/login" className="font-medium text-teal hover:underline">
+            <Link href="/login" className="font-medium text-primary hover:underline">
               Ingresá
             </Link>{" "}
             y volvé a abrir este enlace.
@@ -244,7 +244,7 @@ export function InvitationAcceptance({ token }: { token: string }) {
 function StateCard({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <Card className="w-full max-w-md p-8">
-      <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">{title}</h1>
+      <h1 className="font-display text-2xl font-semibold tracking-tight text-text">{title}</h1>
       {children}
     </Card>
   );

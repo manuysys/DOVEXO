@@ -10,9 +10,9 @@ type ProgressRingProps = {
 };
 
 const colorClasses = {
-  teal: "stroke-teal",
-  amber: "stroke-amber",
-  ink: "stroke-ink",
+  teal: "stroke-accent-teal",
+  amber: "stroke-warning",
+  ink: "stroke-primary",
 } as const;
 
 export function ProgressRing({
@@ -33,7 +33,7 @@ export function ProgressRing({
     <div className={cn("flex items-center gap-4", className)}>
       <div className="relative h-20 w-20 shrink-0">
         <svg viewBox="0 0 80 80" className="h-20 w-20 -rotate-90" aria-hidden="true">
-          <circle cx="40" cy="40" r={radius} className="stroke-mist fill-none" strokeWidth="8" />
+          <circle cx="40" cy="40" r={radius} className="stroke-border fill-none" strokeWidth="8" />
           <circle
             cx="40"
             cy="40"
@@ -45,13 +45,13 @@ export function ProgressRing({
             strokeDashoffset={offset}
           />
         </svg>
-        <span className="text-ink absolute inset-0 flex items-center justify-center text-sm font-semibold">
+        <span className="text-text absolute inset-0 flex items-center justify-center text-sm font-semibold">
           {Math.round(percent)}%
         </span>
       </div>
       <div className="min-w-0">
-        <p className="text-ink text-sm font-semibold">{label}</p>
-        {detail && <p className="text-slate mt-0.5 text-xs">{detail}</p>}
+        <p className="text-text text-sm font-semibold">{label}</p>
+        {detail && <p className="text-text-2 mt-0.5 text-xs">{detail}</p>}
       </div>
     </div>
   );

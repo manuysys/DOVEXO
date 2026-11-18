@@ -44,45 +44,45 @@ export default function RegisterPage() {
 
   return (
     <Card className="w-full max-w-md p-8">
-      <p className="text-teal text-xs font-semibold tracking-[0.14em] uppercase">Empezá hoy</p>
-      <h1 className="font-display text-ink mt-2 text-2xl font-semibold tracking-tight">
+      <p className="text-primary text-xs font-semibold tracking-[0.14em] uppercase">Empezá hoy</p>
+      <h1 className="font-display text-text mt-2 text-2xl font-semibold tracking-tight">
         Crear cuenta
       </h1>
-      <p className="text-slate mt-2 text-sm">
+      <p className="text-text-2 mt-2 text-sm">
         Registrá tu empresa y empezá a ordenar la operación.
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         <div>
-          <label htmlFor="full_name" className="text-ink mb-1 block text-sm font-medium">
+          <label htmlFor="full_name" className="text-text mb-1 block text-sm font-medium">
             Nombre y apellido
           </label>
           <Input id="full_name" autoComplete="name" {...register("full_name")} />
           {errors.full_name && (
-            <p className="mt-1 text-xs text-red-600">{errors.full_name.message}</p>
+            <p className="mt-1 text-xs text-danger">{errors.full_name.message}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="company_name" className="text-ink mb-1 block text-sm font-medium">
+          <label htmlFor="company_name" className="text-text mb-1 block text-sm font-medium">
             Nombre de la empresa
           </label>
           <Input id="company_name" autoComplete="organization" {...register("company_name")} />
           {errors.company_name && (
-            <p className="mt-1 text-xs text-red-600">{errors.company_name.message}</p>
+            <p className="mt-1 text-xs text-danger">{errors.company_name.message}</p>
           )}
         </div>
 
         <div>
-          <label htmlFor="email" className="text-ink mb-1 block text-sm font-medium">
+          <label htmlFor="email" className="text-text mb-1 block text-sm font-medium">
             Email
           </label>
           <Input id="email" type="email" autoComplete="email" {...register("email")} />
-          {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
+          {errors.email && <p className="mt-1 text-xs text-danger">{errors.email.message}</p>}
         </div>
 
         <div>
-          <label htmlFor="password" className="text-ink mb-1 block text-sm font-medium">
+          <label htmlFor="password" className="text-text mb-1 block text-sm font-medium">
             Contraseña
           </label>
           <Input
@@ -92,13 +92,13 @@ export default function RegisterPage() {
             {...register("password")}
           />
           {errors.password && (
-            <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
+            <p className="mt-1 text-xs text-danger">{errors.password.message}</p>
           )}
-          <p className="text-slate mt-1 text-xs">Mínimo 8 caracteres.</p>
+          <p className="text-text-2 mt-1 text-xs">Mínimo 8 caracteres.</p>
         </div>
 
         {serverError && (
-          <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p role="alert" className="bg-danger-soft text-danger-strong rounded-xl px-3 py-2 text-sm">
             {serverError}
           </p>
         )}
@@ -108,9 +108,9 @@ export default function RegisterPage() {
         </Button>
       </form>
 
-      <p className="text-slate mt-6 text-center text-sm">
+      <p className="text-text-2 mt-6 text-center text-sm">
         ¿Ya tenés cuenta?{" "}
-        <Link href="/login" className="text-teal font-medium hover:underline">
+        <Link href="/login" className="text-primary font-medium hover:underline">
           Ingresar
         </Link>
       </p>

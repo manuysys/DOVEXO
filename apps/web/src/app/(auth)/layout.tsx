@@ -5,20 +5,20 @@ import { brand } from "@/lib/brand";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="flex min-h-screen flex-col bg-paper">
+    <main className="bg-bg flex min-h-screen flex-col">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
         <Link href="/" className="flex items-center gap-2.5">
           <span
             aria-hidden="true"
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink text-sm font-bold text-white"
+            className="bg-primary flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white"
           >
             D
           </span>
-          <span className="font-display text-lg font-semibold tracking-tight text-ink">
+          <span className="font-display text-text text-lg font-semibold tracking-tight">
             {brand.name}
           </span>
         </Link>
-        <Link href="/" className="text-sm font-medium text-slate hover:text-ink">
+        <Link href="/" className="text-text-2 hover:text-text text-sm font-medium">
           Volver al inicio
         </Link>
       </header>

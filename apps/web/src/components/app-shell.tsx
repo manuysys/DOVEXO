@@ -26,7 +26,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center gap-3 text-sm text-slate">
+      <div className="text-text-2 flex min-h-screen items-center justify-center gap-3 text-sm">
         <span className="h-5 w-5 animate-spin rounded-full border-2 border-teal border-t-transparent" />
         Cargando sesión...
       </div>
@@ -46,12 +46,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-paper">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col bg-ink text-white md:flex">
+    <div className="bg-bg min-h-screen">
+      <aside className="bg-deep fixed inset-y-0 left-0 hidden w-64 flex-col text-white md:flex">
         <Link href="/dashboard" className="flex items-center gap-3 px-5 py-5">
           <span
             aria-hidden="true"
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal text-sm font-bold text-white"
+            className="bg-primary flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white"
           >
             D
           </span>
@@ -77,14 +77,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
                   active
-                    ? "bg-white/12 text-white"
+                    ? "bg-primary/20 text-white"
                     : "text-white/65 hover:bg-white/8 hover:text-white",
                 )}
                 aria-current={active ? "page" : undefined}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
                 {item.label}
-                {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-teal" />}
+                {active && <span className="bg-accent-teal ml-auto h-1.5 w-1.5 rounded-full" />}
               </Link>
             );
           })}
@@ -112,7 +112,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             onClick={() => setMobileOpen(false)}
             aria-label="Cerrar menú"
           />
-          <div className="relative flex h-full w-72 max-w-[85vw] flex-col bg-ink text-white shadow-2xl">
+          <div className="bg-deep relative flex h-full w-72 max-w-[85vw] flex-col text-white shadow-2xl">
             <div className="flex items-center justify-between px-4 py-4">
               <span className="font-display text-sm font-semibold">{brand.name}</span>
               <button
@@ -138,7 +138,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     onClick={() => setMobileOpen(false)}
                     className={cn(
                       "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium",
-                      active ? "bg-white/12 text-white" : "text-white/65 hover:bg-white/8",
+                      active ? "bg-primary/20 text-white" : "text-white/65 hover:bg-white/8",
                     )}
                     aria-current={active ? "page" : undefined}
                   >
@@ -165,23 +165,23 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       <div className="md:pl-64">
-        <header className="sticky top-0 z-30 border-b border-mist bg-paper/85 backdrop-blur">
+        <header className="border-border bg-bg/85 sticky top-0 z-30 border-b backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 md:px-8">
             <div className="flex min-w-0 items-center gap-2">
               <button
                 type="button"
                 onClick={() => setMobileOpen(true)}
-                className="rounded-xl border border-mist bg-white p-2 text-ink md:hidden"
+                className="border-border bg-surface text-text rounded-xl border p-2 md:hidden"
                 aria-label="Abrir menú"
                 aria-expanded={mobileOpen}
               >
                 <Menu className="h-4 w-4" />
               </button>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-ink">
+                <p className="text-text truncate text-sm font-semibold">
                   {activeTenant?.name ?? "Mi empresa"}
                 </p>
-                <p className="text-xs text-slate">
+                <p className="text-text-2 text-xs">
                   {role === "owner"
                     ? "Owner"
                     : role === "admin"
@@ -204,7 +204,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 aria-label="Empresa activa"
                 value={activeTenantId ?? ""}
                 onChange={(event) => setActiveTenant(event.target.value)}
-                className="hidden max-w-[220px] rounded-xl border border-mist bg-white px-3 py-2 text-sm text-ink sm:block"
+                className="border-border bg-surface text-text hidden max-w-[220px] rounded-xl border px-3 py-2 text-sm sm:block"
               >
                 {tenants.map((tenant) => (
                   <option key={tenant.id} value={tenant.id}>
@@ -217,7 +217,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </header>
 
         {activeTenant?.slug === "servicios-demo" && (
-          <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-xs text-amber-900 md:px-8">
+          <div className="border-warning/30 bg-warning-soft text-warning-strong border-b px-4 py-2 text-center text-xs md:px-8">
             <strong>Demo de DOVEXO:</strong> los datos son de ejemplo y pueden
             restablecerse entre visitas. No cargues información real.
           </div>

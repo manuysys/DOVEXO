@@ -42,21 +42,21 @@ export default function LoginPage() {
 
   return (
     <Card className="w-full max-w-md p-8">
-      <p className="text-teal text-xs font-semibold tracking-[0.14em] uppercase">Bienvenido</p>
-      <h1 className="font-display text-ink mt-2 text-2xl font-semibold tracking-tight">Ingresar</h1>
-      <p className="text-slate mt-2 text-sm">Accedé al panel de tu empresa.</p>
+      <p className="text-primary text-xs font-semibold tracking-[0.14em] uppercase">Bienvenido</p>
+      <h1 className="font-display text-text mt-2 text-2xl font-semibold tracking-tight">Ingresar</h1>
+      <p className="text-text-2 mt-2 text-sm">Accedé al panel de tu empresa.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
         <div>
-          <label htmlFor="email" className="text-ink mb-1 block text-sm font-medium">
+          <label htmlFor="email" className="text-text mb-1 block text-sm font-medium">
             Email
           </label>
           <Input id="email" type="email" autoComplete="email" {...register("email")} />
-          {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
+          {errors.email && <p className="mt-1 text-xs text-danger">{errors.email.message}</p>}
         </div>
 
         <div>
-          <label htmlFor="password" className="text-ink mb-1 block text-sm font-medium">
+          <label htmlFor="password" className="text-text mb-1 block text-sm font-medium">
             Contraseña
           </label>
           <Input
@@ -66,12 +66,12 @@ export default function LoginPage() {
             {...register("password")}
           />
           {errors.password && (
-            <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
+            <p className="mt-1 text-xs text-danger">{errors.password.message}</p>
           )}
         </div>
 
         {serverError && (
-          <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p role="alert" className="bg-danger-soft text-danger-strong rounded-xl px-3 py-2 text-sm">
             {serverError}
           </p>
         )}
@@ -81,19 +81,19 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <div className="bg-paper border-mist mt-5 rounded-xl border px-3 py-2.5 text-xs">
-        <p className="text-ink font-semibold">Cuenta de demo</p>
-        <p className="text-slate mt-0.5">
+      <div className="bg-surface-2 border-border mt-5 rounded-xl border px-3 py-2.5 text-xs">
+        <p className="text-text font-semibold">Cuenta de demo</p>
+        <p className="text-text-2 mt-0.5">
           demo@saasgestion.com · Demo12345! ·{" "}
-          <Link href="/register" className="text-teal font-medium hover:underline">
+          <Link href="/register" className="text-primary font-medium hover:underline">
             crear cuenta
           </Link>
         </p>
       </div>
 
-      <p className="text-slate mt-6 text-center text-sm">
+      <p className="text-text-2 mt-6 text-center text-sm">
         ¿No tenés cuenta?{" "}
-        <Link href="/register" className="text-teal font-medium hover:underline">
+        <Link href="/register" className="text-primary font-medium hover:underline">
           Crear una empresa
         </Link>
       </p>

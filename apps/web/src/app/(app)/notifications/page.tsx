@@ -35,7 +35,7 @@ export default function NotificationsPage() {
 
   if (!activeTenantId) {
     return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-sm text-zinc-600">
+      <div className="rounded-ds-lg border border-border bg-surface p-8 text-sm text-text-2">
         No hay una empresa activa. Cerrá sesión y volvé a ingresar.
       </div>
     );
@@ -51,7 +51,7 @@ export default function NotificationsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Notificaciones</h1>
-          <p className="mt-1 text-sm text-zinc-600">
+          <p className="mt-1 text-sm text-text-2">
             {unread} sin leer de {total} en {activeTenant?.name ?? "tu empresa"}.
           </p>
         </div>
@@ -59,7 +59,7 @@ export default function NotificationsPage() {
           type="button"
           onClick={() => markAllMutation.mutate()}
           disabled={unread === 0 || markAllMutation.isPending}
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <CheckCheck className="h-4 w-4" aria-hidden="true" />
           {markAllMutation.isPending ? "Marcando..." : "Marcar todas como leídas"}
@@ -67,40 +67,40 @@ export default function NotificationsPage() {
       </div>
 
       {actionError && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger-strong">
           {errorMessage(actionError, "No se pudo actualizar la notificación")}
         </p>
       )}
 
       <section
         aria-label="Listado de notificaciones"
-        className="rounded-2xl border border-zinc-200 bg-white"
+        className="rounded-ds-lg border border-border bg-surface"
       >
         {notificationsQuery.isLoading ? (
-          <p className="p-6 text-sm text-zinc-500">Cargando notificaciones...</p>
+          <p className="p-6 text-sm text-text-2">Cargando notificaciones...</p>
         ) : notificationsQuery.isError ? (
           <div className="p-6">
-            <p className="text-sm text-red-600">
+            <p className="text-sm text-danger">
               {errorMessage(notificationsQuery.error, "No se pudieron cargar las notificaciones.")}
             </p>
             <button
               type="button"
               onClick={() => void notificationsQuery.refetch()}
-              className="mt-3 rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+              className="mt-3 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-text-2 hover:bg-surface-2"
             >
               Reintentar
             </button>
           </div>
         ) : items.length === 0 ? (
           <div className="p-8 text-center">
-            <Bell className="mx-auto h-8 w-8 text-zinc-300" aria-hidden="true" />
-            <p className="mt-3 text-sm font-medium text-zinc-800">No tenés notificaciones</p>
-            <p className="mt-1 text-sm text-zinc-500">
+            <Bell className="mx-auto h-8 w-8 text-text-2/50" aria-hidden="true" />
+            <p className="mt-3 text-sm font-medium text-text">No tenés notificaciones</p>
+            <p className="mt-1 text-sm text-text-2">
               Cuando una automatización se dispare, aparecerá acá.
             </p>
           </div>
         ) : (
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-border">
             {items.map((notification) => (
               <NotificationItem
                 key={notification.id}
@@ -131,25 +131,25 @@ function NotificationItem({ notification, pending, onMarkRead }: NotificationIte
     <li
       className={cn(
         "flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:justify-between",
-        isUnread && "border-l-4 border-l-zinc-900 bg-zinc-50",
+        isUnread && "border-l-4 border-l-primary bg-surface-2",
       )}
     >
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
           {isUnread && (
-            <span className="rounded-full bg-zinc-900 px-2 py-0.5 text-xs font-semibold text-white">
+            <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-white">
               Nueva
             </span>
           )}
-          <span className="rounded-full border border-zinc-300 px-2 py-0.5 text-xs text-zinc-600">
+          <span className="rounded-full border border-border px-2 py-0.5 text-xs text-text-2">
             {notification.type}
           </span>
         </div>
-        <p className={cn("text-sm text-zinc-900", isUnread ? "font-semibold" : "font-medium")}>
+        <p className={cn("text-sm text-text", isUnread ? "font-semibold" : "font-medium")}>
           {notification.title}
         </p>
-        <p className="text-sm whitespace-pre-line text-zinc-700">{notification.message}</p>
-        <p className="text-xs text-zinc-500">
+        <p className="text-sm whitespace-pre-line text-text-2">{notification.message}</p>
+        <p className="text-xs text-text-2">
           <time dateTime={notification.created_at}>{formatDate(notification.created_at)}</time>
           {!isUnread && notification.read_at && (
             <span> · Leída el {formatDate(notification.read_at)}</span>
@@ -163,7 +163,7 @@ function NotificationItem({ notification, pending, onMarkRead }: NotificationIte
           onClick={onMarkRead}
           disabled={pending}
           aria-label={`Marcar como leída: ${notification.title}`}
-          className="shrink-0 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100 disabled:opacity-60"
+          className="shrink-0 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-text hover:bg-surface-2 disabled:opacity-60"
         >
           {pending ? "Marcando..." : "Marcar como leída"}
         </button>

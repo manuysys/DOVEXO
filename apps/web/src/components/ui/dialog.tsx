@@ -17,17 +17,17 @@ export function DialogContent({
 }: ComponentProps<typeof DialogPrimitive.Content>) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-sm" />
+      <DialogPrimitive.Overlay className="bg-deep/40 fixed inset-0 z-50 backdrop-blur-sm" />
       <DialogPrimitive.Content
         className={cn(
-          "border-mist fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-white p-6 shadow-2xl",
+          "border-border bg-surface rounded-ds-xl fixed top-1/2 left-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 border p-6 shadow-2xl",
           className,
         )}
         {...props}
       >
         {children}
         <DialogPrimitive.Close
-          className="text-slate hover:bg-mist/60 absolute top-4 right-4 rounded-lg p-1.5"
+          className="text-text-2 hover:bg-surface-2 absolute top-4 right-4 rounded-lg p-1.5"
           aria-label="Cerrar"
         >
           <X className="h-4 w-4" />
@@ -44,7 +44,7 @@ export function DialogHeader({ className, ...props }: ComponentProps<"div">) {
 export function DialogTitle({ className, ...props }: ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      className={cn("text-ink font-display text-lg font-semibold tracking-tight", className)}
+      className={cn("text-text font-display text-lg font-semibold tracking-tight", className)}
       {...props}
     />
   );
@@ -54,7 +54,7 @@ export function DialogDescription({
   className,
   ...props
 }: ComponentProps<typeof DialogPrimitive.Description>) {
-  return <DialogPrimitive.Description className={cn("text-slate text-sm", className)} {...props} />;
+  return <DialogPrimitive.Description className={cn("text-text-2 text-sm", className)} {...props} />;
 }
 
 export function DialogFooter({ className, ...props }: ComponentProps<"div">) {

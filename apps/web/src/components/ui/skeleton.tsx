@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("bg-mist/70 animate-pulse rounded-lg", className)} />;
+  return <div className={cn("bg-surface-2 animate-pulse rounded-lg", className)} />;
 }
 
 export function SkeletonText({ lines = 3 }: { lines?: number }) {
@@ -16,7 +16,7 @@ export function SkeletonText({ lines = 3 }: { lines?: number }) {
 
 export function SkeletonCard() {
   return (
-    <div className="border-mist rounded-2xl border bg-white p-5">
+    <div className="border-border bg-surface rounded-ds-lg border p-5">
       <Skeleton className="h-3 w-24" />
       <Skeleton className="mt-3 h-7 w-32" />
       <Skeleton className="mt-3 h-3 w-40" />
