@@ -1,0 +1,46 @@
+
+name: Chromatic
+
+on:
+  push:
+    paths:
+      - "apps/web/**"
+      - ".github/workflows/chromatic.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  chromatic:
+    name: Publish Storybook and run visual tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 12.4.2
+          run_install: false
+          cache: true
+          cache_dependency_path: apps/web/pnpm-lock.yaml
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        working-directory: apps/web
+        run: pnpm install --frozen-lockfile
+
+      - name: Publish Storybook to Chromatic
+        uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          workingDir: apps/web
+          buildScriptName: build-storybook
