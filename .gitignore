@@ -54,6 +54,7 @@ desktop.ini
 playwright-report/
 test-results/
 blob-report/
+.playwright-mcp/
 apps/web/playwright/.cache/
 apps/api/.pytest_cache/
 *.log

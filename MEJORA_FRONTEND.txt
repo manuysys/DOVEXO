@@ -1,0 +1,2378 @@
+# ARVOKTA — DOVEXO
+# REDISEÑO VISUAL INTEGRAL Y SISTEMA DE DISEÑO MULTIPLATAFORMA
+## PROMPT MAESTRO PARA OPENCode / AGENTES DE DESARROLLO
+
+---
+
+# 0. TU MISIÓN
+
+Actuá como un equipo especializado de diseño y desarrollo de productos digitales de primer nivel, compuesto por:
+
+- Creative Director especializado en identidad visual de SaaS.
+- Senior Product Designer.
+- UX/UI Designer.
+- Senior Frontend Engineer.
+- Especialista en diseño de dashboards B2B.
+- Especialista en aplicaciones móviles Android.
+- Motion Designer.
+- Especialista en accesibilidad.
+- Especialista en rendimiento frontend.
+- Design Systems Architect.
+
+Tu misión es realizar una transformación visual integral de DOVEXO.
+
+No queremos simplemente cambiar colores, redondear tarjetas o agregar animaciones.
+
+Queremos llevar la experiencia visual y de interacción a un nivel profesional comparable con los mejores productos SaaS actuales.
+
+El objetivo es que DOVEXO se vea como un producto tecnológico comercial serio, moderno, atractivo, coherente y bien diseñado.
+
+Debe transmitir:
+
+- Profesionalismo.
+- Confianza.
+- Organización.
+- Modernidad.
+- Inteligencia.
+- Productividad.
+- Calidad.
+- Simplicidad.
+
+Queremos que cuando un potencial cliente ingrese a la landing, vea el dashboard o abra la aplicación móvil, perciba que está utilizando un producto cuidado y profesional.
+
+**La calidad visual debe estar acompañada de una excelente usabilidad. No queremos sacrificar funcionalidad para conseguir una interfaz bonita.**
+
+IMPORTANTE:
+
+Este trabajo debe concentrarse exclusivamente en el FRONTEND.
+
+No modificar innecesariamente:
+
+- Backend.
+- Base de datos.
+- Modelos.
+- Migraciones.
+- Endpoints.
+- Autenticación.
+- Autorización.
+- Reglas de negocio.
+- Automatizaciones.
+- Servicios de IA.
+- Integraciones.
+- Contratos de APIs.
+
+Se pueden realizar adaptaciones menores de integración frontend cuando sean imprescindibles para mejorar la experiencia, pero cualquier modificación del backend debe estar justificada y separada del rediseño visual.
+
+No reescribir la aplicación desde cero.
+
+Trabajar sobre el repositorio existente.
+
+# 1. CONTEXTO DEL PRODUCTO
+
+Empresa: ARVOKTA.
+
+Producto: DOVEXO.
+
+DOVEXO es un SaaS B2B para empresas de servicios técnicos a domicilio.
+
+Está orientado inicialmente a:
+
+- Instaladores de aire acondicionado.
+- Técnicos de climatización.
+- Refrigeración.
+- Electricistas.
+- Plomeros.
+- Empresas de mantenimiento.
+- Empresas de instalaciones.
+- Servicios de reparación.
+
+Su objetivo es centralizar el circuito de trabajo de estas empresas.
+
+Desde que un cliente solicita un servicio hasta que se realiza el trabajo, se cobra y se actualiza el historial.
+
+El producto dispone de:
+
+- Landing comercial.
+- Panel administrativo.
+- Dashboard operativo.
+- CRM.
+- Clientes.
+- Solicitudes.
+- Órdenes de trabajo.
+- Presupuestos.
+- Aprobaciones públicas.
+- Agenda.
+- Técnicos.
+- Pagos.
+- Automatizaciones.
+- Notificaciones.
+- Asistente de IA.
+- WhatsApp.
+- Administración global.
+- Portal del cliente.
+- PWA para técnicos.
+- Aplicación móvil desarrollada en Expo / React Native.
+
+El flujo central es:
+
+Consulta → Solicitud → Orden → Presupuesto → Aprobación → Visita → Trabajo realizado → Pago.
+
+Queremos que todas las interfaces comuniquen visualmente que estos módulos forman parte de un único sistema.
+
+# 2. OBJETIVO VISUAL
+
+La dirección artística propuesta es:
+
+## PREMIUM OPERATIONAL SAAS
+
+Una combinación de:
+
+- Minimalismo profesional.
+- Diseño editorial moderno.
+- Interfaces B2B limpias.
+- Elementos visuales distintivos.
+- Animaciones sutiles.
+- Jerarquías tipográficas fuertes.
+- Composiciones espaciales.
+- Visualizaciones de datos claras.
+- Detalles interactivos.
+- Experiencia móvil excelente.
+
+No buscamos una apariencia genérica de dashboard generado automáticamente.
+
+Tampoco queremos una aplicación completamente oscura con neón, blur y gradientes en todas partes.
+
+La interfaz debe ser atractiva, pero transmitir seriedad empresarial.
+
+## Referencias visuales principales
+
+Utilizar las siguientes marcas como referencias de diseño.
+
+No copiar sus interfaces, código, textos, logos ni identidad visual.
+
+Estudiar sus principios y aplicar los que sean adecuados para DOVEXO.
+
+### LINEAR
+https://linear.app/
+
+Referencia principal para:
+
+- Dashboards.
+- Navegación.
+- Tipografía.
+- Jerarquía visual.
+- Densidad de información.
+- Estados.
+- Tablas.
+- Microinteracciones.
+- Transiciones.
+- Diseño minimalista.
+
+Estudiar especialmente cómo consigue mostrar bastante información sin generar ruido visual.
+
+### JOBBER
+https://www.getjobber.com/
+
+Referencia principal para:
+
+- Software de servicios técnicos.
+- Agenda.
+- Órdenes.
+- Técnicos.
+- Experiencia móvil.
+- Formularios.
+- Visitas.
+- Comunicación.
+- Clientes.
+- Seguimiento operativo.
+
+Es una referencia especialmente importante porque comparte nuestro mercado objetivo.
+
+Estudiar la aplicación móvil y el flujo entre administración y técnicos.
+
+### STRIPE
+https://stripe.com/
+
+Referencia para:
+
+- Landing comercial.
+- Presentación de producto.
+- Tipografía.
+- Visualización financiera.
+- Gráficos.
+- Componentes de confianza.
+- Composición.
+- Espaciado.
+
+### FRAMER
+https://www.framer.com/
+
+Referencia para:
+
+- Landing page.
+- Animaciones de scroll.
+- Composiciones visuales.
+- Mockups.
+- Profundidad.
+- Transiciones.
+- Elementos interactivos.
+- Presentación del producto.
+
+### RAYCAST
+https://www.raycast.com/
+
+Referencia para:
+
+- Rapidez.
+- Simplicidad.
+- Acciones rápidas.
+- Interfaz compacta.
+- Experiencia de teclado.
+- Consistencia visual.
+
+### NOTION
+https://www.notion.com/
+
+Referencia para:
+
+- Organización de información.
+- Interfaces de contenido.
+- Asistentes.
+- Estados vacíos.
+- Organización de datos.
+- Interacción entre módulos.
+
+### Otras referencias
+
+Investigar también:
+
+- https://attio.com/
+- https://vercel.com/
+- https://www.figma.com/
+- https://www.superhuman.com/
+- https://www.webflow.com/
+
+No asumir que todos estos productos son buenos en todas sus áreas.
+
+Elegir patrones específicos según el problema de diseño que se intenta resolver.
+
+# 3. AUDITORÍA VISUAL ANTES DE MODIFICAR
+
+Antes de modificar cualquier componente:
+
+1. Inspeccionar todo el frontend.
+2. Identificar rutas.
+3. Identificar layouts.
+4. Identificar componentes compartidos.
+5. Identificar librerías de UI.
+6. Identificar sistema actual de estilos.
+7. Identificar tipografías.
+8. Identificar iconografía.
+9. Identificar animaciones.
+10. Identificar componentes duplicados.
+11. Identificar componentes inconsistentes.
+12. Identificar problemas responsive.
+13. Identificar pantallas que no tienen estados vacíos adecuados.
+14. Identificar problemas de accesibilidad.
+15. Identificar componentes visuales que dificultan la navegación.
+
+Utilizar Playwright u otras herramientas de navegador disponibles para recorrer la aplicación.
+
+Capturar screenshots de todas las páginas importantes.
+
+No limitarse a inspeccionar el código.
+
+Es necesario observar la interfaz ejecutándose.
+
+## Rutas a inspeccionar
+
+Landing:
+https://saas-gestion-web.vercel.app/
+
+Dashboard:
+https://saas-gestion-web.vercel.app/dashboard
+
+PWA de técnicos:
+https://saas-gestion-web.vercel.app/tech
+
+También inspeccionar:
+
+- Login.
+- Registro.
+- Onboarding.
+- Clientes.
+- Detalle de clientes.
+- Solicitudes.
+- Órdenes.
+- Detalle de órdenes.
+- Presupuestos.
+- Vista pública de presupuestos.
+- Agenda.
+- Pagos.
+- Automatizaciones.
+- Asistente IA.
+- WhatsApp.
+- Facturación.
+- Configuración.
+- Equipo.
+- Suscripciones.
+- Portal del cliente.
+- Panel de administración global.
+
+Utilizar las cuentas de demostración disponibles únicamente en un entorno controlado.
+
+No modificar datos reales ni destruir la información compartida de demostración.
+
+Si no se puede acceder a una pantalla autenticada:
+
+- Inspeccionar los componentes.
+- Identificar sus estilos.
+- Revisar sus estados.
+- Intentar acceder mediante entorno local.
+- Documentar lo que falta validar.
+
+No inventar observaciones visuales.
+
+## Resoluciones a comprobar
+
+Desktop:
+
+- 1920 × 1080.
+- 1440 × 900.
+- 1366 × 768.
+
+Tablet:
+
+- 1024 × 768.
+- 768 × 1024.
+
+Mobile:
+
+- 430 × 932.
+- 390 × 844.
+- 360 × 800.
+
+No diseñar solamente para una resolución.
+
+# 4. SISTEMA DE DISEÑO GLOBAL
+
+Esta es una de las tareas más importantes.
+
+Crear un sistema visual único para todo DOVEXO.
+
+La landing, dashboard, PWA y aplicación Android deben sentirse como partes del mismo producto.
+
+No significa que cada plataforma deba implementar exactamente los mismos componentes: cada una debe respetar el mismo lenguaje de diseño.
+
+Crear tokens centralizados.
+
+## 4.1. Paleta de colores propuesta
+
+Utilizar una paleta moderna y sobria.
+
+Colores iniciales:
+
+### Marca principal
+
+- Azul primario: #315EFB.
+- Azul oscuro: #1E3A8A.
+- Azul profundo: #17243D.
+- Azul secundario: #4778FF.
+
+### Colores complementarios
+
+- Turquesa: #11A69A.
+- Violeta: #7459D9.
+- Cian suave: #4CB7D8.
+
+### Colores de estado
+
+- Éxito: verde.
+- Advertencia: ámbar.
+- Error: rojo.
+- Información: azul.
+
+Definir tonos completos para cada estado.
+
+No utilizar colores arbitrarios por componente.
+
+Los estados deben tener el mismo significado en toda la plataforma.
+
+### Fondos
+
+Modo claro:
+
+- Fondo general: gris azulado muy suave.
+- Superficies: blanco.
+- Superficies secundarias: gris claro.
+- Bordes: gris neutro de bajo contraste.
+- Texto principal: azul marino casi negro.
+- Texto secundario: gris azulado.
+
+Evaluar un modo oscuro opcional posteriormente.
+
+No desarrollar dos sistemas de diseño independientes.
+
+## 4.2. Tipografía
+
+Evaluar:
+
+- Inter.
+- Geist.
+- Otra familia moderna si ya existe en el proyecto.
+
+Preferir una familia principal y utilizar pesos diferentes.
+
+Definir:
+
+- Display.
+- H1.
+- H2.
+- H3.
+- H4.
+- Body.
+- Small.
+- Caption.
+- Labels.
+- Numbers.
+
+Utilizar números tabulares para importes, métricas y tablas.
+
+No utilizar demasiados tamaños ni pesos diferentes.
+
+## 4.3. Espaciado
+
+Implementar una escala consistente de espaciado basada en múltiplos de 4 px.
+
+Ejemplo:
+
+- 4 px.
+- 8 px.
+- 12 px.
+- 16 px.
+- 20 px.
+- 24 px.
+- 32 px.
+- 40 px.
+- 48 px.
+- 64 px.
+
+No introducir valores aleatorios constantemente.
+
+## 4.4. Radios y superficies
+
+Definir:
+
+- Inputs: 8–10 px.
+- Botones: 8–10 px.
+- Cards: 12–16 px.
+- Modales: 16–20 px.
+- Popovers: 10–12 px.
+
+No redondear todos los elementos excesivamente.
+
+## 4.5. Bordes y sombras
+
+Preferir bordes finos y discretos.
+
+Las sombras deben comunicar profundidad real.
+
+No aplicar shadows fuertes a todas las tarjetas.
+
+Evitar el efecto de tarjetas anidadas indiscriminadamente.
+
+No utilizar glassmorphism en toda la aplicación.
+
+Puede utilizarse en algún elemento de marketing si existe una justificación visual.
+
+## 4.6. Iconografía
+
+Utilizar una única familia coherente de iconos.
+
+Lucide es una opción recomendada si ya está integrada.
+
+Mantener consistencia en:
+
+- Tamaños.
+- Stroke.
+- Alineación.
+- Color.
+- Separación.
+- Uso dentro de botones.
+
+No utilizar emojis como iconografía principal de la aplicación.
+
+# 5. LANDING PAGE — REDISEÑO COMPLETO
+
+URL:
+
+https://saas-gestion-web.vercel.app/
+
+La landing tiene que vender el producto y comunicar valor rápidamente.
+
+No tiene que parecer una documentación técnica.
+
+Su visitante debería comprender en pocos segundos:
+
+- Para quién es DOVEXO.
+- Qué problema resuelve.
+- Qué puede hacer.
+- Por qué le conviene.
+- Cómo probarlo.
+
+## 5.1. Hero principal
+
+Mantener el concepto comercial:
+
+"Del primer llamado al último cobro, todo en orden."
+
+Mejorar su ejecución visual.
+
+### Layout
+
+Desktop:
+
+Dos columnas.
+
+Columna izquierda:
+
+- Etiqueta de producto.
+- Título.
+- Descripción breve.
+- CTA principal.
+- CTA secundario.
+- Elemento de confianza cuando exista evidencia.
+
+Columna derecha:
+
+- Composición visual del producto.
+- Dashboard.
+- Smartphone.
+- Elementos superpuestos.
+- Profundidad.
+
+Mobile:
+
+- Título.
+- Descripción.
+- CTA.
+- Mockup debajo.
+- Sin composiciones que excedan el ancho.
+
+### Mockup principal
+
+No utilizar una imagen genérica de un cerebro o un robot.
+
+Representar DOVEXO mediante sus propias interfaces.
+
+Composición sugerida:
+
+- Dashboard administrativo como elemento principal.
+- Teléfono mostrando una orden asignada.
+- Notificación de presupuesto aprobado.
+- Elementos de profundidad leves.
+
+Utilizar componentes HTML reales cuando sea posible.
+
+Los mockups deben mantener información coherente.
+
+No mostrar métricas inexistentes ni operaciones presentadas como reales.
+
+## 5.2. Animación narrativa del hero
+
+Crear una secuencia de demostración que comunique el flujo del producto.
+
+Ejemplo:
+
+1. Se recibe una consulta.
+2. Se crea una solicitud.
+3. Se genera una orden.
+4. Se asigna un técnico.
+5. Se envía un presupuesto.
+6. El cliente lo aprueba.
+7. El trabajo se completa.
+8. Se registra el pago.
+
+La animación debe ser clara.
+
+No hacer ocho pantallas aparecer desordenadamente.
+
+Utilizar una transición visual que conecte los distintos momentos.
+
+Duración sugerida: 5–7 segundos para una secuencia completa.
+
+No utilizar movimiento permanente sin necesidad.
+
+La secuencia debe poder detenerse o respetar las preferencias de movimiento reducido.
+
+## 5.3. Sección de beneficios
+
+En vez de limitarse a enumerar módulos, organizar beneficios:
+
+- Clientes organizados.
+- Trabajos bajo control.
+- Presupuestos profesionales.
+- Técnicos coordinados.
+- Automatización.
+- Información inteligente.
+
+Cada beneficio puede tener:
+
+- Título.
+- Descripción breve.
+- Captura real.
+- Composición visual.
+- Interacción opcional.
+
+Usar una combinación de secciones alternadas.
+
+No crear doce cards idénticas.
+
+## 5.4. Sección interactiva de demostración
+
+La landing ya utiliza diferentes vistas del producto.
+
+Mejorar esa presentación.
+
+Crear tabs:
+
+- Dashboard.
+- Órdenes.
+- Presupuestos.
+- Agenda.
+- Técnico.
+- Portal del cliente.
+
+Al cambiar de tab:
+
+- Transición fluida.
+- Cambio de captura o componente.
+- Indicador de selección.
+- Altura estable cuando sea posible.
+- Ningún desplazamiento inesperado.
+
+En mobile utilizar un selector desplazable o una presentación vertical.
+
+La demostración debe reutilizar el dataset ilustrativo del producto.
+
+## 5.5. Animaciones de scroll
+
+Implementar animaciones de aparición sutiles:
+
+- Opacity.
+- Transform.
+- Desplazamientos pequeños.
+- Stagger en grupos.
+- Animaciones de líneas.
+- Cambios de estado.
+
+No hacer que cada párrafo y cada icono tenga una animación diferente.
+
+Crear un lenguaje de movimiento coherente.
+
+Evitar que elementos importantes aparezcan tarde o impidan acceder al contenido.
+
+## 5.6. Elementos 3D
+
+Evaluar la incorporación de un elemento 3D en el hero o en una sección particular.
+
+Concepto:
+
+Representación isométrica de una operación de servicio técnico:
+
+- Edificio.
+- Técnico.
+- Vehículo.
+- Puntos de visita.
+- Conexiones entre cliente y empresa.
+
+Debe tener relación directa con el producto.
+
+No crear un objeto 3D abstracto que no comunique nada.
+
+### Tecnologías posibles
+
+Prioridad:
+
+1. SVG.
+2. CSS.
+3. Imagen prerenderizada.
+4. Three.js.
+5. Spline.
+
+No incorporar Three.js ni Spline solamente por moda.
+
+Evaluar tamaño del bundle, GPU, mobile y rendimiento.
+
+El 3D debe tener degradación elegante si el dispositivo no puede mostrarlo.
+
+## 5.7. Sección de confianza
+
+Mostrar únicamente características comprobables:
+
+- Separación de datos por empresa.
+- Accesos controlados.
+- Presupuestos con links seguros.
+- Historial.
+- Información centralizada.
+
+No inventar certificaciones.
+
+No mostrar logos de clientes sin autorización.
+
+## 5.8. Precios
+
+Mantener la claridad de precios y planes.
+
+Mejorar:
+
+- Jerarquía.
+- Comparación.
+- Límites.
+- Características.
+- Acciones.
+- Responsive.
+
+No destacar un plan únicamente mediante una enorme tarjeta o gradiente.
+
+Explicar capacidades en lenguaje comprensible.
+
+No mostrar integraciones como disponibles si todavía requieren configuración externa.
+
+# 6. DASHBOARD DEL PROPIETARIO / ADMINISTRADOR
+
+URL:
+
+/dashboard
+
+Debe funcionar como centro de operaciones.
+
+El administrador necesita conocer rápidamente:
+
+- Qué trabajos tiene hoy.
+- Qué está atrasado.
+- Qué requiere atención.
+- Qué presupuestos esperan respuesta.
+- Cuánto dinero está pendiente.
+- Qué técnicos están ocupados.
+- Qué está pasando en la empresa.
+
+## 6.1. Header
+
+Incluir:
+
+- Saludo.
+- Nombre del negocio.
+- Fecha.
+- Selector de período cuando corresponda.
+- Notificaciones.
+- Perfil.
+- Acciones rápidas.
+
+No utilizar headers excesivamente altos.
+
+## 6.2. Acciones rápidas
+
+Agrupar:
+
+- Nuevo cliente.
+- Nueva solicitud.
+- Nueva orden.
+- Nuevo presupuesto.
+- Nueva visita.
+
+Evitar demasiados botones de igual importancia.
+
+## 6.3. Métricas principales
+
+Elegir pocas métricas, pero útiles.
+
+Propuesta:
+
+- Trabajos de hoy.
+- Trabajos atrasados.
+- Presupuestos pendientes.
+- Saldo pendiente de cobro.
+
+Las métricas deben tener significado claro.
+
+No confundir:
+- Órdenes creadas hoy.
+- Órdenes programadas para hoy.
+- Órdenes pendientes.
+- Órdenes atrasadas.
+
+No mostrar porcentajes de crecimiento inventados.
+
+## 6.4. Sección de atención
+
+Incorporar una sección de tareas que requieren atención.
+
+Ejemplos:
+
+- Presupuestos sin respuesta.
+- Órdenes sin técnico.
+- Visitas sin confirmar.
+- Trabajos atrasados.
+- Saldos pendientes.
+
+Cada elemento debe permitir realizar una acción.
+
+## 6.5. Agenda
+
+Mostrar los trabajos de hoy.
+
+Información:
+
+- Horario.
+- Cliente.
+- Técnico.
+- Servicio.
+- Ubicación.
+- Estado.
+
+Facilitar la apertura del trabajo.
+
+## 6.6. Rendimiento
+
+Mostrar gráficos únicamente cuando aporten información.
+
+Posibles gráficos:
+
+- Trabajos completados por período.
+- Presupuestos aceptados.
+- Ingresos registrados.
+- Evolución de solicitudes.
+
+Utilizar un diseño limpio.
+
+No utilizar gráficos circulares de decoración.
+
+No utilizar animaciones fuertes al actualizar datos.
+
+# 7. DASHBOARD DE COORDINACIÓN / DISPATCHER
+
+La coordinación de técnicos merece una experiencia diferente.
+
+Debe facilitar:
+
+- Asignación.
+- Reprogramación.
+- Disponibilidad.
+- Agenda.
+- Conflictos.
+- Seguimiento.
+
+## 7.1. Calendario operativo
+
+Crear una experiencia clara de planificación.
+
+Vistas:
+
+- Día.
+- Semana.
+- Equipo.
+
+En desktop considerar una vista de técnicos por filas y horarios por columnas.
+
+Los bloques de trabajo deben tener:
+
+- Cliente.
+- Servicio.
+- Horario.
+- Técnico.
+- Estado.
+
+Permitir abrir detalles.
+
+## 7.2. Conflictos
+
+Resaltar:
+
+- Superposición de turnos.
+- Técnicos sin disponibilidad.
+- Visitas sin asignar.
+- Trabajos reprogramados.
+
+No mostrar errores únicamente mediante color.
+
+Incluir mensajes comprensibles.
+
+## 7.3. Interacción
+
+Evaluar drag and drop cuando resulte realmente útil.
+
+No depender exclusivamente de arrastrar para asignar trabajos.
+
+Mantener alternativas accesibles mediante formularios y menús.
+
+# 8. DASHBOARD DE ÓRDENES
+
+Crear una experiencia de gestión similar en calidad a Linear.
+
+## Vista tabla
+
+Debe incluir:
+
+- Identificador.
+- Cliente.
+- Servicio.
+- Estado.
+- Prioridad.
+- Técnico.
+- Fecha.
+- Última actualización.
+
+Agregar:
+
+- Búsqueda.
+- Filtros.
+- Ordenamiento.
+- Paginación.
+- Columnas configurables cuando sea necesario.
+
+No comprimir los datos.
+
+## Vista Kanban
+
+Columnas según estados operativos.
+
+Las tarjetas deben ser compactas.
+
+Mostrar solamente información necesaria.
+
+Permitir abrir detalles rápidamente.
+
+Aplicar transiciones suaves al cambiar estados.
+
+No exagerar las animaciones de arrastre.
+
+## Detalle de orden
+
+Organizar:
+
+- Información general.
+- Cliente.
+- Técnico.
+- Dirección.
+- Presupuesto.
+- Actividades.
+- Fotografías.
+- Materiales.
+- Historial.
+
+Utilizar una línea temporal para los eventos.
+
+El usuario debe poder comprender rápidamente qué ocurrió con el trabajo.
+
+# 9. DASHBOARD DE CLIENTES
+
+Tomar referencias de CRM modernos como Attio.
+
+Crear:
+
+## Lista de clientes
+
+- Tabla limpia.
+- Búsqueda.
+- Filtros.
+- Etiquetas.
+- Estado.
+- Última actividad.
+- Datos principales.
+
+## Ficha del cliente
+
+Header:
+
+- Nombre.
+- Teléfono.
+- Email.
+- Dirección.
+- Acciones rápidas.
+
+Tabs:
+
+- Resumen.
+- Solicitudes.
+- Órdenes.
+- Presupuestos.
+- Pagos.
+- Equipos.
+- Notas.
+
+El historial debe poder visualizarse como una línea temporal.
+
+No obligar al usuario a abrir diez pantallas para conocer el historial de una persona.
+
+# 10. DASHBOARD DE PRESUPUESTOS
+
+Los presupuestos son una parte comercial fundamental.
+
+Crear una experiencia profesional de cotizaciones.
+
+## Listado
+
+Estados:
+
+- Borrador.
+- Enviado.
+- Pendiente.
+- Aprobado.
+- Rechazado.
+- Vencido.
+- Revocado.
+
+Mostrar:
+
+- Número.
+- Cliente.
+- Importe.
+- Fecha.
+- Vencimiento.
+- Estado.
+
+## Detalle
+
+Desktop:
+
+- Datos del presupuesto.
+- Vista previa PDF.
+- Historial.
+- Acciones.
+
+Mobile:
+
+- Información resumida.
+- Totales.
+- Acceso al PDF.
+- Acciones cómodas.
+
+No mostrar diez datos secundarios antes de mostrar el total.
+
+## Aprobación pública
+
+Diseñar una experiencia excelente para el cliente.
+
+El enlace debe abrir una página clara, profesional y responsive.
+
+Mostrar:
+
+- Empresa.
+- Presupuesto.
+- Conceptos.
+- Importes.
+- Condiciones.
+- Fecha de vencimiento.
+- Acciones para aprobar o rechazar.
+
+La aprobación debe ser muy sencilla.
+
+Evitar formularios innecesarios.
+
+# 11. DASHBOARD DE PAGOS
+
+Inspirarse en Stripe.
+
+Mostrar:
+
+- Total cobrado.
+- Pendiente.
+- Vencido.
+- Pagos parciales.
+
+Destacar la lista de pagos pendientes.
+
+Los importes deben ser fáciles de comparar.
+
+Utilizar gráficos simples.
+
+Diferenciar claramente importes registrados de importes realmente cobrados.
+
+No mezclar estados de presupuestos con estados de pagos.
+
+# 12. DASHBOARD DE AUTOMATIZACIONES
+
+Crear una interfaz más visual.
+
+Cada automatización debe poder entenderse mediante:
+
+- Disparador.
+- Condiciones.
+- Acciones.
+- Estado.
+
+Representar el flujo de manera gráfica, pero sencilla.
+
+No convertirlo en un editor complejo similar a n8n.
+
+El usuario objetivo no es un desarrollador.
+
+Crear:
+
+- Lista de automatizaciones.
+- Detalle.
+- Configuración.
+- Historial de ejecución.
+- Estados.
+- Indicadores de error.
+- Acciones.
+
+Utilizar iconografía coherente.
+
+Mostrar claramente qué reglas están activas.
+
+# 13. ASISTENTE DE IA
+
+Crear una experiencia integrada con el sistema.
+
+No utilizar un chatbot genérico flotando sobre todo el dashboard.
+
+La interfaz debería incluir:
+
+- Historial.
+- Conversación.
+- Preguntas sugeridas.
+- Resultados.
+- Tablas.
+- Tarjetas de datos.
+- Referencias a entidades.
+- Indicadores de uso.
+
+Las respuestas deberían poder incluir componentes visuales.
+
+Ejemplo:
+
+Ante la pregunta "¿Qué presupuestos siguen pendientes?", mostrar:
+
+- Resumen.
+- Cantidad.
+- Tabla.
+- Enlaces a presupuestos.
+
+No devolver párrafos demasiado largos cuando los datos pueden mostrarse mejor en una tabla.
+
+Visualmente, diferenciar:
+
+- Pregunta.
+- Respuesta.
+- Resultado.
+- Fuente de información.
+- Acción propuesta.
+
+No hacer animaciones de escritura exageradas.
+
+# 14. PWA DE TÉCNICOS
+
+URL:
+
+https://saas-gestion-web.vercel.app/tech
+
+Esta es una de las interfaces más importantes.
+
+Debe estar diseñada para personas que trabajan fuera de la oficina.
+
+No debe parecer el dashboard administrativo reducido de tamaño.
+
+Debe tener una experiencia móvil propia.
+
+## 14.1. Home
+
+Mostrar:
+
+- Nombre.
+- Fecha.
+- Próxima visita.
+- Resumen de trabajos.
+- Estado de sincronización.
+- Agenda del día.
+
+Jerarquía:
+
+1. Próximo trabajo.
+2. Trabajos pendientes.
+3. Agenda.
+4. Acciones rápidas.
+
+## 14.2. Navegación
+
+Utilizar una navegación inferior simple:
+
+- Inicio.
+- Agenda.
+- Trabajos.
+- Perfil.
+
+No incluir demasiadas opciones.
+
+## 14.3. Tarjetas de trabajo
+
+Mostrar:
+
+- Cliente.
+- Servicio.
+- Horario.
+- Dirección.
+- Estado.
+- Acción principal.
+
+Evitar tarjetas enormes.
+
+La información secundaria se consulta al ingresar.
+
+## 14.4. Detalle de trabajo
+
+Secciones:
+
+- Estado.
+- Cliente.
+- Dirección.
+- Servicio.
+- Instrucciones.
+- Presupuesto autorizado.
+- Materiales.
+- Fotografías.
+- Notas.
+- Historial.
+
+Incluir una acción principal fija en la parte inferior:
+
+- Iniciar.
+- Continuar.
+- Finalizar.
+
+No obligar al técnico a desplazarse hasta el final de una pantalla extensa.
+
+## 14.5. Fotografías
+
+Crear un componente de carga de imágenes cómodo.
+
+Debe permitir:
+
+- Abrir cámara.
+- Abrir galería.
+- Ver previews.
+- Eliminar.
+- Reintentar.
+- Ver progreso.
+- Consultar estado de sincronización.
+
+## 14.6. Materiales
+
+Diseñar controles accesibles y rápidos.
+
+Permitir registrar productos y cantidades con pocos toques.
+
+No utilizar formularios excesivamente complejos.
+
+## 14.7. Offline
+
+Mostrar un estado discreto pero claramente identificable.
+
+Estados:
+
+- Online.
+- Offline.
+- Sincronizando.
+- Cambios pendientes.
+- Sincronización fallida.
+
+Mostrar cuántos cambios están pendientes.
+
+Cuando vuelve la conexión, mostrar el resultado de la sincronización.
+
+No mostrar éxito si todavía no se confirmó.
+
+# 15. PORTAL DEL CLIENTE
+
+Debe transmitir profesionalismo y confianza.
+
+El cliente no necesita ver toda la operación administrativa.
+
+Su experiencia debe centrarse en:
+
+- Solicitar servicios.
+- Consultar trabajos.
+- Ver horarios.
+- Aprobar presupuestos.
+- Consultar pagos.
+- Ver información.
+
+Diseñar una home sencilla.
+
+Destacar:
+
+- Trabajo activo.
+- Próxima visita.
+- Presupuestos pendientes.
+- Historial reciente.
+
+Los presupuestos deben visualizarse correctamente en mobile.
+
+Evitar interfaces recargadas.
+
+# 16. APLICACIÓN ANDROID — EXPO / REACT NATIVE
+
+La aplicación móvil debe sentirse realmente nativa.
+
+No queremos una versión visual de la web dentro de un teléfono.
+
+El frontend móvil debe adaptar sus patrones a Android.
+
+## 16.1. Identificar roles
+
+Existen dos experiencias:
+
+A. Técnico.
+
+B. Cliente.
+
+No utilizar exactamente el mismo dashboard para ambos.
+
+Cada rol necesita:
+
+- Navegación propia.
+- Home propia.
+- Acciones propias.
+- Información adecuada.
+- Flujos propios.
+
+## 16.2. Aplicación del técnico
+
+Priorizar:
+
+- Próximo trabajo.
+- Agenda.
+- Lista de trabajos.
+- Detalles.
+- Fotografías.
+- Materiales.
+- Notas.
+- Cierre.
+
+Debe ser cómoda de utilizar con una mano.
+
+Utilizar componentes táctiles grandes.
+
+## 16.3. Aplicación del cliente
+
+Priorizar:
+
+- Solicitudes.
+- Estado de trabajos.
+- Presupuestos.
+- Turnos.
+- Pagos.
+- Perfil.
+
+No llenar la home de indicadores administrativos.
+
+## 16.4. Navegación inferior
+
+Técnico:
+
+- Inicio.
+- Agenda.
+- Trabajos.
+- Perfil.
+
+Cliente:
+
+- Inicio.
+- Servicios.
+- Presupuestos.
+- Perfil.
+
+Evaluar si esta estructura coincide con las rutas existentes y mantener las funciones actuales.
+
+## 16.5. Interacciones nativas
+
+Utilizar:
+
+- Bottom sheets.
+- Navegación con transiciones suaves.
+- Haptic feedback donde aporte valor.
+- Estados de carga.
+- Skeletons.
+- Confirmaciones.
+- Animaciones pequeñas.
+- Feedback táctil.
+- Gestos apropiados.
+
+Evitar animaciones largas que retrasen acciones.
+
+## 16.6. Áreas táctiles
+
+Utilizar 48 × 48 dp como objetivo mínimo para controles táctiles importantes.
+
+Comprobar accesibilidad.
+
+## 16.7. Modo offline
+
+Debe tener una presentación visual clara.
+
+Los cambios locales pendientes deben identificarse.
+
+Mostrar estados reales de sincronización.
+
+No crear animaciones que oculten fallos.
+
+# 17. ANIMACIONES Y MOTION DESIGN
+
+La animación debe aportar calidad.
+
+No debe ser un elemento decorativo constante.
+
+## 17.1. Landing
+
+Utilizar animaciones algo más expresivas:
+
+- Scroll reveal.
+- Stagger.
+- Parallax leve.
+- Mockups flotantes de forma sutil.
+- Cambio de pantallas.
+- Animaciones narrativas.
+- Transiciones.
+- Profundidad.
+
+## 17.2. Dashboard
+
+Utilizar microinteracciones:
+
+- Hover.
+- Focus.
+- Estados.
+- Cambios de columnas.
+- Apertura de paneles.
+- Modales.
+- Tabs.
+- Notificaciones.
+- Actualizaciones.
+
+No utilizar parallax en pantallas de trabajo.
+
+## 17.3. Mobile
+
+Utilizar:
+
+- Transiciones nativas.
+- Bottom sheets.
+- Feedback.
+- Opacity.
+- Transform.
+- Animaciones cortas.
+
+No abusar de componentes animados simultáneamente.
+
+## 17.4. Tiempos orientativos
+
+- Hover: 120–180 ms.
+- Botones: 100–160 ms.
+- Tabs: 180–220 ms.
+- Paneles: 200–280 ms.
+- Layout: 200–300 ms.
+- Secuencias de marketing: 5–7 segundos.
+
+Estos valores son referencias iniciales.
+
+Adaptar según la interacción.
+
+## 17.5. Librerías
+
+Frontend web:
+
+- Motion / Framer Motion.
+- CSS transitions.
+- CSS animations.
+
+Frontend mobile:
+
+- React Native Reanimated, si ya está presente o resulta conveniente.
+- Animaciones nativas de navegación.
+- Expo compatible con la versión instalada.
+
+No actualizar masivamente dependencias sin analizar compatibilidad.
+
+# 18. ELEMENTOS 3D Y PROFUNDIDAD
+
+Evaluar una incorporación moderada de 3D.
+
+Posibles usos:
+
+- Hero de la landing.
+- Ilustraciones isométricas.
+- Composición de producto.
+- Presentaciones comerciales.
+
+No colocar elementos 3D en todos los dashboards.
+
+No comprometer rendimiento.
+
+Priorizar soluciones livianas.
+
+Si se incorpora Three.js o Spline:
+
+- Lazy loading.
+- Fallback estático.
+- Control del peso.
+- Rendimiento mobile.
+- Accesibilidad.
+- Respeto a reduced motion.
+
+El 3D debe tener una función visual concreta.
+
+# 19. QUÉ EVITAR Y ELIMINAR
+
+Realizar una auditoría de elementos que perjudiquen la calidad visual.
+
+Evitar:
+
+- Glassmorphism en todos los componentes.
+- Gradientes sin propósito.
+- Blur excesivo.
+- Sombras exageradas.
+- Cards dentro de cards.
+- Demasiados contenedores.
+- Bordes excesivamente redondeados.
+- Animaciones permanentes.
+- Partículas decorativas.
+- Efectos de parallax innecesarios.
+- Tablas demasiado comprimidas.
+- Iconos inconsistentes.
+- Emojis utilizados como iconografía.
+- Demasiados colores.
+- Tipografías mezcladas.
+- Elementos sin alineación.
+- Información redundante.
+- Espacios vacíos mal aprovechados.
+- Gráficos sin una pregunta concreta.
+- Modales para operaciones sencillas.
+- Botones sin jerarquía.
+- Animaciones que bloquean interacciones.
+
+No eliminar elementos funcionales sin revisar su propósito.
+
+Si una pantalla contiene demasiada información, reorganizarla antes que simplemente eliminarla.
+
+# 20. ESTADOS VISUALES
+
+Todos los módulos deben tener estados completos.
+
+Para cada vista considerar:
+
+- Loading.
+- Skeleton.
+- Empty.
+- Populated.
+- Error.
+- Success.
+- Disabled.
+- No permission.
+- Offline.
+- Partial data.
+
+Los estados vacíos deben explicar cómo comenzar.
+
+Ejemplo:
+
+"Todavía no tenés órdenes. Creá tu primera orden para organizar un trabajo."
+
+No mostrar pantallas vacías sin contexto.
+
+Los errores deben indicar qué puede hacer el usuario.
+
+No mostrar mensajes técnicos directamente.
+
+# 21. ACCESIBILIDAD
+
+Tomar WCAG 2.2 AA como referencia.
+
+Verificar:
+
+- Contraste.
+- Teclado.
+- Foco.
+- Labels.
+- Formularios.
+- Lectores de pantalla.
+- Navegación.
+- Tamaños táctiles.
+- Movimiento reducido.
+- Estados no dependientes exclusivamente del color.
+- Escalado de texto.
+- Focus visible.
+
+Respetar `prefers-reduced-motion` en web.
+
+Respetar preferencias de accesibilidad de Android.
+
+No utilizar animaciones para transmitir información indispensable sin una alternativa textual.
+
+# 22. RENDIMIENTO
+
+La calidad visual no puede comprometer la velocidad.
+
+Medir:
+
+- LCP.
+- INP.
+- CLS.
+- FPS mobile.
+- Tamaño del bundle.
+- Tiempo de navegación.
+- Cargas innecesarias.
+
+Usar como referencias Core Web Vitals:
+
+- LCP <= 2,5 segundos.
+- INP <= 200 ms.
+- CLS <= 0,1.
+
+No convertir todo en Client Components si no es necesario.
+
+Lazy loading para contenido pesado.
+
+Optimizar imágenes.
+
+Preferir formatos modernos.
+
+Evitar cargar 3D cuando no esté visible.
+
+Evitar animaciones sobre muchas propiedades de layout simultáneamente.
+
+No degradar la aplicación en dispositivos Android modestos.
+
+# 23. ARQUITECTURA DEL DESIGN SYSTEM
+
+Crear o mejorar un sistema visual centralizado.
+
+Inspeccionar primero la estructura existente.
+
+No imponer rutas nuevas indiscriminadamente.
+
+Como referencia, organizar:
+
+```text
+design-system/
+├── tokens/
+│   ├── colors
+│   ├── typography
+│   ├── spacing
+│   ├── radius
+│   ├── shadows
+│   └── motion
+│
+├── components/
+│   ├── buttons
+│   ├── inputs
+│   ├── cards
+│   ├── badges
+│   ├── dialogs
+│   ├── dropdowns
+│   ├── navigation
+│   ├── tables
+│   ├── tabs
+│   └── feedback
+│
+└── documentation/
+    ├── foundations
+    ├── components
+    └── usage
+```
+
+## Tokens web
+
+Ejemplo conceptual:
+
+```css
+:root {
+  --color-primary: #315EFB;
+  --color-primary-dark: #1E3A8A;
+
+  --color-background: #F5F7FA;
+  --color-surface: #FFFFFF;
+  --color-surface-secondary: #F0F3F8;
+
+  --color-text: #182235;
+  --color-text-secondary: #667085;
+
+  --color-success: #16865A;
+  --color-warning: #D69B28;
+  --color-danger: #D94848;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+}
+```
+
+Estos son valores iniciales.
+
+No duplicarlos si ya existe un sistema equivalente.
+
+## Tokens mobile
+
+Crear una representación equivalente en TypeScript.
+
+No intentar importar CSS directamente dentro de React Native.
+
+Mantener coherencia entre ambas plataformas.
+
+# 24. TECNOLOGÍAS Y DEPENDENCIAS
+
+Frontend web actual:
+
+- Next.js 16.
+- React 19.
+- TypeScript estricto.
+- Tailwind CSS.
+
+Mobile:
+
+- Expo.
+- React Native.
+
+Antes de instalar dependencias:
+
+1. Revisar package.json.
+2. Revisar versiones.
+3. Revisar dependencias instaladas.
+4. Revisar compatibilidad.
+5. Identificar si el proyecto ya tiene Motion o Reanimated.
+6. Evitar duplicar bibliotecas.
+
+Preferir soluciones que puedan mantenerse con facilidad.
+
+No incorporar librerías de animación, gráficos o 3D sin evaluar su impacto.
+
+# 25. REGLAS DE IMPLEMENTACIÓN
+
+Estas reglas son obligatorias.
+
+## A. No romper funcionalidades
+
+Todo lo que hoy funciona debe seguir funcionando.
+
+No eliminar:
+
+- Formularios.
+- Acciones.
+- Navegación.
+- Filtros.
+- Búsquedas.
+- Permisos.
+- Validaciones.
+- Estados.
+- Integraciones.
+
+Las modificaciones deben conservar todos los callbacks y contratos existentes.
+
+## B. No modificar backend
+
+El objetivo es visual.
+
+Si una mejora parece requerir un cambio de backend:
+
+1. Identificar la necesidad.
+2. Evaluar una solución frontend.
+3. Documentar la limitación.
+4. No modificar backend automáticamente.
+
+## C. No utilizar mocks para ocultar carencias
+
+Las capturas y componentes de demostración pueden utilizar datos ficticios, siempre identificados como tales.
+
+No sustituir consultas reales por información inventada.
+
+No simular estadísticas reales.
+
+No simular envíos exitosos.
+
+## D. No rediseñar indiscriminadamente
+
+Cada modificación debe tener una razón.
+
+Comparar el estado anterior y el nuevo.
+
+No cambiar una pantalla que ya tiene una buena solución simplemente para darle un aspecto diferente.
+
+## E. Mantener consistencia
+
+No crear estilos particulares para cada página.
+
+Priorizar componentes reutilizables.
+
+## F. No generar componentes gigantes
+
+Separar:
+
+- Layout.
+- Presentación.
+- Estado.
+- Interacciones.
+- Elementos compartidos.
+
+Evitar duplicaciones.
+
+# 26. METODOLOGÍA DE TRABAJO
+
+Trabajar en fases.
+
+## FASE 0 — AUDITORÍA
+
+- Inspeccionar todo el frontend.
+- Capturar pantallas.
+- Analizar responsive.
+- Detectar inconsistencias.
+- Revisar componentes.
+- Revisar dependencias.
+- Documentar el estado actual.
+
+Crear:
+
+`docs/DESIGN_AUDIT.md`
+
+## FASE 1 — DESIGN SYSTEM
+
+- Definir paleta.
+- Definir tipografía.
+- Definir espaciado.
+- Definir bordes.
+- Definir sombras.
+- Definir iconografía.
+- Definir estados.
+- Definir movimiento.
+- Crear componentes base.
+
+Crear:
+
+`docs/DESIGN_SYSTEM.md`
+
+## FASE 2 — LANDING
+
+Rediseñar:
+
+- Hero.
+- Mockups.
+- Beneficios.
+- Flujo.
+- Demostración interactiva.
+- Confianza.
+- Precios.
+- FAQ.
+- Footer.
+
+Mantener los textos comerciales correctos.
+
+No inventar testimonios.
+
+## FASE 3 — DASHBOARD ADMINISTRATIVO
+
+Mejorar:
+
+- Layout.
+- Navegación.
+- Dashboard principal.
+- Indicadores.
+- Acciones rápidas.
+- Agenda.
+- Atención.
+- Actividad.
+
+## FASE 4 — MÓDULOS
+
+Rediseñar individualmente:
+
+- Clientes.
+- Órdenes.
+- Solicitudes.
+- Presupuestos.
+- Pagos.
+- Automatizaciones.
+- Asistente.
+- Configuración.
+- Administración global.
+
+## FASE 5 — PWA TÉCNICO
+
+Diseñar:
+
+- Home.
+- Agenda.
+- Lista.
+- Detalle.
+- Materiales.
+- Fotos.
+- Cierre.
+- Offline.
+
+## FASE 6 — PORTAL DEL CLIENTE
+
+Mejorar:
+
+- Home.
+- Solicitudes.
+- Órdenes.
+- Turnos.
+- Presupuestos.
+- Pagos.
+- Perfil.
+
+## FASE 7 — APP ANDROID
+
+Auditar visualmente la aplicación actual.
+
+Capturar pantallas.
+
+Rediseñar:
+
+- Login.
+- Home técnico.
+- Agenda.
+- Trabajos.
+- Detalles.
+- Materiales.
+- Fotografías.
+- Perfil.
+- Home cliente.
+- Servicios.
+- Presupuestos.
+- Pagos.
+
+Probar en diferentes tamaños de pantalla.
+
+## FASE 8 — PULIDO
+
+- Animaciones.
+- Microinteracciones.
+- Accesibilidad.
+- Responsive.
+- Rendimiento.
+- Estados vacíos.
+- Estados de error.
+- Consistencia.
+
+# 27. VALIDACIÓN VISUAL
+
+La implementación no está terminada cuando compila.
+
+Debe revisarse visualmente.
+
+Para cada pantalla:
+
+1. Abrir.
+2. Capturar.
+3. Comparar.
+4. Identificar problemas.
+5. Corregir.
+6. Volver a capturar.
+
+Utilizar Playwright cuando corresponda para web.
+
+Para mobile utilizar:
+
+- Expo.
+- Android Emulator.
+- Dispositivos físicos cuando estén disponibles.
+
+Realizar pruebas de interacción:
+
+- Clicks.
+- Scroll.
+- Formularios.
+- Navegación.
+- Modales.
+- Tabs.
+- Filtros.
+- Responsive.
+
+No conformarse con que el frontend renderice.
+
+# 28. CRITERIOS DE ACEPTACIÓN
+
+El rediseño será satisfactorio cuando:
+
+1. Todas las pantallas compartan el mismo lenguaje visual.
+2. La landing comunique claramente la propuesta.
+3. Los mockups utilicen datos consistentes.
+4. El dashboard permita encontrar rápidamente las tareas importantes.
+5. La agenda sea clara.
+6. Las tablas sean legibles.
+7. La ficha de clientes tenga una buena jerarquía.
+8. Los presupuestos sean visualmente profesionales.
+9. La aplicación del técnico sea fácil de utilizar.
+10. La PWA funcione correctamente en pantallas pequeñas.
+11. El portal del cliente sea sencillo.
+12. Los dashboards estén adaptados por rol.
+13. Las transiciones sean fluidas.
+14. Las animaciones no reduzcan el rendimiento.
+15. Los elementos 3D no sean decorativos sin propósito.
+16. Se respeten preferencias de movimiento reducido.
+17. No existan desbordamientos horizontales inesperados.
+18. No se hayan roto las funcionalidades.
+19. Las pruebas existentes sigan pasando.
+20. Todas las pantallas principales hayan sido verificadas visualmente.
+
+# 29. DOCUMENTACIÓN
+
+Crear o actualizar:
+
+```text
+docs/
+├── DESIGN_AUDIT.md
+├── DESIGN_SYSTEM.md
+├── LANDING_REDESIGN.md
+├── DASHBOARD_REDESIGN.md
+├── MOBILE_REDESIGN.md
+├── PWA_REDESIGN.md
+├── ANIMATION_GUIDELINES.md
+├── RESPONSIVE_GUIDELINES.md
+├── ACCESSIBILITY_AUDIT.md
+├── PERFORMANCE_AUDIT.md
+└── DESIGN_CHANGELOG.md
+```
+
+Documentar:
+
+- Decisiones.
+- Colores.
+- Tipografías.
+- Componentes.
+- Estados.
+- Transiciones.
+- Breakpoints.
+- Problemas encontrados.
+- Mejoras realizadas.
+- Pendientes.
+
+No crear archivos vacíos.
+
+# 30. INFORME FINAL
+
+Al terminar cada fase, presentar:
+
+- Pantallas modificadas.
+- Cambios realizados.
+- Componentes nuevos.
+- Componentes eliminados.
+- Bibliotecas utilizadas.
+- Animaciones implementadas.
+- Problemas corregidos.
+- Pruebas realizadas.
+- Comparación antes/después.
+- Pendientes.
+
+No decir que el trabajo está terminado si existen pantallas importantes sin revisar.
+
+# 31. PRIMERA TAREA: EMPEZAR AHORA
+
+No respondas solamente con un plan.
+
+Primero inspeccioná el repositorio y ejecutá la auditoría visual.
+
+Después creá el sistema de diseño.
+
+Comenzá con:
+
+1. Auditoría de la landing.
+2. Auditoría del dashboard.
+3. Auditoría de la PWA.
+4. Auditoría de la aplicación móvil.
+5. Identificación de componentes comunes.
+6. Definición de la nueva dirección visual.
+7. Implementación inicial del design system.
+8. Rediseño del hero de la landing.
+9. Rediseño del dashboard principal.
+10. Rediseño de la home del técnico.
+
+Trabajá en bloques pequeños.
+
+No modificar todas las páginas simultáneamente.
+
+No romper el backend.
+
+No cambiar reglas de negocio.
+
+No reescribir el proyecto.
+
+No eliminar funcionalidades.
+
+No hacer solamente cambios de colores.
+
+Quiero que mejores la experiencia visual real.
+
+Si una pantalla ya está bien diseñada, conservar lo que funciona.
+
+Si una pantalla está sobrecargada, simplificarla.
+
+Si una pantalla carece de jerarquía, reorganizarla.
+
+Si una pantalla parece genérica, darle personalidad sin sacrificar usabilidad.
+
+No agregar animaciones solamente porque son posibles.
+
+No utilizar 3D solamente para impresionar.
+
+Cada decisión visual debe mejorar la comunicación, la experiencia o la percepción de calidad.
+
+---
+
+# INSTRUCCIÓN FINAL
+
+DOVEXO debe parecer un SaaS profesional desarrollado por una empresa tecnológica seria.
+
+La landing debe ser atractiva y generar confianza.
+
+Los dashboards deben ser claros, rápidos y organizados.
+
+La PWA debe permitir que los técnicos trabajen cómodamente.
+
+La aplicación Android debe sentirse nativa, fluida y cuidada.
+
+El portal del cliente debe ser sencillo y profesional.
+
+Queremos un producto con identidad visual propia, no una copia de Linear, Stripe, Jobber o Framer.
+
+Utilizá esas marcas como inspiración, combinando sus mejores principios y adaptándolos a nuestros usuarios y necesidades.
+
+**Buscamos calidad visual excepcional, consistencia y usabilidad. No decoración por decoración.**
+
+Empezá ahora con la auditoría del frontend existente y continuá con la implementación de las mejoras priorizadas.
+
+# HERRAMIENTAS EXTERNAS, MCP Y WORKFLOW MULTIMODAL PARA DOVEXO
+
+El entorno de desarrollo utiliza OpenCode con Kimi K3.1 Pro.
+
+Además de las herramientas de programación y terminal habituales, pueden estar disponibles herramientas externas mediante MCP.
+
+Tu responsabilidad es aprovecharlas cuando aporten una ventaja real, sin instalar dependencias o servidores innecesarios.
+
+## 1. HERRAMIENTAS DISPONIBLES O PREVISTAS
+
+### Figma MCP
+
+Utilizar para:
+
+- Crear interfaces editables.
+- Diseñar componentes.
+- Crear design systems.
+- Leer variables y estilos.
+- Construir prototipos.
+- Inspeccionar diseños.
+- Mantener consistencia visual.
+- Generar pantallas antes de implementarlas.
+
+Antes de crear un nuevo diseño, revisar si ya existe uno en el proyecto.
+
+No duplicar sistemas de diseño.
+
+### Spline MCP
+
+Utilizar para:
+
+- Crear escenas 3D.
+- Crear objetos.
+- Aplicar materiales.
+- Configurar iluminación.
+- Configurar cámaras.
+- Crear animaciones.
+- Implementar interacciones.
+- Crear composiciones para la landing.
+- Exportar assets.
+
+Priorizar Spline para escenas 3D relativamente ligeras e integrables en la web.
+
+### Blender MCP
+
+Utilizar para tareas de modelado y animación 3D avanzada.
+
+Capacidades posibles:
+
+- Modelado.
+- Objetos.
+- Mallas.
+- Materiales.
+- Geometry Nodes.
+- Iluminación.
+- Cámaras.
+- Keyframes.
+- Física.
+- Renderizado.
+- Exportación.
+
+Antes de utilizarlo, verificar la versión de Blender y la compatibilidad del servidor MCP.
+
+No ejecutar scripts de origen desconocido sin revisar.
+
+No permitir acceso innecesario a archivos externos al proyecto.
+
+### Playwright MCP
+
+Utilizar para:
+
+- Navegar por la landing.
+- Interactuar con dashboards.
+- Completar formularios.
+- Cambiar estados.
+- Probar responsive.
+- Capturar screenshots.
+- Verificar componentes.
+- Comprobar errores visuales.
+- Realizar pruebas E2E.
+
+No asumir que una página funciona porque compila.
+
+Utilizar Playwright después de cada modificación visual importante.
+
+### Expo MCP
+
+Utilizar para:
+
+- Consultar documentación Expo.
+- Consultar versiones compatibles.
+- Inspeccionar aplicaciones.
+- Capturar screenshots.
+- Interactuar con elementos.
+- Abrir React Native DevTools.
+- Validar componentes móviles.
+- Verificar navegación.
+- Probar interacciones.
+
+Antes de utilizar capacidades locales, comprobar SDK, versión y configuración del proyecto.
+
+### Context7 MCP
+
+Utilizar para consultar documentación actualizada de las bibliotecas utilizadas.
+
+Priorizar documentación oficial.
+
+No asumir que ejemplos antiguos siguen vigentes.
+
+### Chrome DevTools MCP
+
+Utilizar cuando sea necesario investigar:
+
+- Errores del navegador.
+- Requests.
+- Console.
+- Performance.
+- Rendering.
+- Network.
+- Traces.
+- Screenshots.
+
+No utilizarlo para tareas que Playwright ya resuelve correctamente.
+
+## 2. HERRAMIENTAS DE ANIMACIÓN
+
+Frontend web:
+
+- Motion para transiciones y microinteracciones.
+- GSAP para secuencias avanzadas.
+- React Three Fiber cuando se necesite renderizado 3D interactivo.
+
+Frontend móvil:
+
+- React Native Reanimated.
+- Rive cuando necesitemos animaciones interactivas.
+- Lottie/dotLottie para animaciones pequeñas.
+
+No instalar todas las bibliotecas automáticamente.
+
+Inspeccionar primero las dependencias existentes.
+
+## 3. WORKFLOW 3D
+
+Cuando se necesite un recurso 3D:
+
+1. Determinar si realmente aporta valor.
+2. Definir el resultado esperado.
+3. Elegir Spline o Blender.
+4. Crear la escena.
+5. Revisar el resultado visual.
+6. Ajustar iluminación, materiales y cámara.
+7. Optimizar geometría.
+8. Optimizar texturas.
+9. Exportar en un formato adecuado.
+10. Integrar en la aplicación.
+11. Comprobar rendimiento.
+12. Comprobar responsive.
+13. Implementar fallback estático.
+
+No incorporar elementos 3D a dashboards administrativos salvo que exista una razón funcional.
+
+Priorizar el 3D en la landing y en presentaciones comerciales.
+
+## 4. WORKFLOW DE DISEÑO
+
+Antes de modificar una pantalla:
+
+1. Capturar el estado actual.
+2. Identificar problemas.
+3. Consultar referencias.
+4. Definir la solución.
+5. Crear o actualizar componentes.
+6. Implementar.
+7. Capturar nuevamente.
+8. Comparar.
+9. Corregir.
+10. Validar responsive.
+
+No afirmar que una mejora visual está terminada sin haber observado el resultado.
+
+## 5. USO DE AGENTES
+
+Distribuir las tareas de manera lógica:
+
+- Agente de investigación visual.
+- Agente de diseño.
+- Agente frontend web.
+- Agente mobile.
+- Agente de pruebas visuales.
+- Agente de rendimiento.
+
+Cada agente debe recibir un alcance definido y evitar modificar simultáneamente los mismos archivos.
+
+El agente principal conserva la responsabilidad de integrar y verificar los resultados.
+
+No delegar modificaciones destructivas sin revisión.
+
+## 6. SEGURIDAD
+
+Todos los MCP deben utilizar el principio de mínimo privilegio.
+
+No conceder acceso innecesario a:
+
+- Bases de datos de producción.
+- Credenciales.
+- Archivos personales.
+- Repositorios no relacionados.
+- Cuentas externas.
+
+Inspeccionar herramientas de terceros antes de instalarlas.
+
+No aprobar automáticamente operaciones destructivas.
+
+No compartir tokens entre servidores MCP.
+
+No guardar secretos dentro del repositorio.
+
+## 7. PRINCIPIO FINAL
+
+Utilizar las herramientas como extensiones reales de las capacidades de desarrollo.
+
+No simular haber creado escenas, animaciones, prototipos o capturas.
+
+Si una herramienta no está conectada, informar la limitación.
+
+Si una herramienta puede resolver una tarea mejor que generar código manualmente, evaluarla.
+
+El objetivo es conseguir la mayor calidad posible en el frontend de DOVEXO, manteniendo rendimiento, accesibilidad, consistencia y facilidad de mantenimiento.
