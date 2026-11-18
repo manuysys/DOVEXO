@@ -109,7 +109,7 @@ async def seed_demo_data(
         title="Reparacion aire acondicionado",
         description="Diagnostico y reparacion del equipo",
         priority="high",
-        assigned_user_id=actor_user_id,
+        assigned_user_id=appointment_technician_id or actor_user_id,
         scheduled_at=_tomorrow_at(10, 0),
     )
 

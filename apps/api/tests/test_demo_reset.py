@@ -321,13 +321,24 @@ async def test_reset_demo_does_not_assign_actor_unless_technician_member(
         "/api/v1/admin/demo/reset", headers=_headers(token, auth_tenant_id)
     )
     assert response.status_code == 200, response.text
-    # El actor ajeno no se asigna a la orden, pero el seed garantiza un turno futuro.
+    # El actor ajeno no se asigna; la orden queda para el técnico demo y el seed
+    # garantiza un turno futuro.
     assert response.json()["counts"]["appointments"] == 1
 
-    work_orders = await db_session.scalars(
-        select(WorkOrder).where(WorkOrder.assigned_user_id.is_not(None))
+    assigned_orders = (
+        await db_session.scalars(select(WorkOrder).where(WorkOrder.assigned_user_id.is_not(None)))
+    ).all()
+    assert len(assigned_orders) == 1
+    assigned_user_id = assigned_orders[0].assigned_user_id
+    assert assigned_user_id != user.id
+    membership = await db_session.scalar(
+        select(Membership).where(
+            Membership.user_id == assigned_user_id,
+            Membership.tenant_id == demo_tenant.id,
+        )
     )
-    assert work_orders.all() == []
+    assert membership is not None
+    assert membership.role == "technician"
 
 
 async def test_reset_demo_records_ip_in_audit(
