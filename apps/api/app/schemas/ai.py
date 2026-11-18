@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AIChatRequest(BaseModel):
@@ -31,6 +31,8 @@ class AIStatusResponse(BaseModel):
 
 
 class AIUsageItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     provider: str
     model: str
