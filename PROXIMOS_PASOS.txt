@@ -86,7 +86,7 @@ Estado reportado:
 - Portal del cliente.
 
 APK actual:
-https://github.com/manuysys/SAAS_GESTION_APP/releases/tag/mobile-apk-3
+https://github.com/manuysys/SAAS_GESTION_APP/releases/tag/mobile-apk-5
 
 IMPORTANTE: todavía no está comprobado en un dispositivo físico. El APK publicado es de debug.
 

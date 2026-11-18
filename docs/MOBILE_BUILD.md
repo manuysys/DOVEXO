@@ -135,7 +135,21 @@ Para el AAB firmado con la keystore de release ver
 APK de prueba publicado:
 
 ```text
-https://github.com/manuysys/SAAS_GESTION_APP/releases/tag/mobile-apk-3
+https://github.com/manuysys/SAAS_GESTION_APP/releases/tag/mobile-apk-5
+```
+
+El asset directo de la release es `app-release.apk` (~29,4 MB) y se descarga
+desde ahí; no hace falta ningún mirror externo (el workflow `mirror-apk.yml`
+que subía copias a tmpfiles.org se eliminó porque esos enlaces expiran y daban
+404). El APK está firmado con la **keystore de debug**: sirve para probar en un
+dispositivo real, pero **no es publicable en Google Play** (el AAB firmado con
+la keystore de release ya existe como artifact `dovexo-android-aab`, ver
+`docs/ANDROID_RELEASE.md`).
+
+SHA-256 del asset verificado el 2026-11-15 con la descarga directa:
+
+```text
+437FE51EA5284EBD5F9FCE740DA738610B7A9142017CF8096A4BD078AD6EE3D3
 ```
 
 ## Android
