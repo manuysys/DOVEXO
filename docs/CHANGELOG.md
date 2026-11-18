@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-11-18 — Rediseño visual integral del frontend
+
+- Design system DOVEXO: tokens nuevos (primary `#315EFB`, deep, teal, violet,
+  estados, superficies, motion), utilidades tipográficas, 13 componentes UI
+  migrados y stories en Storybook.
+- Landing: hero con mockups reales e ilustración isométrica 2D, credenciales
+  demo colapsadas, beneficios alternados, tour de 6 tabs, pricing accesible,
+  trust strip verificable, FAQ y footer.
+- Dashboard: overflow mobile corregido (P0), KPIs accionables sin duplicar,
+  hero compacto, checklist y shell con tokens.
+- Módulos rediseñados: clientes, órdenes/solicitudes, presupuestos/pagos,
+  agenda (día/semana/equipo con conflictos), automatizaciones, asistente,
+  panel global, configuración y onboarding.
+- PWA del técnico: guard de rol para 403, home/detalle, offline real, fotos y
+  materiales. Portal y presupuesto público rediseñados; app móvil con tokens,
+  tabs y pagos.
+- Fix backend aislado: `AIUsageItem` acepta objetos ORM (`from_attributes`);
+  `/api/v1/ai/usage` deja de devolver 500.
+- Verificación: `verify.ps1` OK (backend y frontend), 281 Vitest, build de 28
+  rutas, Storybook build OK y `tsc` móvil OK. Producción sin desplegar.
+
 ## 2026-11-17 — Decisión P0-D: aviso de demo
 
 - Decisión sobre credenciales de demo (auditoría externa): se mantiene la demo

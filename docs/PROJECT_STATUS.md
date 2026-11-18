@@ -1,11 +1,11 @@
 # Estado del proyecto
 
-**Última actualización:** 2026-11-15
-**Fase:** preventa / customer discovery activa (GO_TO_MARKET) + hardening de
-auditoría. Base técnica: Hito 2 completo + PWA, app móvil Android DOVEXO,
-portal del cliente, dashboard operativo, automatizaciones, IA con Groq,
-suscripciones, panel global, WhatsApp, importador CSV/XLSX, onboarding y reset
-de demo (pilot-ready).
+**Última actualización:** 2026-11-18
+**Fase:** preventa / customer discovery activa (GO_TO_MARKET) + rediseño visual
+integral del frontend (rama `feat/frontend-redesign`). Base técnica: Hito 2
+completo + PWA, app móvil Android DOVEXO, portal del cliente, dashboard
+operativo, automatizaciones, IA con Groq, suscripciones, panel global, WhatsApp,
+importador CSV/XLSX, onboarding y reset de demo (pilot-ready).
 
 ## Resumen
 
@@ -384,6 +384,45 @@ basedpyright 0 errores, pytest 179 pruebas en tres chunks (71 + 56 + 52, todas
 en 100 %), ESLint OK, TypeScript OK, Vitest 210 pruebas (24 archivos),
 `next build` 28 rutas y `tsc` móvil OK. Se agregó al script el chunk de
 `test_demo_reset.py`, `test_imports.py` y `test_onboarding.py`, que faltaba.
+
+## Rediseño visual integral (2026-11-18)
+
+Ejecutado sobre la rama `feat/frontend-redesign` según `MEJORA_FRONTEND.txt`.
+Documentos: `DESIGN_AUDIT.md`, `DESIGN_SYSTEM.md`, `LANDING_REDESIGN.md`,
+`DASHBOARD_REDESIGN.md`, `PWA_REDESIGN.md`, `MOBILE_REDESIGN.md`.
+
+- **Design system:** tokens nuevos (primary `#315EFB`, deep, teal, violet,
+  estados), tipografía, radios, sombras y motion en `globals.css`; los 13
+  componentes de `components/ui/` migrados; stories de Button, Card, Badge,
+  Input y StatCard; Storybook build OK.
+- **Landing:** hero nuevo con mockups reales (panel, teléfono, notificación),
+  ilustración isométrica 2D, escena Three.js lazy, credenciales demo
+  colapsadas, fila de confianza y secciones rediseñadas (beneficios
+  alternados, tour de 6 tabs, pricing accesible, trust strip, FAQ, CTA y
+  footer).
+- **Dashboard:** P0 de overflow mobile corregido (390 px sin scroll lateral,
+  medido con Playwright), KPIs accionables sin duplicar, hero compacto,
+  checklist y shell con tokens.
+- **Módulos:** clientes (tabla + ficha con tabs y timeline), órdenes y
+  solicitudes (tabla, kanban, detalle con timeline), presupuestos y pagos
+  (detalle en dos columnas con PDF, métricas de cobro), agenda (día, semana y
+  equipo con detección de conflictos), automatizaciones/asistente/panel global
+  y configuración/onboarding.
+- **PWA del técnico:** guard de rol (403 explicado), home y detalle,
+  indicadores offline/sincronización, fotos y materiales; loading con shell.
+- **Portal y presupuesto público:** home priorizada, aprobación simple, bug de
+  vencimiento civil corregido, sumas de dinero en centavos, token fuera de la
+  URL.
+- **App Android:** tokens TS, tabs por rol, pestaña de pagos, bottom sheets,
+  skeletons y sync offline; `tsc` OK.
+- **Backend:** fix aislado en `AIUsageItem` (`from_attributes`) para que
+  `/api/v1/ai/usage` no devuelva 500; sin cambios de contrato.
+- **Verificación:** `scripts/verify.ps1` (backend ruff/basedpyright/pytest,
+  frontend lint/typecheck/tests/build, móvil tsc) y `build-storybook` OK.
+  Vitest: 281 pruebas en 35 archivos. Build: 28 rutas.
+- **Producción no se actualizó.** Pendiente: deploy, QA visual de las 8
+  resoluciones en todas las rutas, auditoría formal de a11y/performance y
+  prueba en Android físico.
 
 ## Demo pública
 
