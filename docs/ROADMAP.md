@@ -138,7 +138,25 @@ fundador toque la base de datos. Criterios completos en
 
 **Backups y monitoreo**
 
-- [x] Workflow de backup diario configurado en el repositorio (`.github/workflows/backup.yml`). Su ejecución y resultado no están verificados en este documento.
+- [x] Workflow de backup diario configurado en el repositorio (`.github/workflows/backup.yml`).
+  **Verificado el 2026-11-15: las corridas figuran "success" pero no producen artifact
+  porque falta el secreto `NEON_DATABASE_URL`.** El workflow ahora falla en ese caso.
+- [ ] Configurar `NEON_DATABASE_URL` en GitHub y verificar un backup real. *Requiere al fundador.*
 - [ ] Almacenamiento externo independiente y cifrado. *Bloqueado: proveedor a elegir.*
 - [ ] Restauración probada en staging, con fecha registrada.
 - [ ] Alertas de fallos críticos (backend, base, emails, jobs).
+
+## Preventa / customer discovery (activa desde 2026-11-14)
+
+- [x] Paquete comercial en `docs/GO_TO_MARKET/` (14 archivos + borradores de
+  contacto), revisado contra el mandato del fundador (apto, cero bloqueantes).
+- [x] 21 prospectos de Zona Oeste verificados con fuente y fecha
+  (`PROSPECTS.csv`, P-001 a P-021).
+- [x] Demo auditada en producción con HTTP real (14 flujos verificados).
+- [x] Investigación de marca y dominios (`BRAND_DOMAIN_RESEARCH.md`):
+  `dovexo.com.ar` y `arvokta.com/.com.ar` libres; `dovexo.com` en venta.
+- [ ] Autorizar y enviar los primeros mensajes (fundador).
+- [ ] Entrevistas (meta 8-12; hoy 0).
+- [ ] Demos comerciales (meta 3-5; hoy 0).
+- [ ] Pilotos (3 cupos, 30 días; hoy 0).
+- [ ] Conversión a pago del primer piloto.

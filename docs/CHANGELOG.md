@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-11-15 — Paquete de preventa, auditoría externa y verificación integral
+
+- Paquete comercial `docs/GO_TO_MARKET/` (14 archivos): perfil de cliente,
+  `PROSPECTS.csv` con 21 prospectos verificados (P-001 a P-021), guion de
+  entrevista con hoja corta de 8 preguntas, guion de demo con evidencia de
+  producción, programa de pilotos, mensajes, validación de precios, benchmark,
+  feedback, métricas y plan de 14 días.
+- Borradores de primer contacto para El Mejor Clima, TOTALAIR y UBE
+  (`OUTREACH_DRAFTS_2026-11-14.md`), pendientes de aprobación del fundador.
+  Ningún mensaje fue enviado.
+- Investigación de marca y dominios (`BRAND_DOMAIN_RESEARCH.md`): `dovexo.com`
+  registrado (en venta USD 1.995); `dovexo.com.ar`, `arvokta.com`,
+  `arvokta.com.ar`, `dovexo.app` y `dovexo.dev` libres según RDAP (2026-11-15).
+- Auditoría externa del 2026-11-14 verificada:
+  - IDs de orden duplicados en la landing: no reproducibles en el deploy actual
+    (la landing usa `OT-2026-0001..0003` del dataset único).
+  - Enlace de APK roto: causa raíz era el mirror de tmpfiles.org del workflow
+    `mirror-apk.yml`, eliminado. Las 3 releases tienen `app-release.apk` adjunto
+    (30.819.479 bytes). Links actualizados a `mobile-apk-5` y SHA-256 agregado a
+    `MOBILE_BUILD.md` (`437FE51E...E3D3`).
+  - Credenciales de demo: decisión pendiente del fundador (P0-D).
+- Hallazgo propio: el workflow `Database backup` figura "success" pero no produce
+  artifacts porque falta `NEON_DATABASE_URL`. Ahora falla si el secreto no está
+  configurado. No hay backups reales desde el 2026-11-10.
+- `scripts/verify.ps1`: se agregó el chunk de `test_demo_reset.py`,
+  `test_imports.py` y `test_onboarding.py` (faltaba). Salida real del 2026-11-15:
+  ruff/basedpyright OK, pytest 179 pruebas (3 chunks), Vitest 210 pruebas,
+  `next build` 28 rutas, `tsc` móvil OK; código de salida 0.
+- Fix del seed de demo: la orden `WO-2026-0001` ahora se asigna al técnico del
+  tenant demo (`appointment_technician_id`) en vez del actor, para que la PWA
+  `/tech` muestre el trabajo asignado después de un reset. Test de reset
+  actualizado (el actor ajeno sigue sin asignarse). API redesplegada.
+- Sin cambios de código de producto fuera del seed de demo en esta entrada.
+
 ## 2026-11-11 — Importador CSV/XLSX, onboarding y reset de demo
 
 - Importador de clientes CSV y XLSX (`/api/v1/imports/customers/preview`,

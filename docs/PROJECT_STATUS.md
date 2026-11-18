@@ -1,9 +1,11 @@
 # Estado del proyecto
 
-**Última actualización:** 2026-11-14
-**Fase:** Hito 2 completo + PWA, app móvil Android DOVEXO, portal del cliente,
-dashboard operativo, automatizaciones, IA con Groq, suscripciones, panel global,
-WhatsApp, importador CSV/XLSX, onboarding y reset de demo (pilot-ready).
+**Última actualización:** 2026-11-15
+**Fase:** preventa / customer discovery activa (GO_TO_MARKET) + hardening de
+auditoría. Base técnica: Hito 2 completo + PWA, app móvil Android DOVEXO,
+portal del cliente, dashboard operativo, automatizaciones, IA con Groq,
+suscripciones, panel global, WhatsApp, importador CSV/XLSX, onboarding y reset
+de demo (pilot-ready).
 
 ## Resumen
 
@@ -16,6 +18,11 @@ automatizaciones con notificaciones, asistente de IA, planes y suscripciones,
 panel global del SaaS, configuración de WhatsApp Cloud API, importador de clientes
 desde CSV y XLSX con vista previa, onboarding de cuatro pasos y reset del tenant
 demo.
+
+Desde el 2026-11-14 la etapa activa es **preventa / customer discovery**: el
+paquete comercial está en `docs/GO_TO_MARKET/` (21 prospectos verificados con
+fuente, guion de entrevista, guion de demo, programa de pilotos y borradores de
+contacto), a la espera de la aprobación del fundador para enviar mensajes.
 
 El frontend y la API están desplegados en Vercel. La base PostgreSQL está en
 Neon (plan Free, región `gru1`). La demo ya no depende de una máquina local ni
@@ -354,6 +361,30 @@ login. El asistente devolvió `QT-2026-0002` con datos reales de Neon. Las
 migraciones `b2c3d4e5f6a7` y `c3d4e5f6a7b8` quedaron aplicadas en Neon y la API
 se redesplegó el 2026-11-11.
 
+## Verificación de la auditoría externa (2026-11-15)
+
+Una auditoría externa del 2026-11-14 reportó cuatro hallazgos. Verificación con evidencia:
+
+| Hallazgo | Verificación 2026-11-15 | Estado |
+|---|---|---|
+| IDs de orden duplicados en la landing (OT-0141/OT-0142) | El HTML desplegado no contiene esos IDs; usa `OT-2026-0001..0003` desde `apps/web/src/lib/marketing/demo-data.ts` | No reproducible en el deploy actual; cerrado |
+| Identidad "Arreglo" en la release del APK | `mobile-apk-4` y `mobile-apk-5` ya se llaman "DOVEXO Android APK (debug)"; solo la release histórica `mobile-apk-3` conserva el título viejo | Corregido en la release actual |
+| Enlace de descarga del APK roto | Las 3 releases tienen `app-release.apk` adjunto (30.819.479 bytes); el enlace roto era el mirror de tmpfiles.org que escribía `mirror-apk.yml`. Workflow eliminado y links actualizados a `mobile-apk-5`. SHA-256: `437FE51EA5284EBD5F9FCE740DA738610B7A9142017CF8096A4BD078AD6EE3D3` | Corregido |
+| Credenciales de demo expuestas (P0-D) | La demo usa datos ficticios, tiene reset por API y rate limiting, pero las credenciales son públicas en landing y docs | Decisión pendiente del fundador: mantener demo abierta con aviso "datos de ejemplo" y separar credenciales de desarrollo, o cerrar el acceso |
+
+**Hallazgo propio (backup):** las 6 corridas del workflow `Database backup`
+figuran "success" pero **no producen artifact**: `NEON_DATABASE_URL` no está
+configurada y el workflow salía con warning. No hay backups desde el 2026-11-10.
+El workflow ahora **falla** si falta el secreto (2026-11-15); el fundador debe
+configurar `NEON_DATABASE_URL` en GitHub.
+
+**Verificación local integral (2026-11-15):** `scripts/verify.ps1` salió con
+código 0 con la suite completa: ruff check OK, ruff format OK (158 archivos),
+basedpyright 0 errores, pytest 179 pruebas en tres chunks (71 + 56 + 52, todas
+en 100 %), ESLint OK, TypeScript OK, Vitest 210 pruebas (24 archivos),
+`next build` 28 rutas y `tsc` móvil OK. Se agregó al script el chunk de
+`test_demo_reset.py`, `test_imports.py` y `test_onboarding.py`, que faltaba.
+
 ## Demo pública
 
 - Frontend: https://saas-gestion-web.vercel.app
@@ -362,13 +393,18 @@ se redesplegó el 2026-11-11.
 - Admin demo: `demo@saasgestion.com` / `Demo12345!`.
 - Técnico demo: `tecnico@saasgestion.com` / `Tecnico12345!`.
 - Cliente demo del portal: empresa `servicios-demo`, `carlos@example.com`.
-- APK Android de prueba: https://github.com/manuysys/SAAS_GESTION_APP/releases/tag/mobile-apk-3
+- APK Android de prueba: https://github.com/manuysys/SAAS_GESTION_APP/releases/tag/mobile-apk-5
+  (asset directo `app-release.apk`, SHA-256 en `docs/MOBILE_BUILD.md`)
 
 Ver `docs/DEMO.md`. La demo ya no depende de esta máquina. Limitación: el plan
 Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
 
 ## Pendiente
 
+- [ ] Autorizar y enviar los primeros mensajes a prospectos (borradores en
+  `docs/GO_TO_MARKET/OUTREACH_DRAFTS_2026-11-14.md`; requiere aprobación del
+  fundador).
+- [ ] Entrevistas a clientes (8-12 planificadas; 0 realizadas).
 - [ ] Instalar el APK en un Android real y recorrer técnico, cliente, fotos y
   offline.
 - [ ] Publicar en Google Play con keystore de release, ficha, privacidad y data
@@ -379,24 +415,23 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
 - [ ] Enforcement completo de límites por plan en todos los endpoints.
 - [ ] Recordatorios automáticos programados (cron/worker).
 - [ ] Modo de solo lectura de la demo o reset programado (el reset manual ya existe).
-- [ ] Agregar `openpyxl` y `defusedxml` a `apps/api/requirements.txt` y verificar el preview XLSX en Vercel.
 - [ ] Prueba E2E en navegador del importador, el onboarding y el reset contra Vercel + Neon.
-- [ ] Entrevistas a clientes.
-- [ ] Dominio propio, política de privacidad y revisión legal.
-- [ ] Backups verificados y plan de restauración de Neon.
+- [ ] Configurar `NEON_DATABASE_URL` en GitHub y verificar un backup real con
+  restauración (hoy no hay ningún backup; ver "Verificación de la auditoría externa").
+- [ ] Comprar dominio (investigación en `docs/GO_TO_MARKET/BRAND_DOMAIN_RESEARCH.md`),
+  configurar Resend y política de privacidad.
 
 ## Próximo paso concreto
 
-1. Probar el APK `mobile-apk-5` en un dispositivo Android real y corregir lo que
+1. Autorizar y enviar los primeros mensajes (El Mejor Clima, TOTALAIR, UBE) y
+   coordinar las primeras entrevistas.
+2. Probar el APK `mobile-apk-5` en un dispositivo Android real y corregir lo que
    falle.
-2. Subir el AAB firmado a Google Play Console y crear la prueba interna.
-3. Comprar y verificar un dominio; configurar Resend y `EMAIL_FROM` para enviar
-   invitaciones y accesos reales.
-4. Agregar `openpyxl` y `defusedxml` a `requirements.txt`, redesplegar la API y
-   verificar el preview XLSX en producción.
-5. Completar la verificación final del bloque 2026-11-11 (`scripts/verify.ps1`,
-   migraciones en Neon, endpoints nuevos) y la prueba E2E en navegador.
-6. Configurar backups verificados y monitoreo de errores.
+3. Configurar `NEON_DATABASE_URL` en GitHub y verificar un backup real con
+   restauración.
+4. Registrar `dovexo.com.ar` (libre según RDAP 2026-11-15), verificarlo en Resend
+   y configurar `EMAIL_FROM`.
+5. Subir el AAB firmado a Google Play Console y crear la prueba interna.
 
 ## Limitaciones conocidas
 

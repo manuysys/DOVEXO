@@ -145,3 +145,25 @@
   demo serializa los resets, pero otros endpoints que escriben en ese tenant sin tomar el
   lock pueden competir con él. Se acepta para el MVP (comentario en
   `apps/api/app/services/demo_service.py`).
+
+## Auditoría externa (2026-11-14) y backups
+
+- **Backups: no se ejecutan (crítico).** El workflow `Database backup` corrió 6 veces
+  con conclusión "success" entre el 2026-11-10 y el 2026-11-15, pero **ninguna corrida
+  produjo artifact** (verificado vía API de GitHub el 2026-11-15). Causa: falta el
+  secreto `NEON_DATABASE_URL` y el workflow salía con warning. El workflow ahora falla
+  si el secreto no está (2026-11-15). Acción del fundador: configurar el secreto en
+  Settings > Secrets and variables > Actions y verificar un artifact real.
+- **Landing con IDs de orden duplicados (auditoría 2026-11-14): no reproducible.**
+  El HTML desplegado el 2026-11-15 no contiene `OT-0141`/`OT-0142`; usa
+  `OT-2026-0001..0003` desde `apps/web/src/lib/marketing/demo-data.ts`. Si reaparece,
+  revisar cache/CDN y el commit desplegado.
+- **Enlace de descarga del APK (auditoría 2026-11-14): corregido.** El enlace roto era
+  el mirror de tmpfiles.org que escribía `mirror-apk.yml` (host temporal que expira).
+  Workflow eliminado, links actualizados a `mobile-apk-5` y SHA-256 documentado en
+  `MOBILE_BUILD.md`. Las releases tienen el asset `app-release.apk` adjunto.
+- **Credenciales de demo públicas (P0-D): decisión pendiente del fundador.** Hoy la
+  demo usa datos ficticios, tiene reset por API y rate limiting. Recomendación:
+  mantenerla abierta durante la preventa con aviso visible de "datos de ejemplo" y
+  separar credenciales de desarrollo de la documentación comercial; alternativa: cerrar
+  el acceso y entregar credenciales por pedido.
