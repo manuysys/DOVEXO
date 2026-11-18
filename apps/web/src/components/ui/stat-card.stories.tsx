@@ -30,6 +30,7 @@ export const Danger: Story = {
 };
 
 export const Grid: Story = {
+  args: { label: "Clientes", value: "3" },
   render: () => (
     <div className="grid w-[720px] grid-cols-2 gap-4">
       <StatCard label="Clientes" value="3" hint="Ver listado" icon={Users} />
