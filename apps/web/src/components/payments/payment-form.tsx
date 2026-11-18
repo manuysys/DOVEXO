@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { Button } from "@/components/ui/button";
 import { api, errorMessage, type WorkOrder } from "@/lib/api";
 import { formatDateTimeLocal, localDateTimeToIso } from "@/lib/agenda";
 import { PAYMENT_METHOD_LABELS, PAYMENT_METHODS } from "@/lib/payment-status";
@@ -29,9 +30,9 @@ const paymentFormSchema = z.object({
 type PaymentFormValues = z.infer<typeof paymentFormSchema>;
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900";
-const labelClass = "mb-1 block text-sm font-medium";
-const errorClass = "mt-1 text-xs text-red-600";
+  "border-border bg-surface text-text placeholder:text-text-2/70 focus:border-primary focus:ring-primary/20 min-h-11 w-full rounded-ds-md border px-3 text-sm outline-none focus:ring-2";
+const labelClass = "text-text mb-1 block text-xs font-semibold";
+const errorClass = "text-danger-strong mt-1 text-xs";
 
 type PaymentFormProps = {
   tenantId: string;
@@ -73,6 +74,7 @@ export function PaymentForm({ tenantId, orders, onDone }: PaymentFormProps) {
       void queryClient.invalidateQueries({ queryKey: ["payments", tenantId] });
       void queryClient.invalidateQueries({ queryKey: ["work-orders", tenantId] });
       void queryClient.invalidateQueries({ queryKey: ["dashboard-summary", tenantId] });
+      void queryClient.invalidateQueries({ queryKey: ["payment-overview", tenantId] });
       onDone();
     },
   });
@@ -84,10 +86,16 @@ export function PaymentForm({ tenantId, orders, onDone }: PaymentFormProps) {
   return (
     <form
       onSubmit={handleSubmit((values) => createMutation.mutateAsync(values))}
-      className="rounded-2xl border border-zinc-200 bg-white p-5"
+      className="border-border bg-surface rounded-ds-lg border p-5 shadow-card"
       noValidate
+      aria-labelledby="payment-form-title"
     >
-      <h2 className="text-sm font-semibold">Registrar pago</h2>
+      <h2 id="payment-form-title" className="text-text text-h4">
+        Registrar pago
+      </h2>
+      <p className="text-text-2 mt-1 text-sm">
+        El pago queda registrado como movimiento; podés anularlo desde la lista.
+      </p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
@@ -190,26 +198,18 @@ export function PaymentForm({ tenantId, orders, onDone }: PaymentFormProps) {
       </div>
 
       {formError && (
-        <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="bg-danger-soft text-danger-strong mt-4 rounded-ds-md px-3 py-2 text-sm">
           {formError}
         </p>
       )}
 
       <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          onClick={onDone}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-        >
+        <Button type="button" variant="outline" onClick={onDone}>
           Cancelar
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting || createMutation.isPending}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-60"
-        >
+        </Button>
+        <Button type="submit" disabled={isSubmitting || createMutation.isPending}>
           {createMutation.isPending ? "Guardando..." : "Registrar pago"}
-        </button>
+        </Button>
       </div>
     </form>
   );

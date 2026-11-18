@@ -1,29 +1,23 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, FileText, Plus, X } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
+import { FileText, Plus, RefreshCw, Search, X } from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
+import { QuoteForm } from "@/components/quotes/quote-form";
+import { QuoteList } from "@/components/quotes/quote-list";
+import { quoteExpiryState } from "@/components/quotes/quote-expiry";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/ui/stat-card";
-import { QuoteForm } from "@/components/quotes/quote-form";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { QUOTE_STATUS_LABELS, quoteStatusLabel } from "@/lib/quote-status";
-import { cn, formatCurrency, formatDate, formatDateOnly } from "@/lib/utils";
-
-const statusVariant: Record<string, "neutral" | "success" | "warning" | "danger" | "info"> = {
-  draft: "neutral",
-  sent: "warning",
-  approved: "success",
-  rejected: "danger",
-  expired: "neutral",
-};
+import { sumMoney } from "@/lib/money";
+import { cn, formatCurrency } from "@/lib/utils";
 
 const filters = [
   { value: "", label: "Todos" },
@@ -37,12 +31,13 @@ const filters = [
 export default function QuotesPage() {
   const { activeTenantId, tenants } = useAuth();
   const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const activeTenant = tenants.find((tenant) => tenant.id === activeTenantId);
 
   const quotesQuery = useQuery({
-    queryKey: ["quotes", activeTenantId, statusFilter],
-    queryFn: () => api.quotes.list(activeTenantId ?? "", statusFilter || undefined),
+    queryKey: ["quotes", activeTenantId],
+    queryFn: () => api.quotes.list(activeTenantId ?? ""),
     enabled: Boolean(activeTenantId),
   });
 
@@ -52,18 +47,67 @@ export default function QuotesPage() {
     enabled: Boolean(activeTenantId),
   });
 
+  const allQuotes = useMemo(() => quotesQuery.data?.items ?? [], [quotesQuery.data]);
+  const total = quotesQuery.data?.total ?? 0;
+  const customers = useMemo(() => customersQuery.data?.items ?? [], [customersQuery.data]);
+
+  const customerName = useMemo(() => {
+    const names = new Map(customers.map((customer) => [customer.id, customer.name]));
+    return (customerId: string) => names.get(customerId) ?? "Cliente";
+  }, [customers]);
+
+  const searchedQuotes = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return allQuotes;
+    return allQuotes.filter(
+      (quote) =>
+        quote.number.toLowerCase().includes(term) ||
+        customerName(quote.customer_id).toLowerCase().includes(term),
+    );
+  }, [allQuotes, customerName, search]);
+
+  const visibleQuotes = useMemo(
+    () =>
+      statusFilter
+        ? searchedQuotes.filter((quote) => quote.status === statusFilter)
+        : searchedQuotes,
+    [searchedQuotes, statusFilter],
+  );
+
+  const countByStatus = useMemo(() => {
+    const counts: Record<string, number> = { "": searchedQuotes.length };
+    for (const quote of searchedQuotes) {
+      counts[quote.status] = (counts[quote.status] ?? 0) + 1;
+    }
+    return counts;
+  }, [searchedQuotes]);
+
+  const approvedQuotes = useMemo(
+    () => allQuotes.filter((quote) => quote.status === "approved"),
+    [allQuotes],
+  );
+  const approvedAmount = approvedQuotes.length
+    ? sumMoney(approvedQuotes.map((quote) => quote.total))
+    : "0";
+  const sentCount = allQuotes.filter((quote) => quote.status === "sent").length;
+  const dueSoonCount = allQuotes.filter((quote) => {
+    if (quote.status !== "sent" || !quote.valid_until) return false;
+    const { days } = quoteExpiryState(quote.valid_until, quote.status);
+    return days !== null && days <= 7;
+  }).length;
+
+  const hasFilters = Boolean(statusFilter || search.trim());
+  const isFilteredEmpty = allQuotes.length > 0 && visibleQuotes.length === 0;
+  const isTruncated = total > allQuotes.length;
+
   if (!activeTenantId) {
-    return <Card className="text-slate p-8 text-sm">No hay una empresa activa.</Card>;
+    return <Card className="text-text-2 p-8 text-sm">No hay una empresa activa.</Card>;
   }
 
-  const quotes = quotesQuery.data?.items ?? [];
-  const total = quotesQuery.data?.total ?? 0;
-  const customers = customersQuery.data?.items ?? [];
-  const customerName = (id: string) =>
-    customers.find((customer) => customer.id === id)?.name ?? "Cliente";
-  const sent = quotes.filter((quote) => quote.status === "sent").length;
-  const approved = quotes.filter((quote) => quote.status === "approved").length;
-  const amount = quotes.reduce((sum, quote) => sum + Number(quote.total), 0);
+  function clearFilters() {
+    setStatusFilter("");
+    setSearch("");
+  }
 
   return (
     <div className="space-y-6">
@@ -75,165 +119,171 @@ export default function QuotesPage() {
           <Button
             onClick={() => setShowForm((value) => !value)}
             aria-expanded={showForm}
+            aria-controls="quote-form-panel"
             variant={showForm ? "outline" : "primary"}
           >
-            {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            {showForm ? (
+              <X className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Plus className="h-4 w-4" aria-hidden="true" />
+            )}
             {showForm ? "Cancelar" : "Nuevo presupuesto"}
           </Button>
         }
       />
 
-      {showForm && <QuoteForm tenantId={activeTenantId} onCancel={() => setShowForm(false)} />}
+      {showForm && (
+        <div id="quote-form-panel">
+          <QuoteForm tenantId={activeTenantId} onCancel={() => setShowForm(false)} />
+        </div>
+      )}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Total"
-          value={total}
-          hint="Presupuestos registrados"
-          icon={FileText}
-          className="border-ink/10 bg-ink/5"
-        />
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <StatCard label="Presupuestos" value={total} hint="Registrados en la empresa" icon={FileText} />
         <StatCard
           label="Enviados"
-          value={sent}
-          hint="Esperando respuesta"
+          value={sentCount}
+          hint="Esperando respuesta del cliente"
           icon={FileText}
           tone="amber"
-          className="border-amber/20 bg-amber/10"
         />
         <StatCard
           label="Aprobados"
-          value={approved}
-          hint="Listos para ejecutar"
+          value={approvedQuotes.length}
+          hint={approvedQuotes.length ? formatCurrency(approvedAmount) : "Listos para ejecutar"}
           icon={FileText}
           tone="teal"
-          className="border-teal/15 bg-teal/5"
         />
         <StatCard
-          label="Monto total"
-          value={formatCurrency(amount)}
-          hint="Suma de la página actual"
+          label="Por vencer"
+          value={dueSoonCount}
+          hint="Enviados que vencen en 7 días o ya vencieron"
           icon={FileText}
-          tone="teal"
-          className="border-teal/15 bg-teal/5"
+          tone="danger"
         />
       </div>
 
-      <Card>
-        <div className="border-mist flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Filtrar presupuestos">
-            {filters.map((filter) => {
-              const active = statusFilter === filter.value;
-              return (
-                <button
-                  key={filter.value || "all"}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setStatusFilter(filter.value)}
-                  className={cn(
-                    "min-h-9 shrink-0 rounded-full px-3 text-xs font-semibold transition-colors",
-                    active
-                      ? "bg-ink text-white"
-                      : "border-mist text-slate border bg-white hover:bg-paper",
-                  )}
-                >
-                  {filter.label}
-                </button>
-              );
-            })}
+      <Card className="overflow-hidden">
+        <div className="border-border flex flex-col gap-3 border-b px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative">
+              <label htmlFor="quote-search" className="sr-only">
+                Buscar presupuestos por número o cliente
+              </label>
+              <Search
+                aria-hidden="true"
+                className="text-text-2 pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+              />
+              <Input
+                id="quote-search"
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar por número o cliente"
+                className="min-h-9 pl-9 text-sm sm:w-64"
+              />
+            </div>
+
+            <div
+              role="group"
+              aria-label="Filtrar presupuestos por estado"
+              className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1"
+            >
+              {filters.map((filter) => {
+                const active = statusFilter === filter.value;
+                const count = countByStatus[filter.value] ?? 0;
+                return (
+                  <button
+                    key={filter.value || "all"}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setStatusFilter(filter.value)}
+                    className={cn(
+                      "inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors focus-visible:ring-primary focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                      active
+                        ? "bg-primary text-white"
+                        : "border-border text-text-2 hover:bg-surface-2 hover:text-text border bg-surface",
+                    )}
+                  >
+                    {filter.label}
+                    <span className="numeric text-[11px] opacity-75">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <p className="text-slate text-xs">
-            {Object.keys(QUOTE_STATUS_LABELS).length} estados posibles
+
+          <p className="text-text-2 numeric shrink-0 text-xs" aria-live="polite">
+            {visibleQuotes.length} de {allQuotes.length}
           </p>
         </div>
 
         {quotesQuery.isLoading ? (
-          <p className="text-slate p-6 text-sm">Cargando presupuestos...</p>
+          <div className="space-y-2 p-4" aria-busy="true">
+            <span className="sr-only">Cargando presupuestos…</span>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Skeleton key={index} className="bg-surface-2 h-12 w-full" />
+            ))}
+          </div>
         ) : quotesQuery.isError ? (
-          <p className="p-6 text-sm text-red-600">No se pudieron cargar los presupuestos.</p>
-        ) : quotes.length === 0 ? (
-          <div className="p-6">
+          <div role="alert" className="p-6">
+            <p className="text-danger-strong text-sm font-semibold">
+              No se pudieron cargar los presupuestos.
+            </p>
+            <p className="text-text-2 mt-1 text-sm">
+              Revisá la conexión e intentá de nuevo. No se perdió ningún dato.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3"
+              onClick={() => void quotesQuery.refetch()}
+            >
+              <RefreshCw className="h-4 w-4" aria-hidden="true" />
+              Reintentar
+            </Button>
+          </div>
+        ) : allQuotes.length === 0 ? (
+          <div className="p-4 sm:p-6">
             <EmptyState
               icon={FileText}
-              title="No hay presupuestos"
-              description={
-                statusFilter
-                  ? "Probá con otro estado o creá un presupuesto nuevo."
-                  : "Creá el primero para enviárselo a tus clientes."
-              }
+              title="Todavía no hay presupuestos"
+              description="Creá el primero para enviárselo a un cliente y seguir su aprobación."
               action={
                 <Button onClick={() => setShowForm(true)}>
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4" aria-hidden="true" />
                   Nuevo presupuesto
                 </Button>
               }
+              className="border-border bg-surface-2/40"
+            />
+          </div>
+        ) : isFilteredEmpty ? (
+          <div className="p-4 sm:p-6">
+            <EmptyState
+              icon={Search}
+              title="Ningún presupuesto coincide"
+              description="Probá con otro estado o limpiá la búsqueda para ver todos."
+              action={
+                hasFilters ? (
+                  <Button variant="outline" onClick={clearFilters}>
+                    Limpiar filtros
+                  </Button>
+                ) : undefined
+              }
+              className="border-border bg-surface-2/40"
             />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
-              <thead className="bg-paper text-slate text-xs tracking-wide uppercase">
-                <tr>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Número
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Cliente
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Estado
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-right font-medium">
-                    Total
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Fecha
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-right font-medium">
-                    Detalle
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-mist divide-y">
-                {quotes.map((quote) => (
-                  <tr key={quote.id} className="hover:bg-paper/70 transition-colors">
-                    <td className="text-ink px-4 py-3 font-mono text-xs font-semibold">
-                      {quote.number}
-                    </td>
-                    <td className="text-slate px-4 py-3">{customerName(quote.customer_id)}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant={statusVariant[quote.status] ?? "neutral"}>
-                        {quoteStatusLabel(quote.status)}
-                      </Badge>
-                    </td>
-                    <td className="text-ink px-4 py-3 text-right font-semibold">
-                      {formatCurrency(quote.total)}
-                    </td>
-                    <td className="text-slate px-4 py-3 text-xs">
-                      {quote.sent_at ? (
-                        <p>Enviado {formatDate(quote.sent_at)}</p>
-                      ) : (
-                        <p>Sin enviar</p>
-                      )}
-                      {quote.valid_until && (
-                        <p className="mt-0.5">Válido hasta {formatDateOnly(quote.valid_until)}</p>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/quotes/${quote.id}`}
-                        className="border-mist text-ink hover:bg-paper inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium"
-                      >
-                        Ver
-                        <ArrowRight className="h-3 w-3" />
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <>
+            <QuoteList quotes={visibleQuotes} customerName={customerName} />
+            {isTruncated && (
+              <p className="border-border text-text-2 border-t px-4 py-3 text-xs">
+                Mostrando los primeros {allQuotes.length} de {total} presupuestos. Los filtros se
+                aplican sobre esa lista.
+              </p>
+            )}
+          </>
         )}
       </Card>
     </div>

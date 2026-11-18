@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
+import { Button } from "@/components/ui/button";
 import { api, errorMessage, type QuoteInput } from "@/lib/api";
 import { calculateQuoteTotals } from "@/lib/quote-totals";
 import { formatCurrency } from "@/lib/utils";
@@ -77,9 +78,9 @@ type QuoteFormProps = {
 };
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900";
-const labelClass = "mb-1 block text-sm font-medium";
-const errorClass = "mt-1 text-xs text-red-600";
+  "border-border bg-surface text-text placeholder:text-text-2/70 focus:border-primary focus:ring-primary/20 min-h-11 w-full rounded-ds-md border px-3 text-sm outline-none focus:ring-2";
+const labelClass = "text-text mb-1 block text-xs font-semibold";
+const errorClass = "text-danger-strong mt-1 text-xs";
 
 export function QuoteForm({ tenantId, onCancel }: QuoteFormProps) {
   const router = useRouter();
@@ -139,10 +140,16 @@ export function QuoteForm({ tenantId, onCancel }: QuoteFormProps) {
   return (
     <form
       onSubmit={handleSubmit((values) => createMutation.mutateAsync(values))}
-      className="rounded-2xl border border-zinc-200 bg-white p-5"
+      className="border-border bg-surface rounded-ds-lg border p-5 shadow-card"
       noValidate
+      aria-labelledby="quote-form-title"
     >
-      <h2 className="text-sm font-semibold">Nuevo presupuesto</h2>
+      <h2 id="quote-form-title" className="text-text text-h4">
+        Nuevo presupuesto
+      </h2>
+      <p className="text-text-2 mt-1 text-sm">
+        Elegí el cliente, cargá los conceptos y el servidor calcula el total oficial.
+      </p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div>
@@ -212,17 +219,13 @@ export function QuoteForm({ tenantId, onCancel }: QuoteFormProps) {
 
       <section aria-labelledby="quote-items-title" className="mt-6">
         <div className="flex items-center justify-between gap-3">
-          <h3 id="quote-items-title" className="text-sm font-semibold">
+          <h3 id="quote-items-title" className="text-text text-sm font-semibold">
             Conceptos
           </h3>
-          <button
-            type="button"
-            onClick={() => append(EMPTY_ITEM)}
-            className="inline-flex items-center gap-1 rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
-          >
-            <Plus className="h-3.5 w-3.5" />
+          <Button type="button" variant="outline" size="sm" onClick={() => append(EMPTY_ITEM)}>
+            <Plus className="h-3.5 w-3.5" aria-hidden="true" />
             Agregar concepto
-          </button>
+          </Button>
         </div>
 
         {errors.items?.root?.message && <p className={errorClass}>{errors.items.root.message}</p>}
@@ -232,17 +235,17 @@ export function QuoteForm({ tenantId, onCancel }: QuoteFormProps) {
             const itemErrors = errors.items?.[index];
             const itemNumber = index + 1;
             return (
-              <li key={field.id} className="rounded-xl border border-zinc-200 p-3">
+              <li key={field.id} className="border-border bg-surface-2/40 rounded-ds-md border p-3">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-semibold text-zinc-500">Concepto {itemNumber}</span>
+                  <span className="text-text-2 text-xs font-semibold">Concepto {itemNumber}</span>
                   <button
                     type="button"
                     onClick={() => remove(index)}
                     disabled={fields.length === 1}
                     aria-label={`Quitar concepto ${itemNumber}`}
-                    className="inline-flex items-center gap-1 rounded-lg p-1.5 text-xs text-zinc-500 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="text-text-2 hover:bg-danger-soft hover:text-danger-strong inline-flex items-center gap-1 rounded-ds-sm p-1.5 text-xs transition-colors focus-visible:ring-primary focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                     Quitar
                   </button>
                 </div>
@@ -347,55 +350,47 @@ export function QuoteForm({ tenantId, onCancel }: QuoteFormProps) {
 
       <section
         aria-labelledby="quote-preview-title"
-        className="mt-6 rounded-xl bg-zinc-50 p-4 sm:ml-auto sm:max-w-sm"
+        className="bg-surface-2 rounded-ds-md mt-6 p-4 sm:ml-auto sm:max-w-sm"
       >
-        <h3 id="quote-preview-title" className="text-sm font-semibold">
+        <h3 id="quote-preview-title" className="text-text text-sm font-semibold">
           Vista previa de totales
         </h3>
-        <dl className="mt-3 space-y-1.5 text-sm">
+        <dl className="numeric mt-3 space-y-1.5 text-sm">
           <div className="flex justify-between gap-4">
-            <dt className="text-zinc-600">Subtotal</dt>
-            <dd className="font-medium">{formatCurrency(totals.subtotal)}</dd>
+            <dt className="text-text-2">Subtotal</dt>
+            <dd className="text-text font-medium">{formatCurrency(totals.subtotal)}</dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt className="text-zinc-600">Descuentos</dt>
-            <dd className="font-medium">− {formatCurrency(totals.discountTotal)}</dd>
+            <dt className="text-text-2">Descuentos</dt>
+            <dd className="text-text font-medium">− {formatCurrency(totals.discountTotal)}</dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt className="text-zinc-600">IVA</dt>
-            <dd className="font-medium">{formatCurrency(totals.taxTotal)}</dd>
+            <dt className="text-text-2">IVA</dt>
+            <dd className="text-text font-medium">{formatCurrency(totals.taxTotal)}</dd>
           </div>
-          <div className="flex justify-between gap-4 border-t border-zinc-200 pt-2 text-base">
-            <dt className="font-semibold">Total</dt>
-            <dd className="font-semibold">{formatCurrency(totals.total)}</dd>
+          <div className="border-border flex justify-between gap-4 border-t pt-2 text-base">
+            <dt className="text-text font-semibold">Total</dt>
+            <dd className="text-text font-display font-semibold">{formatCurrency(totals.total)}</dd>
           </div>
         </dl>
-        <p className="mt-2 text-xs text-zinc-500">
+        <p className="text-text-2 mt-2 text-xs">
           Vista orientativa. El total oficial lo calcula el servidor al guardar.
         </p>
       </section>
 
       {formError && (
-        <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="bg-danger-soft text-danger-strong mt-4 rounded-ds-md px-3 py-2 text-sm">
           {formError}
         </p>
       )}
 
       <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-        >
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting || createMutation.isPending}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-60"
-        >
+        </Button>
+        <Button type="submit" variant="primary" disabled={isSubmitting || createMutation.isPending}>
           {createMutation.isPending ? "Guardando..." : "Guardar presupuesto"}
-        </button>
+        </Button>
       </div>
     </form>
   );
