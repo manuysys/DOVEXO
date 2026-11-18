@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMutation } from "@tanstack/react-query";
 import { KeyRound, Link2, Mail, ShieldAlert } from "lucide-react";
@@ -88,22 +88,22 @@ export function PortalAccessSection({ customer }: PortalAccessSectionProps) {
       <Card>
         <CardHeader>
           <CardTitle id="portal-access-title" className="flex items-center gap-2">
-            <KeyRound className="h-4 w-4 text-teal" aria-hidden="true" />
+            <KeyRound className="h-4 w-4 text-accent-teal" aria-hidden="true" />
             Acceso al portal
           </CardTitle>
-          <p className="text-sm text-slate">
+          <p className="text-sm text-text-2">
             El cliente entra con un enlace seguro para ver sus solicitudes, órdenes, presupuestos y
             pagos. Solo ve su información.
           </p>
         </CardHeader>
         <CardContent className="space-y-5">
-          <p className="text-sm text-slate">
+          <p className="text-sm text-text-2">
             Contacto registrado:{" "}
-            <span className="font-medium text-ink">{customer.email ?? "sin email cargado"}</span>
+            <span className="font-medium text-text">{customer.email ?? "sin email cargado"}</span>
           </p>
 
           {!canManage ? (
-            <p className="flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-950">
+            <p className="flex items-start gap-2 rounded-ds-md bg-warning-soft px-3 py-2 text-sm text-warning-strong">
               <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
               Solo owner, administradores y coordinadores pueden gestionar el acceso al portal.
             </p>
@@ -135,25 +135,25 @@ export function PortalAccessSection({ customer }: PortalAccessSectionProps) {
                 </Button>
               </div>
               {!hasEmail && (
-                <p id="portal-email-hint" className="text-xs text-slate">
+                <p id="portal-email-hint" className="text-xs text-text-2">
                   Cargá un email en la ficha del cliente para enviarle el acceso. También podés
                   copiar el enlace.
                 </p>
               )}
 
               {error && (
-                <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+                <p role="alert" className="rounded-ds-md bg-danger-soft px-3 py-2 text-sm text-danger-strong">
                   {error}
                 </p>
               )}
 
               {access && (
-                <div className="space-y-3 rounded-xl border border-mist bg-white p-4">
+                <div className="space-y-3 rounded-ds-md border border-border bg-surface p-4">
                   {notice && (
                     <p
                       role="status"
                       className={
-                        notice.tone === "warning" ? "text-sm text-amber-900" : "text-sm text-slate"
+                        notice.tone === "warning" ? "text-sm text-warning-strong" : "text-sm text-text-2"
                       }
                     >
                       {notice.text}
@@ -167,18 +167,18 @@ export function PortalAccessSection({ customer }: PortalAccessSectionProps) {
                       helpText={`${PORTAL_ACCESS_NOTICE} Vence el ${formatDate(access.expires_at)}.`}
                     />
                   ) : (
-                    <p role="alert" className="text-sm text-red-700">
+                    <p role="alert" className="text-sm text-danger-strong">
                       El enlace recibido no es válido. Generá uno nuevo.
                     </p>
                   )}
                 </div>
               )}
 
-              <div className="border-t border-mist pt-4">
+              <div className="border-t border-border pt-4">
                 <Button
                   type="button"
                   variant="ghost"
-                  className="text-red-700 hover:bg-red-50"
+                  className="text-danger-strong hover:bg-danger-soft"
                   disabled={busy}
                   onClick={() => {
                     revokeMutation.reset();
@@ -203,7 +203,7 @@ export function PortalAccessSection({ customer }: PortalAccessSectionProps) {
             </DialogDescription>
           </DialogHeader>
           {revokeMutation.isError && (
-            <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p role="alert" className="rounded-ds-md bg-danger-soft px-3 py-2 text-sm text-danger-strong">
               {userFacingError(revokeMutation.error, "No se pudieron revocar los accesos.")}
             </p>
           )}
