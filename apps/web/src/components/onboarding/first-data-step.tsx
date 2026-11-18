@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileUp, UserPlus } from "lucide-react";
+import { ArrowRight, FileUp, UserPlus } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -24,7 +24,7 @@ export function FirstDataStep({
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-slate">
+      <p className="text-text-2 text-sm">
         Cargá tus primeros clientes para empezar el historial. Podés importar una planilla o cargar
         uno a uno.
       </p>
@@ -32,23 +32,51 @@ export function FirstDataStep({
       <div className="grid gap-3 sm:grid-cols-2">
         <Link
           href="/settings/import"
-          className="flex flex-col gap-2 rounded-xl border border-mist bg-white p-4 hover:border-teal/40 hover:bg-teal/5"
+          className="border-border bg-surface hover:border-primary/40 hover:bg-primary/5 group flex flex-col gap-2 rounded-ds-md border p-4 transition-colors"
         >
-          <FileUp className="h-5 w-5 text-teal" aria-hidden="true" />
-          <span className="text-sm font-semibold text-ink">Importar desde CSV o Excel</span>
-          <span className="text-xs text-slate">Revisamos cada fila antes de crear clientes.</span>
+          <span className="bg-primary/10 text-primary flex h-9 w-9 items-center justify-center rounded-ds-md">
+            <FileUp className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <span className="text-text text-sm font-semibold">Importar desde CSV o Excel</span>
+          <span className="text-text-2 text-xs">Revisamos cada fila antes de crear clientes.</span>
+          <span className="text-primary mt-1 inline-flex items-center gap-1 text-xs font-semibold">
+            Importar
+            <ArrowRight
+              className="h-3 w-3 transition-transform group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          </span>
         </Link>
         <Link
           href="/customers"
-          className="flex flex-col gap-2 rounded-xl border border-mist bg-white p-4 hover:border-teal/40 hover:bg-teal/5"
+          className="border-border bg-surface hover:border-primary/40 hover:bg-primary/5 group flex flex-col gap-2 rounded-ds-md border p-4 transition-colors"
         >
-          <UserPlus className="h-5 w-5 text-teal" aria-hidden="true" />
-          <span className="text-sm font-semibold text-ink">Cargar un cliente</span>
-          <span className="text-xs text-slate">Alta manual desde la cartera de clientes.</span>
+          <span className="bg-accent-teal/10 text-accent-teal flex h-9 w-9 items-center justify-center rounded-ds-md">
+            <UserPlus className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <span className="text-text text-sm font-semibold">Cargar un cliente</span>
+          <span className="text-text-2 text-xs">Alta manual desde la cartera de clientes.</span>
+          <span className="text-primary mt-1 inline-flex items-center gap-1 text-xs font-semibold">
+            Ir a clientes
+            <ArrowRight
+              className="h-3 w-3 transition-transform group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          </span>
         </Link>
       </div>
 
-      <div role="status" className="rounded-xl bg-paper px-4 py-3 text-sm text-slate">
+      <div
+        role="status"
+        className={cn(
+          "rounded-ds-md px-4 py-3 text-sm",
+          customersError
+            ? "bg-warning-soft text-warning-strong"
+            : hasCustomers
+              ? "bg-success-soft text-success-strong"
+              : "bg-surface-2 text-text",
+        )}
+      >
         {customersError
           ? "No pudimos revisar tus clientes. Podés finalizar igual y cargarlos después."
           : customersCount === null
@@ -58,7 +86,7 @@ export function FirstDataStep({
               : "Todavía no hay clientes cargados. Podés finalizar ahora y cargarlos después."}
       </div>
 
-      <div className="flex flex-col-reverse gap-2 border-t border-mist pt-4 sm:flex-row sm:justify-between">
+      <div className="border-border flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-between">
         <Button type="button" variant="outline" disabled={pending} onClick={onBack}>
           Volver
         </Button>

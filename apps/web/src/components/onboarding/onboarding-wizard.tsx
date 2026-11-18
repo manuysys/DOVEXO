@@ -11,9 +11,11 @@ import { FirstDataStep } from "@/components/onboarding/first-data-step";
 import { OnboardingProgress } from "@/components/onboarding/onboarding-progress";
 import { ServicesStep } from "@/components/onboarding/services-step";
 import { TeamStep } from "@/components/onboarding/team-step";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import {
@@ -125,7 +127,7 @@ function OnboardingSession() {
 
   if (!tenantId) {
     return (
-      <Card className="p-8 text-sm text-slate">
+      <Card className="p-8 text-sm text-text-2">
         No hay una empresa activa. Cerrá sesión y volvé a ingresar.
       </Card>
     );
@@ -133,15 +135,15 @@ function OnboardingSession() {
 
   if (!canManage) {
     return (
-      <Card className="flex flex-col items-start gap-3 p-6 sm:flex-row sm:items-center">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-900">
+      <Card className="flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center">
+        <span className="bg-warning-soft text-warning-strong flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-lg">
           <ShieldAlert className="h-5 w-5" aria-hidden="true" />
         </span>
         <div>
-          <p className="text-sm font-semibold text-ink">
+          <p className="text-text text-sm font-semibold">
             No tenés permisos para esta configuración
           </p>
-          <p className="mt-1 text-sm text-slate">
+          <p className="text-text-2 mt-1 text-sm">
             Solo el propietario o un administrador de {activeTenant?.name ?? "la empresa"} puede
             completar los primeros pasos.
           </p>
@@ -151,17 +153,13 @@ function OnboardingSession() {
   }
 
   if (statusQuery.isPending) {
-    return (
-      <Card className="p-6 text-sm text-slate" role="status">
-        Cargando tu progreso...
-      </Card>
-    );
+    return <WizardSkeleton />;
   }
 
   if (statusQuery.isError) {
     return (
-      <Card className="space-y-3 p-6">
-        <p role="alert" className="text-sm text-red-700">
+      <Card className="space-y-4 p-6">
+        <p role="alert" className="text-danger-strong text-sm">
           {onboardingErrorMessage(
             statusQuery.error,
             "No pudimos cargar tu progreso. Probá de nuevo.",
@@ -179,15 +177,24 @@ function OnboardingSession() {
     return (
       <div className="space-y-6">
         <PageHeader eyebrow="Puesta en marcha" title="Primeros pasos" />
-        <Card className="space-y-4 p-6">
-          <p className="flex items-center gap-2 text-base font-semibold text-ink">
-            <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden="true" />
-            La configuración inicial está completa
-          </p>
-          <p className="text-sm text-slate">
-            Podés seguir ajustando la empresa, el equipo y los clientes desde sus secciones.
-          </p>
-          <div className="flex flex-col gap-2 sm:flex-row">
+        <Card className="p-6 sm:p-8">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <span
+              className="bg-success-soft text-success-strong flex h-12 w-12 shrink-0 items-center justify-center rounded-ds-lg"
+              aria-hidden="true"
+            >
+              <CheckCircle2 className="h-6 w-6" />
+            </span>
+            <div>
+              <p className="text-text text-lg font-semibold">
+                La configuración inicial está completa
+              </p>
+              <p className="text-text-2 mt-1 text-sm">
+                Podés seguir ajustando la empresa, el equipo y los clientes desde sus secciones.
+              </p>
+            </div>
+          </div>
+          <div className="border-border mt-6 flex flex-col gap-2 border-t pt-5 sm:flex-row">
             <Link href="/dashboard" className={buttonVariants({ variant: "primary" })}>
               Ir al panel
             </Link>
@@ -214,25 +221,26 @@ function OnboardingSession() {
       <OnboardingProgress current={step} />
 
       {saveError && (
-        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p role="alert" className="bg-danger-soft text-danger-strong rounded-ds-md px-4 py-3 text-sm">
           {saveError}
         </p>
       )}
       {finishError && (
-        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p role="alert" className="bg-danger-soft text-danger-strong rounded-ds-md px-4 py-3 text-sm">
           {finishError}
         </p>
       )}
 
       <Card>
-        <CardHeader>
-          <p className="text-xs font-semibold tracking-wide text-slate uppercase">
-            Paso {step} de {ONBOARDING_STEP_COUNT}
-          </p>
-          <CardTitle>{currentStep.title}</CardTitle>
-          <p className="text-sm text-slate">{currentStep.description}</p>
+        <CardHeader className="border-border border-b">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-text-2 text-label">Paso {step} de {ONBOARDING_STEP_COUNT}</p>
+            <Badge variant="neutral">Se guarda al continuar</Badge>
+          </div>
+          <CardTitle className="text-text font-display text-xl">{currentStep.title}</CardTitle>
+          <p className="text-text-2 text-sm">{currentStep.description}</p>
         </CardHeader>
-        <CardContent aria-busy={pending || undefined}>
+        <CardContent className="pt-5" aria-busy={pending || undefined}>
           {step === 1 && (
             <CompanyStep
               state={state}
@@ -258,6 +266,28 @@ function OnboardingSession() {
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function WizardSkeleton() {
+  return (
+    <div className="space-y-6" role="status" aria-label="Cargando tu progreso">
+      <Skeleton className="h-8 w-56" />
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton key={index} className="h-14 w-full" />
+        ))}
+      </div>
+      <div className="border-border bg-surface rounded-ds-lg border p-5">
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="mt-3 h-6 w-40" />
+        <Skeleton className="mt-2 h-4 w-64" />
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <Skeleton className="h-11 w-full" />
+          <Skeleton className="h-11 w-full" />
+        </div>
+      </div>
     </div>
   );
 }

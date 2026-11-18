@@ -2,9 +2,25 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Send } from "lucide-react";
+import {
+  AlertTriangle,
+  Building2,
+  CheckCircle2,
+  Circle,
+  KeyRound,
+  MessageCircle,
+  Phone,
+  RefreshCw,
+  Send,
+  ShieldCheck,
+} from "lucide-react";
 import { useForm, type UseFormRegisterReturn } from "react-hook-form";
 
+import { Badge, type BadgeProps } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/ui/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError, api, errorMessage, type WhatsAppConfig, type WhatsAppMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import {
@@ -19,11 +35,27 @@ import { cn, formatDate } from "@/lib/utils";
 const ADMIN_ROLES = ["owner", "admin"];
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 aria-[invalid=true]:border-red-600";
+  "border-border text-text placeholder:text-text-2/70 focus:border-primary focus:ring-primary/20 min-h-11 w-full rounded-ds-md border bg-surface px-3 text-sm outline-none focus:ring-2 aria-[invalid=true]:border-danger";
 
 const DIRECTION_LABELS: Record<string, string> = {
   inbound: "Entrante",
   outbound: "Saliente",
+};
+
+const MESSAGE_STATUS_VARIANTS: Record<string, BadgeProps["variant"]> = {
+  sent: "info",
+  delivered: "success",
+  read: "success",
+  failed: "danger",
+  queued: "neutral",
+};
+
+const MESSAGE_STATUS_LABELS: Record<string, string> = {
+  sent: "Enviado",
+  delivered: "Entregado",
+  read: "Leído",
+  failed: "Fallido",
+  queued: "En cola",
 };
 
 export default function WhatsAppSettingsPage() {
@@ -45,17 +77,28 @@ export default function WhatsAppSettingsPage() {
 
   if (!activeTenantId) {
     return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-sm text-zinc-600">
+      <Card className="p-8 text-sm text-text-2">
         No hay una empresa activa. Cerrá sesión y volvé a ingresar.
-      </div>
+      </Card>
     );
   }
 
   if (!canManage) {
     return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-sm text-zinc-600">
-        Solo los administradores de la empresa pueden configurar WhatsApp.
-      </div>
+      <Card className="flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center">
+        <span className="bg-warning-soft text-warning-strong flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-lg">
+          <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <div>
+          <p className="text-text text-sm font-semibold">
+            Solo los administradores pueden configurar WhatsApp
+          </p>
+          <p className="text-text-2 mt-1 text-sm">
+            Pedile al propietario o a un administrador de {activeTenant?.name ?? "la empresa"} que
+            revise la integración.
+          </p>
+        </div>
+      </Card>
     );
   }
 
@@ -64,72 +107,98 @@ export default function WhatsAppSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">WhatsApp</h1>
-        <p className="mt-1 text-sm text-zinc-600">
-          Configuración y mensajes de {activeTenant?.name ?? "tu empresa"}.
-        </p>
-      </div>
-
-      <p
-        role="note"
-        className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
-      >
-        Requiere WhatsApp Business Cloud API oficial. Sin credenciales reales no se puede enviar.
-      </p>
+      <PageHeader
+        eyebrow="Configuración"
+        title="WhatsApp"
+        description={`Integración y mensajes de ${activeTenant?.name ?? "tu empresa"} con la API oficial de Meta.`}
+      />
 
       {configQuery.isLoading ? (
-        <p className="text-sm text-zinc-500">Cargando configuración...</p>
+        <ConfigSkeleton />
       ) : configQuery.isError ? (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-          {errorMessage(configQuery.error, "No se pudo cargar la configuración de WhatsApp.")}
-        </p>
+        <Card className="space-y-4 p-6">
+          <p role="alert" className="text-danger-strong text-sm">
+            {errorMessage(configQuery.error, "No se pudo cargar la configuración de WhatsApp.")}
+          </p>
+          <Button variant="outline" onClick={() => void configQuery.refetch()}>
+            <RefreshCw className="h-4 w-4" aria-hidden="true" />
+            Reintentar
+          </Button>
+        </Card>
       ) : config ? (
         <>
           <ConfigSummary config={config} />
-          <section
-            aria-labelledby="config-title"
-            className="rounded-2xl border border-zinc-200 bg-white p-5"
-          >
-            <h2 id="config-title" className="text-sm font-semibold">
-              Configuración
-            </h2>
-            <p className="mt-1 text-xs text-zinc-500">
-              Los secretos no se muestran. Dejá un campo vacío para conservar el valor guardado.
-            </p>
-            <WhatsAppConfigForm key={configKey(config)} tenantId={activeTenantId} config={config} />
-          </section>
+          <Card>
+            <CardHeader className="border-border border-b">
+              <CardTitle className="flex items-center gap-2">
+                <KeyRound className="text-primary h-4 w-4" aria-hidden="true" />
+                Configuración
+              </CardTitle>
+              <p className="text-text-2 text-sm">
+                Los secretos no se muestran. Dejá un campo vacío para conservar el valor guardado.
+              </p>
+            </CardHeader>
+            <CardContent className="pt-5">
+              <WhatsAppConfigForm
+                key={configKey(config)}
+                tenantId={activeTenantId}
+                config={config}
+              />
+            </CardContent>
+          </Card>
         </>
       ) : null}
 
-      <WhatsAppSendForm tenantId={activeTenantId} />
+      <WhatsAppSendForm tenantId={activeTenantId} configured={config?.configured ?? null} />
 
-      <section
-        aria-labelledby="messages-title"
-        className="rounded-2xl border border-zinc-200 bg-white"
-      >
-        <div className="border-b border-zinc-200 px-4 py-3">
-          <h2 id="messages-title" className="text-sm font-semibold">
-            Mensajes
-          </h2>
-          <p className="text-xs text-zinc-500">Últimos mensajes registrados de la empresa.</p>
-        </div>
-        {messagesQuery.isLoading ? (
-          <p className="p-6 text-sm text-zinc-500">Cargando mensajes...</p>
-        ) : messagesQuery.isError ? (
-          <p role="alert" className="p-6 text-sm text-red-600">
-            {errorMessage(messagesQuery.error, "No se pudieron cargar los mensajes.")}
-          </p>
-        ) : messages.length === 0 ? (
-          <p className="p-6 text-sm text-zinc-500">Todavía no hay mensajes registrados.</p>
-        ) : (
-          <ul className="divide-y divide-zinc-100">
-            {messages.map((message) => (
-              <MessageItem key={message.id} message={message} />
-            ))}
-          </ul>
-        )}
-      </section>
+      <Card>
+        <CardHeader className="border-border flex-row items-start justify-between gap-3 border-b">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <MessageCircle className="text-accent-teal h-4 w-4" aria-hidden="true" />
+              Mensajes
+            </CardTitle>
+            <p className="text-text-2 mt-1 text-sm">Últimos mensajes registrados de la empresa.</p>
+          </div>
+          {!messagesQuery.isLoading && !messagesQuery.isError && (
+            <Badge variant="neutral" className="numeric shrink-0">
+              {messages.length} {messages.length === 1 ? "mensaje" : "mensajes"}
+            </Badge>
+          )}
+        </CardHeader>
+        <CardContent className="p-0">
+          {messagesQuery.isLoading ? (
+            <div className="space-y-3 p-5" role="status" aria-label="Cargando mensajes">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="space-y-2">
+                  <Skeleton className="h-3 w-1/3" />
+                  <Skeleton className="h-3 w-2/3" />
+                </div>
+              ))}
+            </div>
+          ) : messagesQuery.isError ? (
+            <div className="space-y-3 p-5">
+              <p role="alert" className="text-danger-strong text-sm">
+                {errorMessage(messagesQuery.error, "No se pudieron cargar los mensajes.")}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => void messagesQuery.refetch()}>
+                <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                Reintentar
+              </Button>
+            </div>
+          ) : messages.length === 0 ? (
+            <p className="text-text-2 p-6 text-sm">
+              Todavía no hay mensajes registrados. Los mensajes que envíes o recibas aparecen acá.
+            </p>
+          ) : (
+            <ul className="divide-border divide-y">
+              {messages.map((message) => (
+                <MessageItem key={message.id} message={message} />
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -146,66 +215,132 @@ function configKey(config: WhatsAppConfig): string {
   ].join("|");
 }
 
-function ConfigSummary({ config }: { config: WhatsAppConfig }) {
-  const secrets: { label: string; loaded: boolean }[] = [
-    { label: "Access token", loaded: config.has_access_token },
-    { label: "Verify token", loaded: config.has_verify_token },
-    { label: "App secret", loaded: config.has_app_secret },
+type Requirement = {
+  label: string;
+  loaded: boolean;
+  hint: string;
+};
+
+function configRequirements(config: WhatsAppConfig): Requirement[] {
+  return [
+    {
+      label: "phone_number_id",
+      loaded: Boolean(config.phone_number_id),
+      hint: "Identificador del número de WhatsApp Business.",
+    },
+    {
+      label: "business_account_id",
+      loaded: Boolean(config.business_account_id),
+      hint: "Identificador de la cuenta de empresa de Meta.",
+    },
+    {
+      label: "Access token",
+      loaded: config.has_access_token,
+      hint: "Token de acceso permanente de la app de Meta.",
+    },
+    {
+      label: "Verify token",
+      loaded: config.has_verify_token,
+      hint: "Secreto compartido para verificar el webhook.",
+    },
+    {
+      label: "App secret",
+      loaded: config.has_app_secret,
+      hint: "Firma HMAC de los webhooks entrantes.",
+    },
   ];
+}
+
+function ConfigSummary({ config }: { config: WhatsAppConfig }) {
+  const requirements = configRequirements(config);
+  const missing = requirements.filter((requirement) => !requirement.loaded);
+  const ready = missing.length === 0;
 
   return (
     <section
       aria-labelledby="status-title"
-      className="rounded-2xl border border-zinc-200 bg-white p-5"
+      className="border-border bg-surface rounded-ds-lg border p-5 shadow-card sm:p-6"
     >
-      <h2 id="status-title" className="text-sm font-semibold">
-        Estado
-      </h2>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Badge tone={config.configured ? "ok" : "neutral"}>
-          {config.configured ? "Configurado" : "Sin configurar"}
-        </Badge>
-        <Badge tone={config.active ? "ok" : "neutral"}>
-          {config.active ? "Activo" : "Inactivo"}
-        </Badge>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 id="status-title" className="text-text text-label">
+            Estado de la integración
+          </h2>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Badge variant={config.configured ? "success" : "neutral"}>
+              {config.configured ? "Configurado" : "Sin configurar"}
+            </Badge>
+            <Badge variant={config.active ? "success" : "neutral"}>
+              {config.active ? "Activo" : "Inactivo"}
+            </Badge>
+          </div>
+        </div>
+        <span
+          className={cn(
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-lg",
+            ready ? "bg-success-soft text-success-strong" : "bg-warning-soft text-warning-strong",
+          )}
+          aria-hidden="true"
+        >
+          {ready ? <CheckCircle2 className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+        </span>
       </div>
-      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-        <div>
-          <dt className="text-xs text-zinc-500">phone_number_id</dt>
-          <dd className="font-mono break-all">{config.phone_number_id ?? "—"}</dd>
-        </div>
-        <div>
-          <dt className="text-xs text-zinc-500">business_account_id</dt>
-          <dd className="font-mono break-all">{config.business_account_id ?? "—"}</dd>
-        </div>
-      </dl>
-      <ul className="mt-4 grid gap-2 text-sm sm:grid-cols-3" aria-label="Secretos cargados">
-        {secrets.map((secret) => (
+
+      <p
+        className={cn(
+          "mt-4 rounded-ds-md px-4 py-3 text-sm",
+          ready ? "bg-success-soft text-success-strong" : "bg-warning-soft text-warning-strong",
+        )}
+      >
+        {ready
+          ? config.active
+            ? "La integración está configurada y activa. Los envíos usan la API oficial de Meta."
+            : "La integración está configurada pero inactiva. Activá el interruptor para enviar."
+          : `Faltan ${missing.length} de ${requirements.length} datos. Sin credenciales reales no se puede enviar ningún mensaje.`}
+      </p>
+
+      <ul className="mt-4 grid gap-2 sm:grid-cols-2" aria-label="Requisitos de la integración">
+        {requirements.map((requirement) => (
           <li
-            key={secret.label}
-            className="flex items-center justify-between gap-2 rounded-lg bg-zinc-50 px-3 py-2"
+            key={requirement.label}
+            className="border-border flex items-start gap-2 rounded-ds-md border px-3 py-2"
           >
-            <span className="text-zinc-700">{secret.label}</span>
-            <span className={secret.loaded ? "font-medium text-emerald-700" : "text-zinc-500"}>
-              {secret.loaded ? "Cargado" : "No cargado"}
-            </span>
+            {requirement.loaded ? (
+              <CheckCircle2 className="text-success mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            ) : (
+              <Circle className="text-text-2 mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            )}
+            <div className="min-w-0">
+              <p className="text-text font-mono text-xs break-all">{requirement.label}</p>
+              <p className="text-text-2 mt-0.5 text-xs">
+                {requirement.loaded ? "Cargado" : "Falta"} · {requirement.hint}
+              </p>
+            </div>
           </li>
         ))}
       </ul>
-    </section>
-  );
-}
 
-function Badge({ tone, children }: { tone: "ok" | "neutral"; children: string }) {
-  return (
-    <span
-      className={cn(
-        "rounded-full px-2.5 py-0.5 text-xs font-medium",
-        tone === "ok" ? "bg-emerald-50 text-emerald-700" : "bg-zinc-100 text-zinc-700",
-      )}
-    >
-      {children}
-    </span>
+      <dl className="border-border mt-4 grid gap-3 border-t pt-4 text-sm sm:grid-cols-2">
+        <div className="flex items-start gap-2">
+          <Phone className="text-text-2 mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <div className="min-w-0">
+            <dt className="text-text-2 text-xs">phone_number_id</dt>
+            <dd className="text-text font-mono break-all">
+              {config.phone_number_id ?? "Sin configurar"}
+            </dd>
+          </div>
+        </div>
+        <div className="flex items-start gap-2">
+          <Building2 className="text-text-2 mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <div className="min-w-0">
+            <dt className="text-text-2 text-xs">business_account_id</dt>
+            <dd className="text-text font-mono break-all">
+              {config.business_account_id ?? "Sin configurar"}
+            </dd>
+          </div>
+        </div>
+      </dl>
+    </section>
   );
 }
 
@@ -240,104 +375,134 @@ function WhatsAppConfigForm({ tenantId, config }: { tenantId: string; config: Wh
   }
 
   return (
-    <form onSubmit={form.handleSubmit(submit)} noValidate className="mt-4 space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
+    <form onSubmit={form.handleSubmit(submit)} noValidate className="space-y-6">
+      <section aria-labelledby="wa-ids-title" className="space-y-3">
+        <h3 id="wa-ids-title" className="text-text text-sm font-semibold">
+          Identificadores
+        </h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="wa-phone-number-id" className="text-text mb-1 block text-sm font-medium">
+              phone_number_id *
+            </label>
+            <input
+              id="wa-phone-number-id"
+              inputMode="numeric"
+              autoComplete="off"
+              aria-invalid={Boolean(form.formState.errors.phone_number_id)}
+              aria-describedby={
+                form.formState.errors.phone_number_id ? "wa-phone-number-id-error" : undefined
+              }
+              className={inputClass}
+              {...form.register("phone_number_id")}
+            />
+            <FieldError
+              id="wa-phone-number-id-error"
+              message={form.formState.errors.phone_number_id?.message}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="wa-business-account-id"
+              className="text-text mb-1 block text-sm font-medium"
+            >
+              business_account_id *
+            </label>
+            <input
+              id="wa-business-account-id"
+              inputMode="numeric"
+              autoComplete="off"
+              aria-invalid={Boolean(form.formState.errors.business_account_id)}
+              aria-describedby={
+                form.formState.errors.business_account_id
+                  ? "wa-business-account-id-error"
+                  : undefined
+              }
+              className={inputClass}
+              {...form.register("business_account_id")}
+            />
+            <FieldError
+              id="wa-business-account-id-error"
+              message={form.formState.errors.business_account_id?.message}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="wa-secrets-title" className="space-y-3">
         <div>
-          <label htmlFor="wa-phone-number-id" className="mb-1 block text-sm font-medium">
-            phone_number_id *
-          </label>
-          <input
-            id="wa-phone-number-id"
-            inputMode="numeric"
-            autoComplete="off"
-            aria-invalid={Boolean(form.formState.errors.phone_number_id)}
-            aria-describedby={
-              form.formState.errors.phone_number_id ? "wa-phone-number-id-error" : undefined
-            }
-            className={inputClass}
-            {...form.register("phone_number_id")}
+          <h3 id="wa-secrets-title" className="text-text text-sm font-semibold">
+            Credenciales
+          </h3>
+          <p className="text-text-2 mt-1 text-xs">
+            Se guardan cifradas. Nunca se vuelven a mostrar completas.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <SecretField
+            id="wa-access-token"
+            label="Access token"
+            loaded={config.has_access_token}
+            error={form.formState.errors.access_token?.message}
+            registration={form.register("access_token")}
           />
-          <FieldError
-            id="wa-phone-number-id-error"
-            message={form.formState.errors.phone_number_id?.message}
+          <SecretField
+            id="wa-verify-token"
+            label="Verify token"
+            loaded={config.has_verify_token}
+            error={form.formState.errors.verify_token?.message}
+            registration={form.register("verify_token")}
+          />
+          <SecretField
+            id="wa-app-secret"
+            label="App secret"
+            loaded={config.has_app_secret}
+            error={form.formState.errors.app_secret?.message}
+            registration={form.register("app_secret")}
           />
         </div>
+      </section>
 
-        <div>
-          <label htmlFor="wa-business-account-id" className="mb-1 block text-sm font-medium">
-            business_account_id *
-          </label>
-          <input
-            id="wa-business-account-id"
-            inputMode="numeric"
-            autoComplete="off"
-            aria-invalid={Boolean(form.formState.errors.business_account_id)}
-            aria-describedby={
-              form.formState.errors.business_account_id ? "wa-business-account-id-error" : undefined
-            }
-            className={inputClass}
-            {...form.register("business_account_id")}
-          />
-          <FieldError
-            id="wa-business-account-id-error"
-            message={form.formState.errors.business_account_id?.message}
-          />
-        </div>
-
-        <SecretField
-          id="wa-access-token"
-          label="Access token"
-          loaded={config.has_access_token}
-          error={form.formState.errors.access_token?.message}
-          registration={form.register("access_token")}
-        />
-        <SecretField
-          id="wa-verify-token"
-          label="Verify token"
-          loaded={config.has_verify_token}
-          error={form.formState.errors.verify_token?.message}
-          registration={form.register("verify_token")}
-        />
-        <SecretField
-          id="wa-app-secret"
-          label="App secret"
-          loaded={config.has_app_secret}
-          error={form.formState.errors.app_secret?.message}
-          registration={form.register("app_secret")}
-        />
-
-        <div className="flex items-center gap-2 self-end">
+      <section aria-labelledby="wa-active-title" className="border-border border-t pt-5">
+        <h3 id="wa-active-title" className="sr-only">
+          Estado de la integración
+        </h3>
+        <label className="flex items-start gap-3 text-sm">
           <input
             id="wa-active"
             type="checkbox"
-            className="h-4 w-4 rounded border-zinc-300"
+            className="accent-primary mt-0.5 h-4 w-4 rounded border-border"
+            aria-describedby="wa-active-help"
             {...form.register("active")}
           />
-          <label htmlFor="wa-active" className="text-sm font-medium">
-            Integración activa
-          </label>
-        </div>
-      </div>
+          <span>
+            <span className="text-text block font-medium">Integración activa</span>
+            <span id="wa-active-help" className="text-text-2 block text-xs">
+              Si está inactiva, los envíos quedan registrados como no enviados.
+            </span>
+          </span>
+        </label>
+      </section>
 
       {mutation.error && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="bg-danger-soft text-danger-strong rounded-ds-md px-3 py-2 text-sm">
           {errorMessage(mutation.error, "No se pudo guardar la configuración.")}
         </p>
       )}
       {mutation.isSuccess && (
-        <p role="status" className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+        <p
+          role="status"
+          className="bg-success-soft text-success-strong rounded-ds-md px-3 py-2 text-sm"
+        >
           Configuración guardada.
         </p>
       )}
 
       <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={mutation.isPending}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-60"
-        >
+        <Button type="submit" disabled={mutation.isPending} className="w-full sm:w-auto">
           {mutation.isPending ? "Guardando..." : "Guardar configuración"}
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -359,9 +524,9 @@ function SecretField({
   const errorId = `${id}-error`;
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium">
+      <label htmlFor={id} className="text-text mb-1 block text-sm font-medium">
         {label}{" "}
-        <span className="text-xs font-normal text-zinc-500">
+        <span className="text-text-2 text-xs font-normal">
           ({loaded ? "cargado: dejar vacío para conservar" : "no cargado"})
         </span>
       </label>
@@ -381,7 +546,13 @@ function SecretField({
   );
 }
 
-function WhatsAppSendForm({ tenantId }: { tenantId: string }) {
+function WhatsAppSendForm({
+  tenantId,
+  configured,
+}: {
+  tenantId: string;
+  configured: boolean | null;
+}) {
   const queryClient = useQueryClient();
   const form = useForm<WhatsAppSendFormValues>({
     resolver: zodResolver(whatsappSendSchema),
@@ -405,83 +576,87 @@ function WhatsAppSendForm({ tenantId }: { tenantId: string }) {
   }
 
   return (
-    <section
-      aria-labelledby="send-title"
-      className="rounded-2xl border border-zinc-200 bg-white p-5"
-    >
-      <h2 id="send-title" className="text-sm font-semibold">
-        Enviar mensaje de prueba
-      </h2>
-      <p className="mt-1 text-xs text-zinc-500">
-        Si la integración no está configurada, el sistema no simula el envío y muestra el motivo.
-      </p>
-
-      <form
-        onSubmit={form.handleSubmit(submit)}
-        noValidate
-        className="mt-4 grid gap-4 sm:grid-cols-2"
-      >
-        <div>
-          <label htmlFor="wa-to-phone" className="mb-1 block text-sm font-medium">
-            Teléfono destino *
-          </label>
-          <input
-            id="wa-to-phone"
-            type="tel"
-            autoComplete="off"
-            placeholder="+5491155550000"
-            aria-invalid={Boolean(form.formState.errors.to_phone)}
-            aria-describedby={form.formState.errors.to_phone ? "wa-to-phone-error" : undefined}
-            className={inputClass}
-            {...form.register("to_phone")}
-          />
-          <FieldError id="wa-to-phone-error" message={form.formState.errors.to_phone?.message} />
-        </div>
-
-        <div className="sm:col-span-2">
-          <label htmlFor="wa-body" className="mb-1 block text-sm font-medium">
-            Mensaje *
-          </label>
-          <textarea
-            id="wa-body"
-            rows={3}
-            aria-invalid={Boolean(form.formState.errors.body)}
-            aria-describedby={form.formState.errors.body ? "wa-body-error" : undefined}
-            className={inputClass}
-            {...form.register("body")}
-          />
-          <FieldError id="wa-body-error" message={form.formState.errors.body?.message} />
-        </div>
-
-        {mutation.error && (
+    <Card>
+      <CardHeader className="border-border border-b">
+        <CardTitle className="flex items-center gap-2">
+          <Send className="text-primary h-4 w-4" aria-hidden="true" />
+          Enviar mensaje de prueba
+        </CardTitle>
+        <p className="text-text-2 text-sm">
+          Si la integración no está configurada, el sistema no simula el envío y muestra el motivo.
+        </p>
+      </CardHeader>
+      <CardContent className="pt-5">
+        {configured === false && (
           <p
-            role="alert"
-            className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 sm:col-span-2"
+            role="note"
+            className="bg-warning-soft text-warning-strong mb-4 rounded-ds-md px-4 py-3 text-sm"
           >
-            {sendErrorMessage(mutation.error)}
-          </p>
-        )}
-        {mutation.isSuccess && (
-          <p
-            role="status"
-            className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 sm:col-span-2"
-          >
-            Mensaje registrado con estado “{mutation.data.status}”.
+            Todavía no hay credenciales guardadas. Podés completar el formulario, pero el envío va a
+            fallar con el motivo real del backend.
           </p>
         )}
 
-        <div className="flex justify-end sm:col-span-2">
-          <button
-            type="submit"
-            disabled={mutation.isPending}
-            className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-60"
-          >
-            <Send className="h-4 w-4" aria-hidden="true" />
-            {mutation.isPending ? "Enviando..." : "Enviar"}
-          </button>
-        </div>
-      </form>
-    </section>
+        <form onSubmit={form.handleSubmit(submit)} noValidate className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label htmlFor="wa-to-phone" className="text-text mb-1 block text-sm font-medium">
+              Teléfono destino *
+            </label>
+            <input
+              id="wa-to-phone"
+              type="tel"
+              autoComplete="off"
+              placeholder="+5491155550000"
+              aria-invalid={Boolean(form.formState.errors.to_phone)}
+              aria-describedby={form.formState.errors.to_phone ? "wa-to-phone-error" : undefined}
+              className={inputClass}
+              {...form.register("to_phone")}
+            />
+            <FieldError id="wa-to-phone-error" message={form.formState.errors.to_phone?.message} />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label htmlFor="wa-body" className="text-text mb-1 block text-sm font-medium">
+              Mensaje *
+            </label>
+            <textarea
+              id="wa-body"
+              rows={3}
+              aria-invalid={Boolean(form.formState.errors.body)}
+              aria-describedby={form.formState.errors.body ? "wa-body-error" : undefined}
+              className={cn(inputClass, "py-2")}
+              {...form.register("body")}
+            />
+            <FieldError id="wa-body-error" message={form.formState.errors.body?.message} />
+          </div>
+
+          {mutation.error && (
+            <p
+              role="alert"
+              className="bg-danger-soft text-danger-strong rounded-ds-md px-3 py-2 text-sm sm:col-span-2"
+            >
+              {sendErrorMessage(mutation.error)}
+            </p>
+          )}
+          {mutation.isSuccess && (
+            <p
+              role="status"
+              className="bg-success-soft text-success-strong rounded-ds-md px-3 py-2 text-sm sm:col-span-2"
+            >
+              Mensaje registrado con estado “
+              {MESSAGE_STATUS_LABELS[mutation.data.status] ?? mutation.data.status}”.
+            </p>
+          )}
+
+          <div className="flex justify-end sm:col-span-2">
+            <Button type="submit" disabled={mutation.isPending} className="w-full sm:w-auto">
+              <Send className="h-4 w-4" aria-hidden="true" />
+              {mutation.isPending ? "Enviando..." : "Enviar"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -495,28 +670,23 @@ function sendErrorMessage(error: unknown): string {
 
 function MessageItem({ message }: { message: WhatsAppMessage }) {
   return (
-    <li className="flex flex-col gap-2 px-4 py-4">
-      <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-        <span
-          className={cn(
-            "rounded-full px-2 py-0.5 font-medium",
-            message.direction === "inbound"
-              ? "bg-sky-50 text-sky-800"
-              : "bg-zinc-100 text-zinc-800",
-          )}
-        >
+    <li className="flex flex-col gap-2 px-5 py-4">
+      <div className="text-text-2 flex flex-wrap items-center gap-2 text-xs">
+        <Badge variant={message.direction === "inbound" ? "info" : "neutral"}>
           {DIRECTION_LABELS[message.direction] ?? message.direction}
-        </span>
-        <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-zinc-700">{message.status}</span>
-        <span>{message.message_type}</span>
+        </Badge>
+        <Badge variant={MESSAGE_STATUS_VARIANTS[message.status] ?? "neutral"}>
+          {MESSAGE_STATUS_LABELS[message.status] ?? message.status}
+        </Badge>
+        <span className="font-mono">{message.message_type}</span>
         <time dateTime={message.created_at} className="ml-auto">
           {formatDate(message.created_at)}
         </time>
       </div>
-      <p className="font-mono text-xs break-all text-zinc-600">
+      <p className="text-text-2 font-mono text-xs break-all">
         {message.from_phone} → {message.to_phone}
       </p>
-      <p className="text-sm whitespace-pre-wrap text-zinc-900">{message.body ?? "(sin texto)"}</p>
+      <p className="text-text text-sm whitespace-pre-wrap">{message.body ?? "(sin texto)"}</p>
     </li>
   );
 }
@@ -524,8 +694,27 @@ function MessageItem({ message }: { message: WhatsAppMessage }) {
 function FieldError({ id, message }: { id: string; message: string | undefined }) {
   if (!message) return null;
   return (
-    <p id={id} className="mt-1 text-xs text-red-600">
+    <p id={id} className="text-danger mt-1 text-xs">
       {message}
     </p>
+  );
+}
+
+function ConfigSkeleton() {
+  return (
+    <div className="border-border bg-surface rounded-ds-lg border p-6" role="status">
+      <span className="sr-only">Cargando configuración</span>
+      <Skeleton className="h-3 w-32" />
+      <div className="mt-3 flex gap-2">
+        <Skeleton className="h-5 w-24 rounded-full" />
+        <Skeleton className="h-5 w-20 rounded-full" />
+      </div>
+      <Skeleton className="mt-4 h-12 w-full" />
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton key={index} className="h-12 w-full" />
+        ))}
+      </div>
+    </div>
   );
 }

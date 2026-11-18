@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Building2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -54,7 +55,7 @@ export function CompanyStep({ state, tenantName, pending, onSave }: CompanyStepP
       <div className="sm:col-span-2">
         <label
           htmlFor="onboarding-company-name"
-          className="mb-1 block text-sm font-medium text-ink"
+          className="text-text mb-1 block text-sm font-medium"
         >
           Nombre de la empresa *
         </label>
@@ -62,25 +63,32 @@ export function CompanyStep({ state, tenantName, pending, onSave }: CompanyStepP
           id="onboarding-company-name"
           autoComplete="organization"
           aria-invalid={errors.name ? true : undefined}
-          aria-describedby={errors.name ? "onboarding-company-name-error" : undefined}
+          aria-describedby={
+            errors.name ? "onboarding-company-name-error" : "onboarding-company-name-help"
+          }
           {...register("name")}
         />
+        <p id="onboarding-company-name-help" className="text-text-2 mt-1 text-xs">
+          Es el nombre que ven tus clientes en presupuestos, emails y el portal.
+        </p>
         {errors.name && (
-          <p id="onboarding-company-name-error" className="mt-1 text-xs text-red-600">
+          <p id="onboarding-company-name-error" className="text-danger mt-1 text-xs">
             {errors.name.message}
           </p>
         )}
       </div>
 
       <div>
-        <label htmlFor="onboarding-timezone" className="mb-1 block text-sm font-medium text-ink">
+        <label htmlFor="onboarding-timezone" className="text-text mb-1 block text-sm font-medium">
           Zona horaria *
         </label>
         <select
           id="onboarding-timezone"
           aria-invalid={errors.timezone ? true : undefined}
-          aria-describedby={errors.timezone ? "onboarding-timezone-error" : undefined}
-          className="min-h-11 w-full rounded-xl border border-mist bg-white px-3 text-sm text-ink outline-none focus:border-teal focus:ring-2 focus:ring-teal/20"
+          aria-describedby={
+            errors.timezone ? "onboarding-timezone-error" : "onboarding-timezone-help"
+          }
+          className="border-border text-text focus:border-primary focus:ring-primary/20 min-h-11 w-full rounded-ds-md border bg-surface px-3 text-sm outline-none focus:ring-2"
           {...register("timezone")}
         >
           {ONBOARDING_TIMEZONES.map((zone) => (
@@ -89,22 +97,26 @@ export function CompanyStep({ state, tenantName, pending, onSave }: CompanyStepP
             </option>
           ))}
         </select>
+        <p id="onboarding-timezone-help" className="text-text-2 mt-1 text-xs">
+          Se usa para agenda, vencimientos y reportes.
+        </p>
         {errors.timezone && (
-          <p id="onboarding-timezone-error" className="mt-1 text-xs text-red-600">
+          <p id="onboarding-timezone-error" className="text-danger mt-1 text-xs">
             {errors.timezone.message}
           </p>
         )}
       </div>
 
       <div>
-        <p className="mb-1 text-sm font-medium text-ink">Moneda</p>
-        <p className="min-h-11 rounded-xl border border-mist bg-paper px-3 py-2.5 text-sm text-slate">
+        <p className="text-text mb-1 text-sm font-medium">Moneda</p>
+        <p className="border-border bg-surface-2 text-text-2 flex min-h-11 items-center gap-2 rounded-ds-md border px-3 text-sm">
+          <Building2 className="h-4 w-4 shrink-0" aria-hidden="true" />
           Peso argentino (ARS)
         </p>
-        <p className="mt-1 text-xs text-slate">Por ahora todos los importes se expresan en ARS.</p>
+        <p className="text-text-2 mt-1 text-xs">Por ahora todos los importes se expresan en ARS.</p>
       </div>
 
-      <div className="flex justify-end sm:col-span-2">
+      <div className="border-border flex justify-end border-t pt-4 sm:col-span-2">
         <Button type="submit" disabled={pending} className="w-full sm:w-auto">
           {pending ? "Guardando..." : "Guardar y continuar"}
         </Button>

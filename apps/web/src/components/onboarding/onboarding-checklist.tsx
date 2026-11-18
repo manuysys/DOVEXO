@@ -32,11 +32,12 @@ export function OnboardingChecklist({ tenantId }: OnboardingChecklistProps) {
 
   const items = onboardingChecklist(normalizeOnboardingState(statusQuery.data.state));
   const doneCount = items.filter((item) => item.done).length;
+  const percent = items.length > 0 ? Math.round((doneCount / items.length) * 100) : 0;
 
   return (
-    <Card className="border-primary/15 bg-primary/5">
+    <Card className="border-primary/20 bg-primary/[0.03]">
       <CardHeader className="flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-        <div>
+        <div className="min-w-0">
           <CardTitle className="flex items-center gap-2">
             <Rocket className="text-primary h-4 w-4" aria-hidden="true" />
             Primeros pasos
@@ -53,9 +54,20 @@ export function OnboardingChecklist({ tenantId }: OnboardingChecklistProps) {
         </Link>
       </CardHeader>
       <CardContent>
+        <div
+          role="progressbar"
+          aria-label="Progreso de los primeros pasos"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={percent}
+          aria-valuetext={`${doneCount} de ${items.length} completados`}
+          className="bg-surface-2 mb-2 h-1.5 w-full overflow-hidden rounded-full"
+        >
+          <div className="bg-primary h-full rounded-full" style={{ width: `${percent}%` }} />
+        </div>
         <ul className="divide-border divide-y">
           {items.map((item) => (
-            <li key={item.key} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+            <li key={item.key} className="flex items-center gap-3 py-3 first:pt-3 last:pb-0">
               {item.done ? (
                 <CheckCircle2 className="text-success h-5 w-5 shrink-0" aria-hidden="true" />
               ) : (

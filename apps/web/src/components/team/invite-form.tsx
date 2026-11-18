@@ -2,8 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { UserPlus } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { api, type TeamInvitationCreated, type TeamRole } from "@/lib/api";
 import { userFacingError } from "@/lib/errors";
-import { TEAM_ROLE_DESCRIPTIONS, TEAM_ROLE_LABELS } from "@/lib/team";
+import { TEAM_ROLE_DESCRIPTIONS, TEAM_ROLE_LABELS, isTeamRole } from "@/lib/team";
 
 const schema = z.object({
   full_name: z.string().trim().min(2, "Ingresá el nombre de la persona"),
@@ -27,6 +28,9 @@ type InviteFormProps = {
   onCreated: (invitation: TeamInvitationCreated) => void;
 };
 
+const selectClass =
+  "border-border text-text focus:border-primary focus:ring-primary/20 min-h-11 w-full rounded-ds-md border bg-surface px-3 text-sm outline-none focus:ring-2 disabled:opacity-60";
+
 export function InviteForm({ tenantId, roles, onCreated }: InviteFormProps) {
   const defaultRole: TeamRole = roles.includes("technician")
     ? "technician"
@@ -36,11 +40,18 @@ export function InviteForm({ tenantId, roles, onCreated }: InviteFormProps) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { full_name: "", email: "", role: defaultRole },
   });
+
+  const selectedRole = useWatch({ control, name: "role" });
+  const selectedRoleLabel =
+    selectedRole && isTeamRole(selectedRole) ? TEAM_ROLE_LABELS[selectedRole] : null;
+  const selectedDescription =
+    selectedRole && isTeamRole(selectedRole) ? TEAM_ROLE_DESCRIPTIONS[selectedRole] : null;
 
   const inviteMutation = useMutation({
     mutationFn: (values: { email: string; full_name: string; role: TeamRole }) =>
@@ -71,25 +82,36 @@ export function InviteForm({ tenantId, roles, onCreated }: InviteFormProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Invitar integrante</CardTitle>
-        <p className="text-sm text-slate">
+      <CardHeader className="border-border border-b">
+        <CardTitle className="flex items-center gap-2">
+          <UserPlus className="text-primary h-4 w-4" aria-hidden="true" />
+          Invitar integrante
+        </CardTitle>
+        <p className="text-text-2 text-sm">
           La persona recibe un enlace para crear su acceso. La invitación vence en 7 días.
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-5">
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 sm:grid-cols-2" noValidate>
           <div>
-            <label htmlFor="invite-full-name" className="mb-1 block text-sm font-medium text-ink">
+            <label htmlFor="invite-full-name" className="text-text mb-1 block text-sm font-medium">
               Nombre y apellido *
             </label>
-            <Input id="invite-full-name" autoComplete="off" {...register("full_name")} />
+            <Input
+              id="invite-full-name"
+              autoComplete="off"
+              aria-invalid={errors.full_name ? true : undefined}
+              aria-describedby={errors.full_name ? "invite-full-name-error" : undefined}
+              {...register("full_name")}
+            />
             {errors.full_name && (
-              <p className="mt-1 text-xs text-red-600">{errors.full_name.message}</p>
+              <p id="invite-full-name-error" className="text-danger mt-1 text-xs">
+                {errors.full_name.message}
+              </p>
             )}
           </div>
           <div>
-            <label htmlFor="invite-email" className="mb-1 block text-sm font-medium text-ink">
+            <label htmlFor="invite-email" className="text-text mb-1 block text-sm font-medium">
               Email *
             </label>
             <Input
@@ -97,17 +119,23 @@ export function InviteForm({ tenantId, roles, onCreated }: InviteFormProps) {
               type="email"
               autoComplete="off"
               inputMode="email"
+              aria-invalid={errors.email ? true : undefined}
+              aria-describedby={errors.email ? "invite-email-error" : undefined}
               {...register("email")}
             />
-            {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>}
+            {errors.email && (
+              <p id="invite-email-error" className="text-danger mt-1 text-xs">
+                {errors.email.message}
+              </p>
+            )}
           </div>
           <div className="sm:col-span-2">
-            <label htmlFor="invite-role" className="mb-1 block text-sm font-medium text-ink">
+            <label htmlFor="invite-role" className="text-text mb-1 block text-sm font-medium">
               Rol *
             </label>
             <select
               id="invite-role"
-              className="min-h-10 w-full rounded-xl border border-mist bg-white px-3 py-2 text-sm text-ink outline-none focus:border-teal focus:ring-2 focus:ring-teal/20"
+              className={selectClass}
               aria-describedby="invite-role-help"
               {...register("role")}
             >
@@ -117,16 +145,16 @@ export function InviteForm({ tenantId, roles, onCreated }: InviteFormProps) {
                 </option>
               ))}
             </select>
-            <p id="invite-role-help" className="mt-1 text-xs text-slate">
-              {roles
-                .map((role) => `${TEAM_ROLE_LABELS[role]}: ${TEAM_ROLE_DESCRIPTIONS[role]}`)
-                .join(" ")}
+            <p id="invite-role-help" className="text-text-2 mt-1 text-xs">
+              {selectedDescription && selectedRoleLabel
+                ? `${selectedRoleLabel}: ${selectedDescription}`
+                : "Elegí qué puede hacer esta persona dentro de la empresa."}
             </p>
           </div>
           {serverError && (
             <p
               role="alert"
-              className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700 sm:col-span-2"
+              className="bg-danger-soft text-danger-strong rounded-ds-md px-3 py-2 text-sm sm:col-span-2"
             >
               {serverError}
             </p>

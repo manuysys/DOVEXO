@@ -1,7 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileSpreadsheet } from "lucide-react";
+import { FileSpreadsheet, Upload } from "lucide-react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,8 @@ type ImportFileFormProps = {
 };
 
 export function ImportFileForm({ pending, serverError, onAnalyze }: ImportFileFormProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   const {
     handleSubmit,
     setValue,
@@ -36,56 +39,88 @@ export function ImportFileForm({ pending, serverError, onAnalyze }: ImportFileFo
     }
   }
 
+  function selectFile(file: File | null) {
+    setFileName(file?.name ?? null);
+    setValue("file", file, { shouldValidate: true });
+  }
+
   const fileError = errors.file?.message ?? null;
   const maxMb = IMPORT_MAX_FILE_BYTES / (1024 * 1024);
+  const describedBy = fileError ? "import-file-help import-file-error" : "import-file-help";
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
       <div>
-        <label htmlFor="import-file" className="mb-1 block text-sm font-medium text-ink">
+        <label htmlFor="import-file" className="text-text mb-1.5 block text-sm font-medium">
           Archivo CSV o XLSX
         </label>
         <input
+          ref={inputRef}
           id="import-file"
           type="file"
           accept={IMPORT_ACCEPT_ATTRIBUTE}
           disabled={pending}
+          tabIndex={-1}
           aria-invalid={fileError ? true : undefined}
-          aria-describedby={fileError ? "import-file-help import-file-error" : "import-file-help"}
-          onChange={(event) =>
-            setValue("file", event.target.files?.[0] ?? null, { shouldValidate: true })
-          }
-          className="block w-full min-w-0 rounded-xl border border-mist bg-white text-sm text-ink file:mr-3 file:min-h-10 file:cursor-pointer file:rounded-l-xl file:border-0 file:bg-mist/60 file:px-4 file:text-sm file:font-semibold file:text-ink hover:file:bg-mist focus-visible:ring-2 focus-visible:ring-teal focus-visible:outline-none disabled:opacity-60"
+          aria-describedby={describedBy}
+          onChange={(event) => selectFile(event.target.files?.[0] ?? null)}
+          className="sr-only"
         />
-        <p id="import-file-help" className="mt-2 text-xs text-slate">
+        <div className="border-border bg-surface-2/40 flex flex-col gap-2 rounded-ds-md border border-dashed p-3 sm:flex-row sm:items-center">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => inputRef.current?.click()}
+            disabled={pending}
+            aria-describedby={describedBy}
+            className="bg-surface shrink-0"
+          >
+            <Upload className="h-4 w-4" aria-hidden="true" />
+            {fileName ? "Cambiar archivo" : "Elegir archivo"}
+          </Button>
+          <p
+            className="text-text-2 min-w-0 truncate text-sm"
+            title={fileName ?? "Ningún archivo seleccionado"}
+          >
+            {fileName ?? "Ningún archivo seleccionado"}
+          </p>
+        </div>
+        <p id="import-file-help" className="text-text-2 mt-2 text-xs">
           Hasta {IMPORT_MAX_ROWS} filas y {maxMb} MB. Solo es obligatoria la columna{" "}
-          <code className="font-mono text-ink">name</code>.
+          <code className="text-text font-mono">name</code>.
         </p>
         {fileError && (
-          <p id="import-file-error" role="alert" className="mt-1 text-xs text-red-600">
+          <p id="import-file-error" role="alert" className="text-danger mt-1 text-xs">
             {fileError}
           </p>
         )}
       </div>
 
-      <div className="rounded-xl bg-paper px-4 py-3">
-        <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-slate uppercase">
+      <div className="bg-surface-2 rounded-ds-md px-4 py-3">
+        <p className="text-text-2 text-label flex items-center gap-2">
           <FileSpreadsheet className="h-3.5 w-3.5" aria-hidden="true" />
           Columnas reconocidas
         </p>
-        <p className="mt-2 font-mono text-xs leading-relaxed break-words text-ink">
-          {IMPORT_COLUMNS.join(", ")}
-        </p>
+        <ul className="mt-2 flex flex-wrap gap-1.5" aria-label="Columnas reconocidas">
+          {IMPORT_COLUMNS.map((column) => (
+            <li key={column}>
+              <code className="border-border bg-surface text-text rounded-ds-sm border px-2 py-0.5 font-mono text-xs">
+                {column}
+              </code>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {serverError && (
-        <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p role="alert" className="bg-danger-soft text-danger-strong rounded-ds-md px-3 py-2 text-sm">
           {serverError}
         </p>
       )}
 
       <div className="flex justify-end">
         <Button type="submit" disabled={pending} className="w-full sm:w-auto">
+          <Upload className="h-4 w-4" aria-hidden="true" />
           {pending ? "Analizando archivo..." : "Analizar archivo"}
         </Button>
       </div>
