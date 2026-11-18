@@ -34,40 +34,40 @@ export function OnboardingChecklist({ tenantId }: OnboardingChecklistProps) {
   const doneCount = items.filter((item) => item.done).length;
 
   return (
-    <Card className="border-teal/20 bg-teal/5">
-      <CardHeader className="flex-row items-start justify-between gap-4">
+    <Card className="border-primary/15 bg-primary/5">
+      <CardHeader className="flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
           <CardTitle className="flex items-center gap-2">
-            <Rocket className="h-4 w-4 text-teal" aria-hidden="true" />
+            <Rocket className="text-primary h-4 w-4" aria-hidden="true" />
             Primeros pasos
           </CardTitle>
-          <p className="mt-1 text-sm text-slate">
+          <p className="text-text-2 mt-1 text-sm">
             {doneCount} de {items.length} listos. Lo que falta sale del estado real de tu empresa.
           </p>
         </div>
         <Link
           href="/onboarding"
-          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "shrink-0")}
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "self-start sm:shrink-0")}
         >
           Continuar configuración
         </Link>
       </CardHeader>
       <CardContent>
-        <ul className="divide-y divide-mist">
+        <ul className="divide-border divide-y">
           {items.map((item) => (
             <li key={item.key} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
               {item.done ? (
-                <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" aria-hidden="true" />
+                <CheckCircle2 className="text-success h-5 w-5 shrink-0" aria-hidden="true" />
               ) : (
-                <Circle className="h-5 w-5 shrink-0 text-slate" aria-hidden="true" />
+                <Circle className="text-text-2 h-5 w-5 shrink-0" aria-hidden="true" />
               )}
-              <span className="min-w-0 flex-1 text-sm font-medium text-ink">{item.label}</span>
+              <span className="text-text min-w-0 flex-1 text-sm font-medium">{item.label}</span>
               {item.done ? (
                 <Badge variant="success">Listo</Badge>
               ) : (
                 <Link
                   href={item.href}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-teal hover:underline"
+                  className="text-primary inline-flex items-center gap-1 text-xs font-semibold hover:underline"
                 >
                   Completar
                   <ArrowRight className="h-3 w-3" aria-hidden="true" />

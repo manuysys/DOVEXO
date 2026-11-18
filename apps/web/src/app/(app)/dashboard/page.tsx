@@ -190,7 +190,7 @@ export default function DashboardPage() {
   });
 
   if (activeTenant && !canViewDashboard) {
-    return <p className="text-slate text-sm">Redirigiendo...</p>;
+    return <p className="text-text-2 text-sm">Redirigiendo...</p>;
   }
 
   const summary = summaryQuery.data;
@@ -209,48 +209,45 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <section className="bg-ink relative overflow-hidden rounded-3xl p-6 text-white sm:p-8">
+      <section className="bg-deep relative overflow-hidden rounded-ds-xl p-5 text-white sm:p-7">
         <div
           aria-hidden="true"
-          className="absolute inset-0 opacity-[0.14]"
+          className="absolute inset-0 opacity-[0.12]"
           style={{
             backgroundImage:
               "linear-gradient(rgba(255,255,255,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.35) 1px, transparent 1px)",
             backgroundSize: "34px 34px",
           }}
         />
-        <div aria-hidden="true" className="bg-teal/30 absolute -top-24 -right-20 h-64 w-64 rounded-full blur-3xl" />
-        <div aria-hidden="true" className="bg-amber/20 absolute -bottom-32 left-1/3 h-64 w-64 rounded-full blur-3xl" />
+        <div aria-hidden="true" className="bg-primary/25 absolute -top-24 -right-20 h-64 w-64 rounded-full blur-3xl" />
+        <div aria-hidden="true" className="bg-accent-teal/15 absolute -bottom-32 left-1/3 h-64 w-64 rounded-full blur-3xl" />
 
-        <div className="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-xl">
-            <p className="text-teal-300 flex items-center gap-2 text-xs font-semibold tracking-[0.16em] uppercase">
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0 max-w-xl">
+            <p className="text-accent-teal flex items-center gap-2 text-xs font-semibold tracking-[0.16em] uppercase">
               <span className="relative flex h-2 w-2">
-                <span className="bg-teal absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
-                <span className="bg-teal relative inline-flex h-2 w-2 rounded-full" />
+                <span className="bg-accent-teal absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
+                <span className="bg-accent-teal relative inline-flex h-2 w-2 rounded-full" />
               </span>
               Operación en vivo
             </p>
-            <h1 className="font-display mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h1 className="font-display mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
               Hola, {user?.full_name.split(" ")[0] ?? "bienvenido"}.
             </h1>
-            <p className="mt-2 text-sm text-white/70">
+            <p className="mt-1.5 text-sm text-white/70">
               Este es el pulso de {activeTenant?.name ?? "tu empresa"}.
             </p>
-            <div className="mt-6 flex flex-wrap gap-2">
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <Link
                 href="/quotes"
-                className={cn(
-                  buttonVariants({ variant: "secondary" }),
-                  "bg-amber text-ink hover:bg-amber/90",
-                )}
+                className={cn(buttonVariants({ variant: "primary" }), "justify-center")}
               >
                 Nuevo presupuesto
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
               <Link
                 href="/assistant"
-                className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-white/20 px-4 text-sm font-semibold text-white hover:bg-white/10"
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-ds-md border border-white/20 px-4 text-sm font-semibold text-white hover:bg-white/10"
               >
                 <Sparkles className="h-4 w-4" aria-hidden="true" />
                 Preguntale al asistente
@@ -258,22 +255,22 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <dl className="grid grid-cols-3 gap-4 sm:gap-6">
-            <div>
+          <dl className="flex flex-wrap gap-x-6 gap-y-3 sm:gap-x-8">
+            <div className="min-w-0">
               <dt className="text-xs text-white/55">Órdenes abiertas</dt>
-              <dd className="font-display mt-1 text-3xl font-semibold tracking-tight">
+              <dd className="font-display numeric mt-0.5 text-2xl font-semibold tracking-tight">
                 {display(summary?.work_orders_open)}
               </dd>
             </div>
-            <div>
+            <div className="min-w-0">
               <dt className="text-xs text-white/55">Presupuestos pendientes</dt>
-              <dd className="font-display mt-1 text-3xl font-semibold tracking-tight">
+              <dd className="font-display numeric mt-0.5 text-2xl font-semibold tracking-tight">
                 {display(summary?.quotes_pending)}
               </dd>
             </div>
-            <div>
+            <div className="min-w-0">
               <dt className="text-xs text-white/55">Pendiente de cobro</dt>
-              <dd className="font-display mt-1 text-xl font-semibold tracking-tight sm:text-2xl">
+              <dd className="font-display numeric mt-0.5 text-xl font-semibold tracking-tight">
                 {balance}
               </dd>
             </div>
@@ -282,7 +279,7 @@ export default function DashboardPage() {
       </section>
 
       {unavailable && (
-        <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p role="alert" className="rounded-xl bg-danger-soft text-danger-strong px-4 py-3 text-sm">
           No se pudo cargar el resumen. Probá recargar la página.
         </p>
       )}
@@ -291,40 +288,13 @@ export default function DashboardPage() {
         <OnboardingChecklist tenantId={activeTenantId} />
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-5">
         <StatCard
           label="Clientes"
           value={display(summary?.customers_total)}
           hint="Ver listado"
           icon={Users}
           tone="teal"
-          className="border-teal/15 bg-teal/5"
-        />
-        <StatCard
-          label="Órdenes abiertas"
-          value={display(summary?.work_orders_open)}
-          hint={summary && !unavailable ? `de ${summary.work_orders_total} en total` : "Ver órdenes"}
-          icon={ClipboardList}
-          tone="amber"
-          className="border-amber/20 bg-amber/10"
-        />
-        <StatCard
-          label="Presupuestos pendientes"
-          value={display(summary?.quotes_pending)}
-          hint={
-            summary && !unavailable ? `de ${summary.quotes_total} en total` : "Ver presupuestos"
-          }
-          icon={FileText}
-          tone="amber"
-          className="border-amber/20 bg-amber/10"
-        />
-        <StatCard
-          label="Pendiente de cobro"
-          value={balance}
-          hint="Ver pagos"
-          icon={Wallet}
-          tone="teal"
-          className="border-teal/15 bg-teal/5"
         />
         <StatCard
           label="Turnos de hoy"
@@ -332,7 +302,27 @@ export default function DashboardPage() {
           hint="Ver agenda"
           icon={CalendarDays}
           tone="default"
-          className="border-ink/10 bg-ink/5"
+        />
+        <StatCard
+          label="Sin técnico"
+          value={opsLoading ? "…" : (ops?.counts.unassigned_orders ?? "—")}
+          hint="Asignar"
+          icon={UserX}
+          tone="amber"
+        />
+        <StatCard
+          label="Presupuestos por vencer"
+          value={opsLoading ? "…" : (ops?.counts.expiring_quotes ?? "—")}
+          hint="Ver presupuestos"
+          icon={FileText}
+          tone="amber"
+        />
+        <StatCard
+          label="Finalizadas con saldo"
+          value={opsLoading ? "…" : (ops?.counts.finished_with_balance ?? "—")}
+          hint="Ver pagos"
+          icon={Wallet}
+          tone="danger"
         />
       </div>
 
@@ -341,10 +331,10 @@ export default function DashboardPage() {
           <CardHeader className="flex-row items-start justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <CalendarDays className="text-teal h-4 w-4" aria-hidden="true" />
+                <CalendarDays className="text-accent-teal h-4 w-4" aria-hidden="true" />
                 Hoy
               </CardTitle>
-              <p className="text-slate mt-1 text-sm">
+              <p className="text-text-2 mt-1 text-sm">
                 Turnos del día{" "}
                 {ops ? `(${ops.counts.today_appointments})` : "—"}
               </p>
@@ -358,25 +348,25 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             {opsLoading ? (
-              <p className="text-slate text-sm">Cargando turnos...</p>
+              <p className="text-text-2 text-sm">Cargando turnos...</p>
             ) : !ops || ops.today_appointments.length === 0 ? (
-              <p className="text-slate text-sm">
+              <p className="text-text-2 text-sm">
                 No hay turnos agendados para hoy. Cuando asignes una visita, aparece acá.
               </p>
             ) : (
-              <ul className="divide-mist divide-y">
+              <ul className="divide-border divide-y">
                 {ops.today_appointments.map((appointment) => (
                   <li key={appointment.id} className="flex gap-3 py-3 first:pt-0 last:pb-0">
-                    <span className="bg-teal/10 text-teal flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-semibold">
+                    <span className="bg-accent-teal/10 text-accent-teal flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-semibold">
                       <Clock className="h-3.5 w-3.5" aria-hidden="true" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-ink text-sm font-semibold">
+                      <p className="text-text text-sm font-semibold">
                         {formatTime(appointment.starts_at)} · {appointment.order_title}
                       </p>
-                      <p className="text-slate text-xs">{appointment.customer_name}</p>
+                      <p className="text-text-2 text-xs">{appointment.customer_name}</p>
                       {appointment.technician_name && (
-                        <p className="text-slate/70 mt-0.5 text-[11px]">
+                        <p className="text-text-2/70 mt-0.5 text-[11px]">
                           Técnico: {appointment.technician_name}
                         </p>
                       )}
@@ -395,10 +385,10 @@ export default function DashboardPage() {
           <CardHeader className="flex-row items-start justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="text-amber h-4 w-4" aria-hidden="true" />
+                <AlertTriangle className="text-warning h-4 w-4" aria-hidden="true" />
                 Requiere atención
               </CardTitle>
-              <p className="text-slate mt-1 text-sm">
+              <p className="text-text-2 mt-1 text-sm">
                 Atrasadas, sin técnico, presupuestos por vencer y saldos.
               </p>
             </div>
@@ -406,24 +396,24 @@ export default function DashboardPage() {
           <CardContent className="space-y-5">
             <section>
               <div className="mb-2 flex items-center justify-between">
-                <h4 className="text-ink flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
+                <h4 className="text-text flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
                   <ClipboardList className="h-3.5 w-3.5" aria-hidden="true" />
                   Órdenes atrasadas{" "}
                   {ops ? `(${ops.counts.overdue_orders})` : "—"}
                 </h4>
                 <Link
                   href="/orders"
-                  className="text-teal text-xs font-semibold hover:underline"
+                  className="text-accent-teal text-xs font-semibold hover:underline"
                 >
                   Ver órdenes
                 </Link>
               </div>
               {!ops || opsLoading ? (
-                <p className="text-slate text-sm">Cargando...</p>
+                <p className="text-text-2 text-sm">Cargando...</p>
               ) : ops.overdue_orders.length === 0 ? (
-                <p className="text-slate text-sm">No hay órdenes atrasadas. Todo en tiempo.</p>
+                <p className="text-text-2 text-sm">No hay órdenes atrasadas. Todo en tiempo.</p>
               ) : (
-                <ul className="divide-mist divide-y">
+                <ul className="divide-border divide-y">
                   {ops.overdue_orders.map((order) => (
                     <li key={order.id} className="py-2 first:pt-0 last:pb-0">
                       <Link
@@ -431,10 +421,10 @@ export default function DashboardPage() {
                         className="group flex items-start justify-between gap-2"
                       >
                         <div className="min-w-0">
-                          <p className="text-ink truncate text-sm font-medium group-hover:text-teal">
+                          <p className="text-text truncate text-sm font-medium group-hover:text-accent-teal">
                             {order.code} · {order.title}
                           </p>
-                          <p className="text-slate text-xs">{order.customer_name}</p>
+                          <p className="text-text-2 text-xs">{order.customer_name}</p>
                         </div>
                         <Badge variant="danger" className="h-fit shrink-0 text-[10px]">
                           {order.days_overdue}d
@@ -448,24 +438,24 @@ export default function DashboardPage() {
 
             <section>
               <div className="mb-2 flex items-center justify-between">
-                <h4 className="text-ink flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
+                <h4 className="text-text flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
                   <UserX className="h-3.5 w-3.5" aria-hidden="true" />
                   Sin técnico{" "}
                   {ops ? `(${ops.counts.unassigned_orders})` : "—"}
                 </h4>
                 <Link
                   href="/orders"
-                  className="text-teal text-xs font-semibold hover:underline"
+                  className="text-accent-teal text-xs font-semibold hover:underline"
                 >
                   Asignar
                 </Link>
               </div>
               {!ops || opsLoading ? (
-                <p className="text-slate text-sm">Cargando...</p>
+                <p className="text-text-2 text-sm">Cargando...</p>
               ) : ops.unassigned_orders.length === 0 ? (
-                <p className="text-slate text-sm">Todas las órdenes abiertas tienen técnico.</p>
+                <p className="text-text-2 text-sm">Todas las órdenes abiertas tienen técnico.</p>
               ) : (
-                <ul className="divide-mist divide-y">
+                <ul className="divide-border divide-y">
                   {ops.unassigned_orders.map((order) => (
                     <li key={order.id} className="py-2 first:pt-0 last:pb-0">
                       <Link
@@ -473,10 +463,10 @@ export default function DashboardPage() {
                         className="group flex items-start justify-between gap-2"
                       >
                         <div className="min-w-0">
-                          <p className="text-ink truncate text-sm font-medium group-hover:text-teal">
+                          <p className="text-text truncate text-sm font-medium group-hover:text-accent-teal">
                             {order.code} · {order.title}
                           </p>
-                          <p className="text-slate text-xs">{order.customer_name}</p>
+                          <p className="text-text-2 text-xs">{order.customer_name}</p>
                         </div>
                         <Badge variant="warning" className="h-fit shrink-0 text-[10px]">
                           {statusLabel(order.priority)}
@@ -490,24 +480,24 @@ export default function DashboardPage() {
 
             <section>
               <div className="mb-2 flex items-center justify-between">
-                <h4 className="text-ink flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
+                <h4 className="text-text flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
                   <FileText className="h-3.5 w-3.5" aria-hidden="true" />
                   Presupuestos por vencer{" "}
                   {ops ? `(${ops.counts.expiring_quotes})` : "—"}
                 </h4>
                 <Link
                   href="/quotes"
-                  className="text-teal text-xs font-semibold hover:underline"
+                  className="text-accent-teal text-xs font-semibold hover:underline"
                 >
                   Ver presupuestos
                 </Link>
               </div>
               {!ops || opsLoading ? (
-                <p className="text-slate text-sm">Cargando...</p>
+                <p className="text-text-2 text-sm">Cargando...</p>
               ) : ops.expiring_quotes.length === 0 ? (
-                <p className="text-slate text-sm">No hay presupuestos por vencer.</p>
+                <p className="text-text-2 text-sm">No hay presupuestos por vencer.</p>
               ) : (
-                <ul className="divide-mist divide-y">
+                <ul className="divide-border divide-y">
                   {ops.expiring_quotes.map((quote) => (
                     <li key={quote.id} className="py-2 first:pt-0 last:pb-0">
                       <Link
@@ -515,10 +505,10 @@ export default function DashboardPage() {
                         className="group flex items-start justify-between gap-2"
                       >
                         <div className="min-w-0">
-                          <p className="text-ink truncate text-sm font-medium group-hover:text-teal">
+                          <p className="text-text truncate text-sm font-medium group-hover:text-accent-teal">
                             {quote.number} · {quote.customer_name}
                           </p>
-                          <p className="text-slate text-xs">
+                          <p className="text-text-2 text-xs">
                             Vence {formatDate(quote.valid_until)} ·{" "}
                             {formatCurrency(quote.total)}
                           </p>
@@ -535,24 +525,24 @@ export default function DashboardPage() {
 
             <section>
               <div className="mb-2 flex items-center justify-between">
-                <h4 className="text-ink flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
+                <h4 className="text-text flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide">
                   <Wallet className="h-3.5 w-3.5" aria-hidden="true" />
                   Finalizadas con saldo{" "}
                   {ops ? `(${ops.counts.finished_with_balance})` : "—"}
                 </h4>
                 <Link
                   href="/payments"
-                  className="text-teal text-xs font-semibold hover:underline"
+                  className="text-accent-teal text-xs font-semibold hover:underline"
                 >
                   Ver pagos
                 </Link>
               </div>
               {!ops || opsLoading ? (
-                <p className="text-slate text-sm">Cargando...</p>
+                <p className="text-text-2 text-sm">Cargando...</p>
               ) : ops.finished_with_balance.length === 0 ? (
-                <p className="text-slate text-sm">No hay órdenes finalizadas con saldo pendiente.</p>
+                <p className="text-text-2 text-sm">No hay órdenes finalizadas con saldo pendiente.</p>
               ) : (
-                <ul className="divide-mist divide-y">
+                <ul className="divide-border divide-y">
                   {ops.finished_with_balance.map((order) => (
                     <li key={order.id} className="py-2 first:pt-0 last:pb-0">
                       <Link
@@ -560,10 +550,10 @@ export default function DashboardPage() {
                         className="group flex items-start justify-between gap-2"
                       >
                         <div className="min-w-0">
-                          <p className="text-ink truncate text-sm font-medium group-hover:text-teal">
+                          <p className="text-text truncate text-sm font-medium group-hover:text-accent-teal">
                             {order.code} · {order.title}
                           </p>
-                          <p className="text-slate text-xs">
+                          <p className="text-text-2 text-xs">
                             {order.customer_name} · pagado {formatCurrency(order.paid)} de{" "}
                             {formatCurrency(order.total)}
                           </p>
@@ -584,28 +574,28 @@ export default function DashboardPage() {
           <CardHeader className="flex-row items-start justify-between gap-3">
             <div>
               <CardTitle>Actividad reciente</CardTitle>
-              <p className="text-slate mt-1 text-sm">Lo último que pasó en la empresa.</p>
+              <p className="text-text-2 mt-1 text-sm">Lo último que pasó en la empresa.</p>
             </div>
-            <Activity className="text-teal h-4 w-4" aria-hidden="true" />
+            <Activity className="text-accent-teal h-4 w-4" aria-hidden="true" />
           </CardHeader>
           <CardContent>
             {activityQuery.isLoading ? (
-              <p className="text-slate text-sm">Cargando actividad...</p>
+              <p className="text-text-2 text-sm">Cargando actividad...</p>
             ) : notifications.length === 0 ? (
-              <p className="text-slate text-sm">
+              <p className="text-text-2 text-sm">
                 Todavía no hay actividad. Cuando una automatización se dispare, aparece acá.
               </p>
             ) : (
-              <ul className="divide-mist divide-y">
+              <ul className="divide-border divide-y">
                 {notifications.map((notification) => (
                   <li key={notification.id} className="flex gap-3 py-3 first:pt-0 last:pb-0">
-                    <span className="bg-teal/10 text-teal mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                    <span className="bg-accent-teal/10 text-accent-teal mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                       <Activity className="h-3.5 w-3.5" aria-hidden="true" />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-ink text-sm font-semibold">{notification.title}</p>
-                      <p className="text-slate line-clamp-2 text-xs">{notification.message}</p>
-                      <p className="text-slate/70 mt-1 text-[11px]">
+                      <p className="text-text text-sm font-semibold">{notification.title}</p>
+                      <p className="text-text-2 line-clamp-2 text-xs">{notification.message}</p>
+                      <p className="text-text-2/70 mt-1 text-[11px]">
                         {formatDate(notification.created_at)}
                       </p>
                     </div>
@@ -621,7 +611,7 @@ export default function DashboardPage() {
             )}
             <Link
               href="/notifications"
-              className="text-teal mt-4 inline-flex items-center gap-1 text-xs font-semibold hover:underline"
+              className="text-accent-teal mt-4 inline-flex items-center gap-1 text-xs font-semibold hover:underline"
             >
               Ver todas
               <ArrowRight className="h-3 w-3" aria-hidden="true" />
@@ -642,11 +632,11 @@ export default function DashboardPage() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "border-mist hover:border-teal/40 hover:bg-teal/5 flex min-h-20 flex-col justify-between rounded-xl border p-3 transition-colors",
+                  "border-border hover:border-accent-teal/40 hover:bg-accent-teal/5 rounded-ds-md flex min-h-20 flex-col justify-between border p-3 transition-colors",
                 )}
               >
-                <Icon className="text-teal h-4 w-4" aria-hidden="true" />
-                <span className="text-ink text-sm font-medium">{link.label}</span>
+                <Icon className="text-accent-teal h-4 w-4" aria-hidden="true" />
+                <span className="text-text text-sm font-medium">{link.label}</span>
               </Link>
             );
           })}
