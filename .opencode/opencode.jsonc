@@ -48,6 +48,10 @@
           "DATABASE_URI": "{env:DATABASE_URL_SYNC}"
         },
         "disabled": true
+      },
+      "storybook-dovexo": {
+        "type": "remote",
+        "url": "http://localhost:6006/mcp"
       }
     }
   }
