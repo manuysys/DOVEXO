@@ -12,24 +12,30 @@ type SectionHeadingProps = {
 };
 
 const eyebrowTone = {
-  light: "text-teal",
+  light: "text-primary",
   dark: "text-mk-teal",
   teal: "text-white",
 } as const;
 
 const titleTone = {
-  light: "text-ink",
+  light: "text-text",
   dark: "text-white",
   teal: "text-white",
 } as const;
 
 const textTone = {
-  light: "text-ink/75",
-  dark: "text-white/75",
-  teal: "text-white/85",
+  light: "text-text-2",
+  dark: "text-white/70",
+  teal: "text-white/80",
 } as const;
 
-/** Encabezado de sección: eyebrow con filete, título display y texto opcional. */
+/**
+ * Encabezado de sección: etiqueta con filete, título display y texto opcional.
+ * Las tres variantes mantienen contraste AA sobre su fondo (claro, deep y color).
+ *
+ * Las clases de tipografía se concatenan con template literal a propósito:
+ * tailwind-merge no conoce `text-h1`/`text-body` y las trataría como color.
+ */
 export function SectionHeading({
   eyebrow,
   title,
@@ -40,25 +46,14 @@ export function SectionHeading({
 }: SectionHeadingProps) {
   return (
     <Reveal className={cn("max-w-2xl", className)}>
-      <p
-        className={cn(
-          "inline-flex items-center gap-3 text-xs font-semibold tracking-[0.14em] uppercase",
-          eyebrowTone[tone],
-        )}
-      >
+      <p className={`text-label inline-flex items-center gap-3 ${eyebrowTone[tone]}`}>
         <span aria-hidden="true" className="h-px w-6 bg-current" />
         {eyebrow}
       </p>
-      <h2
-        id={titleId}
-        className={cn(
-          "mt-4 font-display text-[clamp(2rem,4.6vw,3.5rem)] leading-[1.02] font-semibold tracking-[-0.03em] text-balance",
-          titleTone[tone],
-        )}
-      >
+      <h2 id={titleId} className={`text-h1 mt-4 text-balance ${titleTone[tone]}`}>
         {title}
       </h2>
-      {text && <p className={cn("mt-5 text-base leading-7", textTone[tone])}>{text}</p>}
+      {text && <p className={`text-body mt-4 max-w-xl text-pretty ${textTone[tone]}`}>{text}</p>}
     </Reveal>
   );
 }

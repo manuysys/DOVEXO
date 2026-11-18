@@ -40,7 +40,7 @@ export function MockFrame({
     <div
       aria-hidden="true"
       className={cn(
-        "overflow-hidden rounded-2xl border border-white/10 bg-mk-ink-2 text-white shadow-[0_30px_70px_-30px_rgb(0_0_0/0.75)]",
+        "overflow-hidden rounded-ds-lg border border-white/10 bg-mk-ink-2 text-white shadow-pop",
         className,
       )}
     >
@@ -64,7 +64,7 @@ function Tag({ tone = "muted", children }: { tone?: TagTone; children: ReactNode
     <span
       className={cn(
         "inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
-        tone === "ok" && "bg-teal/35 text-mk-teal",
+        tone === "ok" && "bg-accent-teal/20 text-mk-teal",
         tone === "warn" && "bg-amber/20 text-amber",
         tone === "muted" && "bg-white/10 text-white/85",
       )}
@@ -213,7 +213,7 @@ export function QuoteMockup({ className }: { className?: string }) {
           <span className="font-display text-base font-semibold">{formatArs(quote.total)}</span>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <span className="rounded-lg bg-teal py-2 text-center text-[11px] font-semibold text-white">
+          <span className="rounded-lg bg-primary py-2 text-center text-[11px] font-semibold text-white">
             Aprobar
           </span>
           <span className="rounded-lg border border-white/25 py-2 text-center text-[11px] font-semibold text-white">
@@ -257,7 +257,7 @@ export function AgendaMockup({ className }: { className?: string }) {
               key={slot.id}
               className={cn(
                 "absolute right-0 left-0 rounded-lg border-l-4 px-2 py-1.5",
-                slot.active ? "border-teal bg-teal/25" : "border-amber bg-amber/15",
+                slot.active ? "border-accent-teal bg-accent-teal/20" : "border-amber bg-amber/15",
               )}
               style={{ top: slot.top, height: slot.height }}
             >
@@ -283,7 +283,7 @@ export function PhoneTechMockup({ className }: { className?: string }) {
     <div
       aria-hidden="true"
       className={cn(
-        "mx-auto w-[15.5rem] rounded-[2.25rem] border-[7px] border-[#06121F] bg-mk-ink-2 p-2 shadow-[0_30px_70px_-30px_rgb(0_0_0/0.8)]",
+        "mx-auto w-[15.5rem] rounded-[2.25rem] border-[7px] border-[#0B1626] bg-mk-ink-2 p-2 shadow-pop",
         className,
       )}
     >
@@ -306,7 +306,7 @@ export function PhoneTechMockup({ className }: { className?: string }) {
                 <>
                   <p className="text-[10px] text-white/65">{customer.address}</p>
                   <div className="mt-2 grid grid-cols-2 gap-1.5">
-                    <span className="rounded-md bg-teal py-1.5 text-center text-[10px] font-semibold text-white">
+                    <span className="rounded-md bg-primary py-1.5 text-center text-[10px] font-semibold text-white">
                       Cerrar visita
                     </span>
                     <span className="rounded-md border border-white/25 py-1.5 text-center text-[10px] font-semibold">
@@ -344,7 +344,7 @@ export function PaymentsMockup({ className }: { className?: string }) {
           </div>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-white/15">
-          <div className="h-full rounded-full bg-teal" style={{ width: `${percent}%` }} />
+          <div className="h-full rounded-full bg-accent-teal" style={{ width: `${percent}%` }} />
         </div>
         <p className="text-[10px] text-white/65">
           Cobrado: {formatArs(paid)}
@@ -394,7 +394,7 @@ export function AiMockup({ className }: { className?: string }) {
         <p className="ml-auto w-4/5 rounded-xl rounded-br-sm bg-white/15 px-3 py-2">
           ¿Cuántos presupuestos siguen sin aprobar?
         </p>
-        <p className="w-11/12 rounded-xl rounded-bl-sm bg-teal/25 px-3 py-2">
+        <p className="w-11/12 rounded-xl rounded-bl-sm bg-accent-teal/20 px-3 py-2">
           Hay {plural(summary.quotesAwaitingResponse, "presupuesto", "presupuestos")} sin respuesta:{" "}
           {quote.id} por {formatArs(quote.total)}, enviado hace {plural(days, "día", "días")}. Solo
           consulta datos de tu empresa; no ejecuta acciones.
@@ -414,7 +414,7 @@ export function ClientsMockup({ className }: { className?: string }) {
     <MockFrame title="Cliente · Ficha" className={className}>
       <div className="space-y-3 p-4">
         <div className="flex items-center gap-3">
-          <span className="grid size-9 place-items-center rounded-full bg-teal text-xs font-semibold text-white">
+          <span className="grid size-9 place-items-center rounded-full bg-primary text-xs font-semibold text-white">
             {customer.initials}
           </span>
           <div>
@@ -447,7 +447,7 @@ export function WhatsAppMockup({ className }: { className?: string }) {
         <p className="w-4/5 rounded-xl rounded-bl-sm bg-white/[0.08] px-3 py-2">
           Tu técnico llega {arrival}.
         </p>
-        <p className="ml-auto w-3/5 rounded-xl rounded-br-sm bg-teal/35 px-3 py-2">
+        <p className="ml-auto w-3/5 rounded-xl rounded-br-sm bg-primary/30 px-3 py-2">
           Confirmado, gracias.
         </p>
       </div>
@@ -465,7 +465,7 @@ export function QuoteStatusMockup({ className }: { className?: string }) {
           Presupuesto {quote.id} · {formatArs(quote.total)}
         </p>
         <p className="text-white/70">Sin cuenta: se abre desde el link.</p>
-        <span className="inline-block rounded-lg bg-teal px-3 py-1.5 text-[11px] font-semibold text-white">
+        <span className="inline-block rounded-lg bg-primary px-3 py-1.5 text-[11px] font-semibold text-white">
           Ver y aprobar
         </span>
       </div>

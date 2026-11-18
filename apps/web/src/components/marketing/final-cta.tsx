@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 import { demoAccount } from "@/lib/marketing/content";
@@ -6,36 +6,30 @@ import { cn } from "@/lib/utils";
 
 import { ctaGhostDark, ctaPrimary, focusDark } from "./ui";
 
-/* CTA final oscuro: grilla animada, glow amber sutil y dos acciones claras. */
+/* CTA final: una decisión por columna, sin animación permanente ni blur. */
 export function FinalCta() {
   return (
     <section
       id="demo"
       aria-labelledby="final-cta-title"
-      className="relative isolate scroll-mt-16 overflow-hidden bg-ink text-white"
+      className="relative isolate scroll-mt-16 overflow-hidden bg-deep text-white"
     >
-      <div
-        aria-hidden="true"
-        className="mk-grid-dark mk-grid-move mk-grid-fade absolute -inset-14 -z-10 opacity-70"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute top-0 left-1/2 -z-10 size-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber/15 blur-3xl"
-      />
+      <div aria-hidden="true" className="mk-grid-dark mk-grid-fade absolute inset-0 -z-10 opacity-60" />
 
-      <div className="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 sm:py-28 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:gap-16">
+      <div className="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 sm:py-24 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-16">
         <div>
-          <h2
-            id="final-cta-title"
-            className="font-display text-[clamp(2.25rem,5.6vw,4.5rem)] leading-[1] font-semibold tracking-[-0.035em] text-balance"
-          >
+          <p className="text-label inline-flex items-center gap-3 text-mk-teal">
+            <span aria-hidden="true" className="h-px w-6 bg-current" />
+            Empezar
+          </p>
+          <h2 id="final-cta-title" className="text-h1 mt-4 text-balance">
             Probá la demo o creá tu empresa <span className="text-amber">hoy.</span>
           </h2>
-          <p className="mt-6 max-w-lg text-base leading-7 text-white/80">
+          <p className="text-body mt-5 max-w-lg text-white/70">
             La demo tiene datos de ejemplo. Al crear tu empresa empezás con un espacio propio, sin
             datos compartidos con otras empresas.
           </p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link href="/register" className={cn(ctaPrimary, focusDark)}>
               Crear mi empresa
               <ArrowRight className="size-4" aria-hidden="true" />
@@ -46,19 +40,22 @@ export function FinalCta() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/15 bg-mk-ink-2/80 p-6 backdrop-blur-sm">
-          <p className="text-sm font-semibold">Cuenta demo</p>
-          <dl className="mt-4 space-y-3 text-sm">
+        <div className="rounded-ds-lg border border-white/10 bg-white/[0.04] p-6">
+          <p className="text-small flex items-center gap-2 font-semibold">
+            <ShieldCheck className="size-4 text-mk-teal" aria-hidden="true" />
+            Cuenta demo
+          </p>
+          <dl className="text-small mt-4 space-y-3">
             <div>
-              <dt className="text-white/70">Email</dt>
+              <dt className="text-white/60">Email</dt>
               <dd className="font-mono break-all">{demoAccount.email}</dd>
             </div>
             <div>
-              <dt className="text-white/70">Contraseña</dt>
+              <dt className="text-white/60">Contraseña</dt>
               <dd className="font-mono">{demoAccount.password}</dd>
             </div>
           </dl>
-          <p className="mt-4 text-xs text-white/70">
+          <p className="text-caption mt-4 text-white/60">
             Datos de ejemplo. No cargues información real de clientes en la demo.
           </p>
         </div>

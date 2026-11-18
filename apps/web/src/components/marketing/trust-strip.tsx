@@ -1,60 +1,98 @@
-import { BadgeDollarSign, Link2, MapPin, Smartphone } from "lucide-react";
+import { Check, FileClock, KeyRound, Link2, ShieldCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import { productStats, trustItems } from "@/lib/marketing/content";
-
-import { Counter } from "./counter";
 import { SectionHeading } from "./section-heading";
 
-const icons: Record<(typeof trustItems)[number]["id"], LucideIcon> = {
-  pwa: Smartphone,
-  ars: BadgeDollarSign,
-  "public-link": Link2,
-  ar: MapPin,
+type Pillar = {
+  icon: LucideIcon;
+  title: string;
+  text: string;
+  evidence: string;
 };
 
-/* Cifras del producto con contadores y puntos clave. Sin métricas de clientes. */
+/*
+ * Solo características comprobables del producto. Sin logos de clientes, sin
+ * certificaciones y sin métricas que no existan. La evidencia describe el
+ * comportamiento real del backend.
+ */
+const pillars: Pillar[] = [
+  {
+    icon: ShieldCheck,
+    title: "Datos aislados por empresa",
+    text: "Cada empresa opera en su propio espacio: los datos de una no se mezclan con los de otra.",
+    evidence: "El backend valida la pertenencia en cada operación.",
+  },
+  {
+    icon: KeyRound,
+    title: "Accesos controlados",
+    text: "Los permisos se definen por rol: administración, coordinación, técnicos y consulta. El backend autoriza, no la pantalla.",
+    evidence: "Contraseñas con Argon2id y sesiones con cookies HttpOnly.",
+  },
+  {
+    icon: Link2,
+    title: "Links de presupuesto seguros",
+    text: "Cada presupuesto se comparte con un token aleatorio. Se puede revocar y la aprobación tiene límite de intentos.",
+    evidence: "Quien tiene el link puede verlo: compartilo solo con el cliente.",
+  },
+  {
+    icon: FileClock,
+    title: "Historial que no se reescribe",
+    text: "Los cambios de estado de una orden y las acciones importantes quedan registrados con actor y fecha.",
+    evidence: "Auditoría de transiciones, presupuestos y pagos.",
+  },
+];
+
+const checks = [
+  "Tokens de acceso de corta duración",
+  "Aprobaciones públicas con rate limit",
+  "Acceso al portal revocable",
+  "Eventos de orden con actor y timestamp",
+];
+
 export function TrustStrip() {
   return (
-    <section aria-labelledby="stats-title" className="bg-paper py-20 sm:py-24">
+    <section
+      aria-labelledby="trust-title"
+      className="border-b border-border bg-surface py-20 sm:py-24"
+    >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end lg:gap-16">
-          <SectionHeading
-            eyebrow="Qué incluye"
-            title="Pocas piezas, con los mismos datos."
-            titleId="stats-title"
-          />
+        <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+          <div>
+            <SectionHeading
+              eyebrow="Confianza"
+              title="La operación de cada empresa queda separada."
+              text="La seguridad no es una etiqueta en la landing: es cómo se guardan los datos, cómo se autoriza cada acción y qué queda registrado."
+              titleId="trust-title"
+            />
 
-          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-mist bg-mist">
-            {productStats.map((stat) => (
-              <div key={stat.label} className="bg-white p-5 sm:p-6">
-                <dt className="text-xs leading-5 text-slate">{stat.detail}</dt>
-                <dd className="mt-2 flex items-baseline gap-2 font-display text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
-                  <Counter value={stat.value} />
-                  <span className="text-sm font-medium text-slate">{stat.label}</span>
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+            <ul className="mt-8 space-y-2.5">
+              {checks.map((item) => (
+                <li key={item} className="flex gap-2.5 text-small text-text">
+                  <Check className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
+                  {item}
+                </li>
+              ))}
+            </ul>
 
-        <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {trustItems.map((item) => {
-            const Icon = icons[item.id];
-            return (
-              <li key={item.id} className="flex items-start gap-3 border-t border-ink/15 pt-5">
-                <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-ink">
-                  <Icon className="size-4 text-amber" aria-hidden="true" />
+            <p className="text-caption mt-6 max-w-sm text-text-2">
+              Todavía no hay certificaciones externas. La política de privacidad está en revisión
+              legal y la región de alojamiento y los plazos de backup aún no están definidos.
+            </p>
+          </div>
+
+          <ul className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+            {pillars.map((pillar) => (
+              <li key={pillar.title} className="border-t border-border pt-5">
+                <span className="grid size-9 place-items-center rounded-ds-sm bg-info-soft text-primary">
+                  <pillar.icon className="size-4" aria-hidden="true" />
                 </span>
-                <div>
-                  <p className="text-sm font-semibold text-ink">{item.label}</p>
-                  <p className="mt-0.5 text-xs leading-5 text-slate">{item.detail}</p>
-                </div>
+                <h3 className="text-h4 mt-4 text-text">{pillar.title}</h3>
+                <p className="text-small mt-2 text-text-2">{pillar.text}</p>
+                <p className="text-caption mt-3 text-text-2">{pillar.evidence}</p>
               </li>
-            );
-          })}
-        </ul>
-        <p className="mt-8 text-xs text-slate">Cifras del producto, no de clientes.</p>
+            ))}
+          </ul>
+        </div>
       </div>
     </section>
   );

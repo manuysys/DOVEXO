@@ -9,17 +9,24 @@ type RevealProps = {
   className?: string;
 };
 
-/** Reveal al entrar en viewport. Con reduced motion muestra el contenido sin animar. */
+/**
+ * Aparición sutil al entrar en viewport (una sola vez, sin parallax).
+ * Con `prefers-reduced-motion` no se anima: el contenido se renderiza directo.
+ */
 export function Reveal({ children, delay = 0, className }: RevealProps) {
   const reduce = useReducedMotion();
+
+  if (reduce) {
+    return <div className={className}>{children}</div>;
+  }
 
   return (
     <motion.div
       className={className}
-      initial={reduce ? false : { opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.45, delay, ease: [0.2, 0.7, 0.2, 1] }}
     >
       {children}
     </motion.div>
