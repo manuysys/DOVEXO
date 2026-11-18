@@ -12,6 +12,7 @@ from collections import defaultdict, deque
 
 from fastapi import HTTPException, Request, status
 
+from app.core.client_ip import resolve_client_ip
 from app.core.config import settings
 
 _WINDOW_SECONDS = 60
@@ -24,19 +25,16 @@ def reset_rate_limits() -> None:
 
 
 def _client_key(request: Request) -> str:
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    if request.client is not None:
-        return request.client.host
-    return "unknown"
+    return resolve_client_ip(request) or "unknown"
 
 
-def check_rate_limit(request: Request, *, scope: str, limit: int) -> None:
+def check_rate_limit(
+    request: Request, *, scope: str, limit: int, identifier: str | None = None
+) -> None:
     if not settings.rate_limit_enabled:
         return
 
-    key = f"{scope}:{_client_key(request)}"
+    key = f"{scope}:{identifier or _client_key(request)}"
     now = time.monotonic()
     bucket = _buckets[key]
     while bucket and now - bucket[0] > _WINDOW_SECONDS:

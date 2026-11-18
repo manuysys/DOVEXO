@@ -191,8 +191,7 @@ async def get_status(db: AsyncSession, tenant_id: UUID) -> dict[str, Any]:
 async def get_usage(db: AsyncSession, tenant_id: UUID) -> dict[str, Any]:
     now = _now_argentina()
     items, _total_count = await ai_repo.list_usage_logs(db, tenant_id=tenant_id, limit=50)
-    total_tokens = sum(log.input_tokens + log.output_tokens for log in items)
-    total_cost = sum((log.estimated_cost for log in items), Decimal("0.00"))
+    total_tokens, total_cost = await ai_repo.get_usage_totals(db, tenant_id=tenant_id)
     tokens_used = await ai_repo.get_monthly_token_usage(
         db, tenant_id=tenant_id, year=now.year, month=now.month
     )

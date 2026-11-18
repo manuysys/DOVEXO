@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import re
 from uuid import UUID
 
 from fastapi import HTTPException, UploadFile, status
@@ -31,6 +34,33 @@ from app.services import work_order_service
 
 _ALLOWED_MIME_TYPES = frozenset({"image/jpeg", "image/png", "image/webp"})
 _MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024
+_READ_CHUNK_BYTES = 64 * 1024
+_MAX_FILENAME_LENGTH = 120
+_UNSAFE_FILENAME_CHARS = re.compile(r"[^A-Za-z0-9._-]")
+
+
+def sanitize_filename(raw: str | None) -> str:
+    """Deja solo `[A-Za-z0-9._-]` para evitar path traversal y headers raros."""
+    name = (raw or "").strip().replace("\\", "/").rsplit("/", 1)[-1]
+    cleaned = _UNSAFE_FILENAME_CHARS.sub("_", name)
+    cleaned = cleaned.strip("._")[:_MAX_FILENAME_LENGTH]
+    return cleaned or "attachment"
+
+
+async def _read_upload_limited(file: UploadFile) -> bytes:
+    """Lee el archivo en chunks y corta al superar el tope de 5 MB."""
+    data = bytearray()
+    while True:
+        chunk = await file.read(_READ_CHUNK_BYTES)
+        if not chunk:
+            break
+        data.extend(chunk)
+        if len(data) > _MAX_ATTACHMENT_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="File exceeds maximum size of 5 MB",
+            )
+    return bytes(data)
 
 
 def _to_technician_response(order: WorkOrder, customer: Customer) -> TechnicianWorkOrderResponse:
@@ -240,14 +270,9 @@ async def create_technician_attachment(
             detail=f"Invalid file type: {mime_type}. Allowed: image/jpeg, image/png, image/webp",
         )
 
-    data = await file.read()
-    if len(data) > _MAX_ATTACHMENT_BYTES:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail="File exceeds maximum size of 5 MB",
-        )
+    data = await _read_upload_limited(file)
 
-    filename = file.filename or "attachment"
+    filename = sanitize_filename(file.filename)
     attachment = await create_work_order_attachment(
         db,
         tenant_id=tenant_id,

@@ -10,6 +10,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.client_ip import resolve_client_ip
 from app.core.config import settings
 from app.core.logging import get_logger
 from app.core.rate_limit import check_rate_limit as _memory_check_rate_limit
@@ -29,18 +30,8 @@ class LockoutError(HTTPException):
 
 
 def _client_identifier(request: Request) -> str:
-    # En Vercel, `x-real-ip` lo agrega la plataforma. Si solo hay
-    # `x-forwarded-for`, se usa el último hop (el más cercano al proxy) y no el
-    # primero, que el cliente puede falsificar.
-    real_ip = request.headers.get("x-real-ip")
-    if real_ip:
-        return real_ip.strip()
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[-1].strip()
-    if request.client is not None:
-        return request.client.host
-    return "unknown"
+    # Solo se usan los headers de proxy cuando TRUST_PROXY_HEADERS está activo.
+    return resolve_client_ip(request) or "unknown"
 
 
 def _hash(value: str | None) -> str | None:
@@ -63,12 +54,13 @@ async def check_rate_limit(
     *,
     scope: str,
     limit: int,
+    identifier: str | None = None,
 ) -> None:
     if not settings.rate_limit_enabled:
         return
 
-    identifier = _client_identifier(request)
-    key_hash = _bucket_hash(scope, identifier)
+    client_key = identifier or _client_identifier(request)
+    key_hash = _bucket_hash(scope, client_key)
     now = datetime.now(UTC)
     window = _window_start(now)
     expires_at = window + timedelta(seconds=_WINDOW_SECONDS)
@@ -109,7 +101,7 @@ async def check_rate_limit(
             error=str(exc),
             scope=scope,
         )
-        _memory_check_rate_limit(request, scope=scope, limit=limit)
+        _memory_check_rate_limit(request, scope=scope, limit=limit, identifier=client_key)
 
 
 async def _cleanup_expired_buckets(db: AsyncSession) -> None:

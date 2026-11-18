@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hmac
+import json
 from uuid import UUID
 
 import httpx
@@ -185,7 +186,14 @@ async def verify_webhook(
     token: str,
     challenge: str,
 ) -> int:
-    if mode != "subscribe" or token != settings.whatsapp_verify_token:
+    if not settings.whatsapp_verify_token:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="WhatsApp verify token not configured",
+        )
+    if mode != "subscribe" or not hmac.compare_digest(
+        token.encode("utf-8"), settings.whatsapp_verify_token.encode("utf-8")
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid verification token",
@@ -199,12 +207,48 @@ async def verify_webhook(
         ) from exc
 
 
+def _parse_payload(raw_body: bytes) -> dict[str, object]:
+    try:
+        payload = json.loads(raw_body)
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid JSON body",
+        ) from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid JSON body",
+        )
+    return payload
+
+
 async def handle_webhook(
     db: AsyncSession,
-    payload: dict[str, object],
     raw_body: bytes,
     signature: str | None,
 ) -> dict[str, str]:
+    """Procesa un webhook de WhatsApp Cloud API.
+
+    El secreto global de la app de Meta (`WHATSAPP_APP_SECRET`) es obligatorio:
+    sin él no se procesa ningún webhook (fail closed). La firma se valida sobre
+    los bytes crudos **antes** de parsear el body. Después se resuelve el tenant
+    por `phone_number_id` y, como defensa en profundidad, si el tenant tiene su
+    propio `app_secret` también se valida.
+    """
+    if not settings.whatsapp_app_secret:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="WhatsApp app secret not configured",
+        )
+
+    if not _verify_signature(raw_body, signature, settings.whatsapp_app_secret):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid signature",
+        )
+
+    payload = _parse_payload(raw_body)
     phone_number_id = _extract_phone_number_id(payload)
     if phone_number_id is None:
         return {"status": "ok"}
@@ -213,19 +257,23 @@ async def handle_webhook(
     if config is None:
         return {"status": "ok"}
 
-    if not config.app_secret_encrypted:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid signature",
-        )
+    if config.app_secret_encrypted:
+        tenant_secret = decrypt_secret(config.app_secret_encrypted)
+        if not _verify_signature(raw_body, signature, tenant_secret):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Invalid signature",
+            )
 
-    app_secret = decrypt_secret(config.app_secret_encrypted)
-    if not _verify_signature(raw_body, signature, app_secret):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid signature",
-        )
+    return await _store_messages(db, config=config, payload=payload)
 
+
+async def _store_messages(
+    db: AsyncSession,
+    *,
+    config: WhatsAppConfig,
+    payload: dict[str, object],
+) -> dict[str, str]:
     to_phone = _extract_to_phone(payload)
     for message in _iter_messages(payload):
         wa_message_id = str(message.get("id", "")) or None
@@ -353,4 +401,5 @@ def _verify_signature(raw_body: bytes, signature: str | None, secret: str) -> bo
     if signature is None or not signature.startswith("sha256="):
         return False
     expected = hmac.new(secret.encode("utf-8"), raw_body, "sha256").hexdigest()
-    return hmac.compare_digest(signature[7:], expected)
+    # Comparación en bytes: un header con caracteres no ASCII no debe romper.
+    return hmac.compare_digest(signature[7:].encode("utf-8"), expected.encode("utf-8"))

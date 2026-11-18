@@ -1,4 +1,5 @@
 import io
+from urllib.parse import quote
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
@@ -22,6 +23,13 @@ from app.services import technician_pwa_service
 
 router = APIRouter(prefix="/technician", tags=["technician"])
 TECHNICIAN_ROLE = ("technician",)
+
+
+def _content_disposition(filename: str) -> str:
+    """Header seguro: fallback ASCII + `filename*` RFC 5987."""
+    fallback = "".join(char if char.isascii() and char.isprintable() else "_" for char in filename)
+    fallback = fallback.replace('"', "_") or "attachment"
+    return f"inline; filename=\"{fallback}\"; filename*=UTF-8''{quote(filename, safe='')}"
 
 
 @router.get("/work-orders", response_model=TechnicianWorkOrderListResponse)
@@ -182,5 +190,8 @@ async def download_technician_attachment(
     return StreamingResponse(
         io.BytesIO(attachment.data),
         media_type=attachment.mime_type,
-        headers={"Content-Disposition": f'inline; filename="{attachment.filename}"'},
+        headers={
+            "Content-Disposition": _content_disposition(attachment.filename),
+            "X-Content-Type-Options": "nosniff",
+        },
     )

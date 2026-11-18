@@ -71,8 +71,11 @@ async def test_login_lockout_after_five_failures(
 
 
 async def test_refresh_token_reuse_revokes_family(
-    client: AsyncClient, db_session: AsyncSession, register_payload: dict[str, str]
+    client: AsyncClient, db_session: AsyncSession, register_payload: dict[str, str], monkeypatch
 ) -> None:
+    # Sin ventana de gracia, el reuso del token viejo revoca la familia completa.
+    monkeypatch.setattr("app.core.config.settings.refresh_reuse_grace_seconds", -1)
+
     reg = await client.post("/api/v1/auth/register", json=register_payload)
     assert reg.status_code == 201
     stale_token = reg.cookies.get("refresh_token")
@@ -81,6 +84,7 @@ async def test_refresh_token_reuse_revokes_family(
     first_refresh = await client.post("/api/v1/auth/refresh")
     assert first_refresh.status_code == 200
 
+    client.cookies.clear()
     reuse = await client.post(
         "/api/v1/auth/refresh",
         headers={"Cookie": f"refresh_token={stale_token}"},
@@ -104,6 +108,61 @@ async def test_refresh_token_reuse_revokes_family(
         )
     )
     assert active.scalar_one() == 0
+
+
+async def test_refresh_concurrent_rotation_keeps_successor_valid(
+    client: AsyncClient, db_session: AsyncSession, register_payload: dict[str, str]
+) -> None:
+    reg = await client.post("/api/v1/auth/register", json=register_payload)
+    assert reg.status_code == 201
+    stale_token = reg.cookies.get("refresh_token")
+    assert stale_token
+
+    first = await client.post("/api/v1/auth/refresh")
+    assert first.status_code == 200
+    successor = first.cookies.get("refresh_token")
+    assert successor and successor != stale_token
+
+    # Reuso inmediato del token viejo: cae en la ventana de gracia, responde 401
+    # y NO revoca la familia.
+    client.cookies.clear()
+    reuse = await client.post(
+        "/api/v1/auth/refresh",
+        headers={"Cookie": f"refresh_token={stale_token}"},
+    )
+    assert reuse.status_code == 401
+
+    # El sucesor emitido por la rotación exitosa sigue sirviendo.
+    client.cookies.clear()
+    third = await client.post(
+        "/api/v1/auth/refresh",
+        headers={"Cookie": f"refresh_token={successor}"},
+    )
+    assert third.status_code == 200, third.text
+
+    me = await client.get(
+        "/api/v1/auth/me",
+        headers={
+            "Authorization": f"Bearer {reg.json()['access_token']}",
+            "X-Tenant-ID": reg.json()["tenants"][0]["id"],
+        },
+    )
+    assert me.status_code == 200
+    user_id = UUID(me.json()["user"]["id"])
+    active = await db_session.scalar(
+        select(func.count(RefreshToken.id)).where(
+            RefreshToken.user_id == user_id,
+            RefreshToken.revoked_at.is_(None),
+        )
+    )
+    assert active == 1
+
+    concurrent = await db_session.execute(
+        select(func.count(AuditLog.id)).where(
+            AuditLog.action == "refresh_token_concurrent_rotation"
+        )
+    )
+    assert concurrent.scalar_one() == 1
 
 
 async def test_refresh_with_invalid_origin_is_forbidden(

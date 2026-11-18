@@ -211,6 +211,18 @@ async def get_payments_this_month(db: AsyncSession, *, tenant_id: UUID) -> dict[
     return {"count": int(count or 0), "total": Decimal(total or "0.00")}
 
 
+async def get_usage_totals(db: AsyncSession, *, tenant_id: UUID) -> tuple[int, Decimal]:
+    """Totales del tenant completo, no solo de la última página."""
+    result = await db.execute(
+        select(
+            func.coalesce(func.sum(AIUsageLog.input_tokens + AIUsageLog.output_tokens), 0),
+            func.coalesce(func.sum(AIUsageLog.estimated_cost), Decimal("0.00")),
+        ).where(AIUsageLog.tenant_id == tenant_id)
+    )
+    tokens, cost = result.one()
+    return int(tokens or 0), Decimal(cost or "0.00")
+
+
 async def list_usage_logs(
     db: AsyncSession, *, tenant_id: UUID, limit: int = 50, offset: int = 0
 ) -> tuple[list[AIUsageLog], int]:

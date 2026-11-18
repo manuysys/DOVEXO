@@ -12,8 +12,10 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import raiseload
 
-from app.models import Invitation, Membership, Subscription
+from app.models import Invitation, Membership, Plan, Subscription
 from app.repositories import billing as billing_repo
+
+_MINIMUM_PLAN_CODE = "starter"
 
 
 def _limit_value(limits: dict[str, object] | None, key: str) -> int | None:
@@ -40,6 +42,26 @@ async def _lock_subscription(db: AsyncSession, tenant_id: UUID) -> Subscription 
         .with_for_update()
     )
     return result.scalar_one_or_none()
+
+
+async def _resolve_plan(db: AsyncSession, tenant_id: UUID) -> Plan | None:
+    """Plan aplicable al tenant.
+
+    Si el tenant no tiene suscripción se usa el plan mínimo (starter) como
+    fallback: un tenant sin fila de suscripción no debe quedar sin límites.
+    """
+    row = await billing_repo.get_subscription_with_plan(db, tenant_id)
+    if row is not None:
+        return row[1]
+    return await billing_repo.get_active_plan_by_code(db, _MINIMUM_PLAN_CODE)
+
+
+async def _resolve_plan_for_update(db: AsyncSession, tenant_id: UUID) -> Plan | None:
+    """Igual que `_resolve_plan`, pero bloqueando la suscripción si existe."""
+    subscription = await _lock_subscription(db, tenant_id)
+    if subscription is None:
+        return await billing_repo.get_active_plan_by_code(db, _MINIMUM_PLAN_CODE)
+    return await db.get(Plan, subscription.plan_id)
 
 
 async def _count_active_memberships(db: AsyncSession, tenant_id: UUID) -> int:
@@ -96,11 +118,10 @@ async def _count_pending_technician_invitations(db: AsyncSession, tenant_id: UUI
 
 
 async def assert_can_create_work_order(db: AsyncSession, *, tenant_id: UUID) -> None:
-    row = await billing_repo.get_subscription_with_plan(db, tenant_id)
-    if row is None:
+    plan = await _resolve_plan(db, tenant_id)
+    if plan is None:
         return
 
-    _, plan = row
     limit = _limit_value(plan.limits, "max_orders_per_month")
     if limit is None:
         limit = _limit_value(plan.limits, "orders_per_month")
@@ -123,11 +144,7 @@ async def assert_can_invite_user(db: AsyncSession, *, tenant_id: UUID) -> None:
 
     El cálculo incluye membresías activas más invitaciones pendientes.
     """
-    subscription = await _lock_subscription(db, tenant_id)
-    if subscription is None:
-        return
-
-    plan = await db.get(billing_repo.Plan, subscription.plan_id)
+    plan = await _resolve_plan_for_update(db, tenant_id)
     if plan is None:
         return
 
@@ -152,11 +169,7 @@ async def assert_can_invite_technician(db: AsyncSession, *, tenant_id: UUID) -> 
 
     El cálculo incluye técnicos activos más invitaciones pendientes a técnicos.
     """
-    subscription = await _lock_subscription(db, tenant_id)
-    if subscription is None:
-        return
-
-    plan = await db.get(billing_repo.Plan, subscription.plan_id)
+    plan = await _resolve_plan_for_update(db, tenant_id)
     if plan is None:
         return
 

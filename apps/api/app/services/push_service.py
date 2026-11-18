@@ -7,6 +7,7 @@ from app.core.logging import get_logger
 from app.repositories.device_tokens import (
     create_device_token,
     delete_device_token,
+    get_device_token,
     get_device_token_by_token,
     list_device_tokens_for_user,
 )
@@ -24,12 +25,23 @@ async def register_device_token(
     token: str,
     platform: str,
 ) -> None:
-    existing = await get_device_token_by_token(db, token=token)
+    existing = await get_device_token(db, tenant_id=tenant_id, user_id=user_id, token=token)
     if existing is not None:
-        existing.user_id = user_id
-        existing.tenant_id = tenant_id
         existing.platform = platform
-        await db.flush()
+        await db.commit()
+        return
+
+    # El token es único global: si ya pertenece a otro usuario o tenant no se
+    # reasigna. Reasignarlo permitiría desviar notificaciones ajenas.
+    foreign = await get_device_token_by_token(db, token=token)
+    if foreign is not None:
+        logger.warning(
+            "device_token_owned_by_other_principal",
+            tenant_id=str(tenant_id),
+            user_id=str(user_id),
+            owner_tenant_id=str(foreign.tenant_id),
+            owner_user_id=str(foreign.user_id),
+        )
         return
 
     await create_device_token(

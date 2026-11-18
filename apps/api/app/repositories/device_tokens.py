@@ -7,7 +7,25 @@ from app.models import DeviceToken
 
 
 async def get_device_token_by_token(db: AsyncSession, *, token: str) -> DeviceToken | None:
+    """Busca por token, que es único global.
+
+    El llamador debe comparar `tenant_id` y `user_id` antes de modificarlo: un
+    token no se reasigna a otro usuario ni a otro tenant.
+    """
     result = await db.execute(select(DeviceToken).where(DeviceToken.token == token))
+    return result.scalar_one_or_none()
+
+
+async def get_device_token(
+    db: AsyncSession, *, tenant_id: UUID, user_id: UUID, token: str
+) -> DeviceToken | None:
+    result = await db.execute(
+        select(DeviceToken).where(
+            DeviceToken.tenant_id == tenant_id,
+            DeviceToken.user_id == user_id,
+            DeviceToken.token == token,
+        )
+    )
     return result.scalar_one_or_none()
 
 

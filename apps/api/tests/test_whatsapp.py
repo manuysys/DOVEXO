@@ -18,6 +18,8 @@ from app.services import whatsapp_service
 async def whatsapp_client(monkeypatch) -> AsyncGenerator[AsyncClient, None]:
     monkeypatch.setattr(settings, "whatsapp_encryption_key", "test-encryption-key-32-bytes-long")
     monkeypatch.setattr(settings, "whatsapp_verify_token", "webhook-verify-token")
+    # El secreto global de la app de Meta es obligatorio para procesar webhooks.
+    monkeypatch.setattr(settings, "whatsapp_app_secret", "test-app-secret")
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
@@ -158,6 +160,45 @@ async def test_post_webhook_invalid_signature_returns_403(
             "X-Hub-Signature-256": "sha256=invalid",
             "Content-Type": "application/json",
         },
+    )
+    assert resp.status_code == 403
+
+
+async def test_post_webhook_without_global_secret_returns_503(
+    whatsapp_client: AsyncClient,
+    monkeypatch,
+) -> None:
+    # Fail closed: sin secreto global no se procesa ni se parsea el body.
+    monkeypatch.setattr(settings, "whatsapp_app_secret", "")
+
+    resp = await whatsapp_client.post(
+        "/api/v1/webhooks/whatsapp",
+        content=b"not-json{",
+        headers={"Content-Type": "application/json"},
+    )
+    assert resp.status_code == 503
+
+
+async def test_post_webhook_rejects_tenant_secret_mismatch(
+    whatsapp_client: AsyncClient,
+    monkeypatch,
+) -> None:
+    # Defensa en profundidad: la firma global es válida pero el secreto del
+    # tenant configurado no coincide con el secreto global.
+    monkeypatch.setattr(settings, "whatsapp_app_secret", "other-global-secret")
+    token, tenant_id = await _register_owner(whatsapp_client, "owner-wa6@example.com", "WA6")
+    await whatsapp_client.put(
+        "/api/v1/whatsapp/config",
+        json=CONFIG_PAYLOAD,
+        headers=_headers(token, tenant_id),
+    )
+
+    raw_body = json.dumps(_inbound_payload(CONFIG_PAYLOAD["phone_number_id"])).encode("utf-8")
+    signature = "sha256=" + hmac.new(b"other-global-secret", raw_body, hashlib.sha256).hexdigest()
+    resp = await whatsapp_client.post(
+        "/api/v1/webhooks/whatsapp",
+        content=raw_body,
+        headers={"X-Hub-Signature-256": signature, "Content-Type": "application/json"},
     )
     assert resp.status_code == 403
 

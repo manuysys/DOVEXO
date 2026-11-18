@@ -8,6 +8,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.security import (
     create_access_token,
     generate_refresh_token,
@@ -162,7 +163,11 @@ async def rotate_refresh_token(
     user_agent: str | None = None,
 ) -> tuple[User, str, int, str]:
     token_hash = hash_refresh_token(raw_token)
-    result = await db.execute(select(RefreshToken).where(RefreshToken.token_hash == token_hash))
+    # FOR UPDATE serializa rotaciones concurrentes del mismo token: sin el lock
+    # dos requests podrían emitir dos refresh válidos o detectar un reuso falso.
+    result = await db.execute(
+        select(RefreshToken).where(RefreshToken.token_hash == token_hash).with_for_update()
+    )
     stored = result.scalar_one_or_none()
     now = datetime.now(UTC)
 
@@ -173,6 +178,30 @@ async def rotate_refresh_token(
         )
 
     if stored.revoked_at is not None:
+        # Rotación concurrente: otro request ya rotó este token hace instantes y
+        # emitió un sucesor. No se revoca la familia (el sucesor sigue válido);
+        # solo se rechaza este request con 401.
+        within_grace = (
+            stored.replaced_by is not None
+            and (now - stored.revoked_at).total_seconds() <= settings.refresh_reuse_grace_seconds
+        )
+        if within_grace:
+            await audit_service.record(
+                db,
+                action="refresh_token_concurrent_rotation",
+                entity_type="refresh_token",
+                entity_id=str(stored.id),
+                actor_user_id=stored.user_id,
+                metadata={"family_revoked": False},
+                ip=client_ip,
+                user_agent=user_agent,
+            )
+            await db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
+
         await _revoke_all_user_refresh_tokens(db, stored.user_id)
         await audit_service.record(
             db,

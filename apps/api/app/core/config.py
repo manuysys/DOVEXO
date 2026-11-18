@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     api_url: str = "http://localhost:8000"
     api_cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
     allowed_hosts: list[str] = Field(default_factory=lambda: ["*"])
+    # Solo se confía en X-Real-IP / X-Forwarded-For cuando la app corre detrás
+    # de un proxy que los sobrescribe (por ejemplo Vercel).
+    trust_proxy_headers: bool = False
 
     database_url: str = (
         "postgresql+asyncpg://saas:saas_dev_password@127.0.0.1:55432/saas_gestion_dev"
@@ -41,6 +44,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_access_ttl_minutes: int = 15
     jwt_refresh_ttl_days: int = 30
+    # Ventana de gracia para rotaciones concurrentes del mismo refresh token:
+    # dentro de ella el token sucesor no se revoca por falsa detección de reuso.
+    refresh_reuse_grace_seconds: int = 10
 
     cookie_secure: bool = False
     cookie_samesite: Literal["lax", "strict", "none"] = "lax"
@@ -66,6 +72,9 @@ class Settings(BaseSettings):
     whatsapp_encryption_key: str = ""
     whatsapp_api_version: str = "v23.0"
     whatsapp_verify_token: str = ""
+    # Secreto global de la app de Meta. Si está configurado, la firma del
+    # webhook se valida antes de parsear el body.
+    whatsapp_app_secret: str = ""
 
     email_provider: Literal["console", "resend"] = "console"
     resend_api_key: str = ""
@@ -75,6 +84,7 @@ class Settings(BaseSettings):
     rate_limit_enabled: bool = True
     rate_limit_auth_per_minute: int = 10
     rate_limit_public_per_minute: int = 30
+    rate_limit_ai_chat_per_minute: int = 20
 
     lockout_max_attempts: int = 5
     lockout_window_minutes: int = 15

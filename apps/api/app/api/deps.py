@@ -1,3 +1,4 @@
+from urllib.parse import urlparse
 from uuid import UUID
 
 from fastapi import Depends, Header, HTTPException, Request, status
@@ -6,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.client_ip import resolve_client_ip
 from app.core.config import settings
 from app.core.db import get_db
 from app.core.security import decode_access_token, decode_portal_token
@@ -13,21 +15,46 @@ from app.models import Customer, Membership, Tenant, User
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
+_DEFAULT_PORTS = {"http": 80, "https": 443}
+
+
+def _origin_key(value: str) -> tuple[str, str, int | None] | None:
+    """Normaliza un origen o URL a `(scheme, host, port)`.
+
+    Devuelve `None` si el valor no tiene esquema u host válidos.
+    """
+    try:
+        parsed = urlparse(value.strip())
+        host = parsed.hostname
+        if not parsed.scheme or not host:
+            return None
+        scheme = parsed.scheme.lower()
+        port = parsed.port
+    except ValueError:
+        return None
+    if port is None:
+        port = _DEFAULT_PORTS.get(scheme)
+    return scheme, host.lower(), port
+
 
 def validate_cookie_origin(request: Request) -> None:
     """Valida Origin/Referer para endpoints que usan cookies.
 
     Si no hay header Origin (clientes API no-browser), permite la request.
-    Si el origen no pertenece a API_CORS_ORIGINS, rechaza con 403.
+    Si el origen no coincide exactamente con un origen de API_CORS_ORIGINS,
+    rechaza con 403. La comparación es por esquema, host y puerto, así que
+    `http://localhost:3000.evil.example` no pasa.
     """
     origin = request.headers.get("origin") or request.headers.get("referer")
     if not origin:
         return
 
-    allowed = settings.api_cors_origins
-    for allowed_origin in allowed:
-        if origin.startswith(allowed_origin):
-            return
+    origin_key = _origin_key(origin)
+    if origin_key is not None:
+        for allowed_origin in settings.api_cors_origins:
+            allowed_key = _origin_key(allowed_origin)
+            if allowed_key is not None and allowed_key == origin_key:
+                return
 
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
@@ -36,15 +63,7 @@ def validate_cookie_origin(request: Request) -> None:
 
 
 def get_client_ip(request: Request) -> str | None:
-    real_ip = request.headers.get("x-real-ip")
-    if real_ip:
-        return real_ip.strip() or None
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[-1].strip() or None
-    if request.client is not None:
-        return request.client.host
-    return None
+    return resolve_client_ip(request)
 
 
 async def get_current_user(

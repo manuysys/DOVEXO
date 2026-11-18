@@ -6,7 +6,7 @@ from app.core.db import get_db
 from app.models import User
 from app.repositories.tenants import create_membership, create_tenant
 from app.schemas.auth import TenantCreate, TenantResponse
-from app.services import auth_service
+from app.services import auth_service, billing_service
 from app.services.auth_service import unique_slug
 
 router = APIRouter(prefix="/tenants", tags=["tenants"])
@@ -41,6 +41,9 @@ async def create_new_tenant(
         slug=await unique_slug(db, payload.name),
     )
     await create_membership(db, tenant_id=tenant.id, user_id=user.id, role="owner")
+    # Mismo flujo que el registro: la empresa nueva arranca con trial, para que
+    # GET /subscription responda y los límites del plan se apliquen.
+    await billing_service.create_trial_subscription(db, tenant.id)
     await db.commit()
     await db.refresh(tenant)
     return TenantResponse(
