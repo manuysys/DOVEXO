@@ -2,10 +2,19 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { TriangleAlert } from "lucide-react";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { api, errorMessage, type Technician, type WorkOrder } from "@/lib/api";
+import {
+  agendaErrorMessage,
+  findOverlappingAppointment,
+  formatDayLong,
+  formatTimeRange,
+} from "@/components/agenda/agenda-utils";
+import { Button } from "@/components/ui/button";
+import { api, type Appointment, type Technician, type WorkOrder } from "@/lib/api";
 import { dateTimeLocalFromDay, localDateTimeToIso } from "@/lib/agenda";
 
 const appointmentFormSchema = z
@@ -24,9 +33,14 @@ const appointmentFormSchema = z
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>;
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900";
-const labelClass = "mb-1 block text-sm font-medium";
-const errorClass = "mt-1 text-xs text-red-600";
+  "min-h-10 w-full rounded-ds-md border border-border bg-surface px-3 text-small text-text focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none";
+const labelClass = "mb-1 block text-small font-semibold text-text";
+const errorClass = "mt-1 text-caption text-danger-strong";
+
+function toIso(value: string): string | null {
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : null;
+}
 
 type AppointmentFormProps = {
   tenantId: string;
@@ -34,6 +48,8 @@ type AppointmentFormProps = {
   day: string;
   orders: WorkOrder[];
   technicians: Technician[];
+  /** Turnos ya cargados del día, para avisar de una superposición antes de guardar. */
+  appointments?: readonly Appointment[];
   onDone: () => void;
 };
 
@@ -42,6 +58,7 @@ export function AppointmentForm({
   day,
   orders,
   technicians,
+  appointments = [],
   onDone,
 }: AppointmentFormProps) {
   const queryClient = useQueryClient();
@@ -49,6 +66,7 @@ export function AppointmentForm({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
@@ -61,6 +79,23 @@ export function AppointmentForm({
     },
   });
 
+  const technicianId = watch("technician_id");
+  const startsAt = watch("starts_at");
+  const endsAt = watch("ends_at");
+
+  const overlap = useMemo(() => {
+    if (!technicianId || !startsAt || !endsAt) return null;
+    const startIso = toIso(startsAt);
+    const endIso = toIso(endsAt);
+    if (!startIso || !endIso) return null;
+    return findOverlappingAppointment({
+      appointments,
+      technicianId,
+      startsAt: startIso,
+      endsAt: endIso,
+    });
+  }, [appointments, technicianId, startsAt, endsAt]);
+
   const createMutation = useMutation({
     mutationFn: (values: AppointmentFormValues) =>
       api.appointments.create(tenantId, {
@@ -72,22 +107,26 @@ export function AppointmentForm({
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["appointments", tenantId] });
+      void queryClient.invalidateQueries({ queryKey: ["work-orders", tenantId] });
       void queryClient.invalidateQueries({ queryKey: ["dashboard-summary", tenantId] });
       onDone();
     },
   });
 
   const formError = createMutation.error
-    ? errorMessage(createMutation.error, "No se pudo crear el turno")
+    ? agendaErrorMessage(createMutation.error, "No se pudo crear el turno")
     : null;
 
   return (
     <form
       onSubmit={handleSubmit((values) => createMutation.mutateAsync(values))}
-      className="rounded-2xl border border-zinc-200 bg-white p-5"
+      className="border-border bg-surface rounded-ds-lg border p-4 shadow-card sm:p-5"
       noValidate
     >
-      <h2 className="text-sm font-semibold">Nuevo turno</h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-h4 text-text">Nuevo turno</h2>
+        <p className="text-text-2 text-caption">{formatDayLong(day)}</p>
+      </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
@@ -98,6 +137,7 @@ export function AppointmentForm({
             id="appointment-work-order"
             className={inputClass}
             aria-invalid={Boolean(errors.work_order_id)}
+            aria-describedby={errors.work_order_id ? "appointment-work-order-error" : undefined}
             {...register("work_order_id")}
           >
             <option value="">Seleccionar orden</option>
@@ -107,29 +147,15 @@ export function AppointmentForm({
               </option>
             ))}
           </select>
-          {errors.work_order_id && <p className={errorClass}>{errors.work_order_id.message}</p>}
-        </div>
-
-        <div>
-          <label htmlFor="appointment-technician" className={labelClass}>
-            Técnico *
-          </label>
-          <select
-            id="appointment-technician"
-            className={inputClass}
-            aria-invalid={Boolean(errors.technician_id)}
-            {...register("technician_id")}
-          >
-            <option value="">Seleccionar técnico</option>
-            {technicians.map((technician) => (
-              <option key={technician.id} value={technician.id}>
-                {technician.full_name}
-              </option>
-            ))}
-          </select>
-          {errors.technician_id && <p className={errorClass}>{errors.technician_id.message}</p>}
-          {technicians.length === 0 && (
-            <p className="mt-1 text-xs text-zinc-500">No hay técnicos cargados en la empresa.</p>
+          {errors.work_order_id && (
+            <p id="appointment-work-order-error" className={errorClass}>
+              {errors.work_order_id.message}
+            </p>
+          )}
+          {orders.length === 0 && (
+            <p className="text-text-2 mt-1 text-caption">
+              No hay órdenes abiertas para agendar. Creá una orden primero.
+            </p>
           )}
         </div>
 
@@ -142,9 +168,14 @@ export function AppointmentForm({
             type="datetime-local"
             className={inputClass}
             aria-invalid={Boolean(errors.starts_at)}
+            aria-describedby={errors.starts_at ? "appointment-starts-at-error" : undefined}
             {...register("starts_at")}
           />
-          {errors.starts_at && <p className={errorClass}>{errors.starts_at.message}</p>}
+          {errors.starts_at && (
+            <p id="appointment-starts-at-error" className={errorClass}>
+              {errors.starts_at.message}
+            </p>
+          )}
         </div>
 
         <div>
@@ -156,9 +187,44 @@ export function AppointmentForm({
             type="datetime-local"
             className={inputClass}
             aria-invalid={Boolean(errors.ends_at)}
+            aria-describedby={errors.ends_at ? "appointment-ends-at-error" : undefined}
             {...register("ends_at")}
           />
-          {errors.ends_at && <p className={errorClass}>{errors.ends_at.message}</p>}
+          {errors.ends_at && (
+            <p id="appointment-ends-at-error" className={errorClass}>
+              {errors.ends_at.message}
+            </p>
+          )}
+        </div>
+
+        <div className="sm:col-span-2">
+          <label htmlFor="appointment-technician" className={labelClass}>
+            Técnico *
+          </label>
+          <select
+            id="appointment-technician"
+            className={inputClass}
+            aria-invalid={Boolean(errors.technician_id)}
+            aria-describedby={errors.technician_id ? "appointment-technician-error" : undefined}
+            {...register("technician_id")}
+          >
+            <option value="">Seleccionar técnico</option>
+            {technicians.map((technician) => (
+              <option key={technician.id} value={technician.id}>
+                {technician.full_name}
+              </option>
+            ))}
+          </select>
+          {errors.technician_id && (
+            <p id="appointment-technician-error" className={errorClass}>
+              {errors.technician_id.message}
+            </p>
+          )}
+          {technicians.length === 0 && (
+            <p className="text-text-2 mt-1 text-caption">
+              No hay técnicos activos en la empresa.
+            </p>
+          )}
         </div>
 
         <div className="sm:col-span-2">
@@ -171,33 +237,50 @@ export function AppointmentForm({
             className={inputClass}
             placeholder="Ej.: Llevar escalera y repuesto de capacitor"
             aria-invalid={Boolean(errors.notes)}
+            aria-describedby={errors.notes ? "appointment-notes-error" : undefined}
             {...register("notes")}
           />
-          {errors.notes && <p className={errorClass}>{errors.notes.message}</p>}
+          {errors.notes && (
+            <p id="appointment-notes-error" className={errorClass}>
+              {errors.notes.message}
+            </p>
+          )}
         </div>
       </div>
 
+      {overlap && (
+        <p
+          role="status"
+          className="bg-warning-soft text-warning-strong mt-4 flex items-start gap-2 rounded-ds-md px-3 py-2 text-small"
+        >
+          <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <span>
+            Ese técnico ya tiene una visita de {formatTimeRange(overlap)}. El servidor va a rechazar
+            el turno si se superpone.
+          </span>
+        </p>
+      )}
+
       {formError && (
-        <p role="alert" className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p
+          role="alert"
+          className="bg-danger-soft text-danger-strong mt-4 rounded-ds-md px-3 py-2 text-small"
+        >
           {formError}
         </p>
       )}
 
-      <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          onClick={onDone}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-        >
+      <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Button variant="outline" onClick={onDone}>
           Cancelar
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           disabled={isSubmitting || createMutation.isPending}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-60"
+          aria-busy={createMutation.isPending}
         >
-          {createMutation.isPending ? "Guardando..." : "Guardar turno"}
-        </button>
+          {createMutation.isPending ? "Guardando…" : "Guardar turno"}
+        </Button>
       </div>
     </form>
   );
