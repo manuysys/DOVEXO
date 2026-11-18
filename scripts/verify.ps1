@@ -70,6 +70,9 @@ if (Test-Path (Join-Path $api 'pyproject.toml')) {
             'tests/test_mobile_auth.py', 'tests/test_payments.py', 'tests/test_portal.py',
             'tests/test_push.py', 'tests/test_quotes.py', 'tests/test_security.py',
             'tests/test_technician.py', 'tests/test_whatsapp.py', 'tests/test_work_orders.py'
+        ),
+        @(
+            'tests/test_demo_reset.py', 'tests/test_imports.py', 'tests/test_onboarding.py'
         )
     )
     foreach ($chunk in $pytestChunks) {
