@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { Button } from "@/components/ui/button";
 import { api, errorMessage, type Technician, type WorkOrder } from "@/lib/api";
 
 const assignmentSchema = z.object({
@@ -15,7 +16,7 @@ const assignmentSchema = z.object({
 type AssignmentValues = z.infer<typeof assignmentSchema>;
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900";
+  "border-border text-text focus:border-primary focus:ring-primary/20 min-h-11 w-full rounded-ds-md border bg-surface px-3 text-sm outline-none focus:ring-2";
 
 type TechnicianAssignmentProps = {
   tenantId: string;
@@ -56,19 +57,20 @@ export function TechnicianAssignment({ tenantId, order, technicians }: Technicia
   return (
     <section
       aria-labelledby="assignment-title"
-      className="rounded-2xl border border-zinc-200 bg-white p-6"
+      className="border-border bg-surface rounded-ds-lg border p-5 shadow-card"
     >
-      <h2 id="assignment-title" className="text-sm font-semibold">
+      <h2 id="assignment-title" className="text-text text-base font-semibold">
         Técnico asignado
       </h2>
-      <form onSubmit={handleSubmit((values) => assignMutation.mutateAsync(values))} noValidate>
-        <label htmlFor="assigned_user_id" className="mt-4 mb-1 block text-sm font-medium">
+      <form onSubmit={handleSubmit((values) => assignMutation.mutate(values))} noValidate>
+        <label htmlFor="assigned_user_id" className="text-text mt-4 mb-1 block text-small font-medium">
           Técnico
         </label>
         <select
           id="assigned_user_id"
           className={inputClass}
           aria-invalid={Boolean(errors.assigned_user_id)}
+          aria-describedby={errors.assigned_user_id ? "assigned-user-error" : undefined}
           {...register("assigned_user_id")}
         >
           <option value="">Sin técnico asignado</option>
@@ -79,31 +81,29 @@ export function TechnicianAssignment({ tenantId, order, technicians }: Technicia
           ))}
         </select>
         {errors.assigned_user_id && (
-          <p className="mt-1 text-xs text-red-600">{errors.assigned_user_id.message}</p>
+          <p id="assigned-user-error" className="text-danger-strong mt-1 text-caption">
+            {errors.assigned_user_id.message}
+          </p>
         )}
         {technicians.length === 0 && (
-          <p className="mt-1 text-xs text-zinc-500">No hay técnicos cargados en la empresa.</p>
+          <p className="text-text-2 mt-1 text-caption">No hay técnicos cargados en la empresa.</p>
         )}
 
         {formError && (
-          <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p role="alert" className="bg-danger-soft text-danger-strong rounded-ds-md mt-3 px-3 py-2 text-small">
             {formError}
           </p>
         )}
         {showSaved && (
-          <p role="status" className="mt-3 text-sm text-emerald-700">
+          <p role="status" className="text-success-strong mt-3 text-small">
             Asignación guardada.
           </p>
         )}
 
         <div className="mt-4 flex justify-end">
-          <button
-            type="submit"
-            disabled={!isDirty || assignMutation.isPending}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-60"
-          >
+          <Button type="submit" size="sm" disabled={!isDirty || assignMutation.isPending}>
             {assignMutation.isPending ? "Guardando..." : "Guardar asignación"}
-          </button>
+          </Button>
         </div>
       </form>
     </section>

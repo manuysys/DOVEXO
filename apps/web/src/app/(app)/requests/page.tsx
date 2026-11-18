@@ -1,74 +1,63 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, Inbox, Plus, X } from "lucide-react";
+import { AlertTriangle, ArrowRightLeft, Inbox, Plus, SearchX, ShieldAlert, WifiOff, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
 
-import { Badge } from "@/components/ui/badge";
+import {
+  EMPTY_REQUEST_FILTERS,
+  countActiveRequestFilters,
+  filterRequests,
+  paginate,
+  sortRequests,
+  type RequestFilters,
+  type RequestSortKey,
+  type SortDirection,
+} from "@/components/requests/request-list-utils";
+import { RequestForm } from "@/components/requests/request-form";
+import { RequestsTable } from "@/components/requests/requests-table";
+import { RequestsToolbar } from "@/components/requests/requests-toolbar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/ui/stat-card";
-import { ApiError, api } from "@/lib/api";
+import { ApiError, api, errorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { PRIORITY_LABELS, REQUEST_STATUS_LABELS } from "@/lib/order-status";
-import { formatDate } from "@/lib/utils";
+import { MANAGEMENT_ROLES } from "@/lib/navigation";
 
-const requestSchema = z.object({
-  customer_id: z.string().uuid("Seleccioná un cliente"),
-  title: z.string().min(2, "Ingresá el motivo de la solicitud"),
-  description: z.string().max(5000).optional(),
-  priority: z.enum(["low", "normal", "high", "urgent"]),
-  source: z.enum(["whatsapp", "phone", "email", "web", "manual"]),
-});
+const PAGE_SIZE_DEFAULT = 10;
 
-type RequestFormValues = z.infer<typeof requestSchema>;
-
-const priorityVariant: Record<string, "neutral" | "success" | "warning" | "danger" | "info"> = {
-  low: "neutral",
-  normal: "info",
-  high: "warning",
-  urgent: "danger",
-};
-
-const statusVariant: Record<string, "neutral" | "success" | "warning" | "info"> = {
-  new: "info",
-  triaged: "warning",
-  converted: "success",
-  closed: "neutral",
-};
-
-const sourceLabels: Record<string, string> = {
-  manual: "Carga manual",
-  whatsapp: "WhatsApp",
-  phone: "Teléfono",
-  email: "Email",
-  web: "Formulario web",
-};
+function RequestsSkeleton() {
+  return (
+    <div aria-busy="true" aria-label="Cargando solicitudes" className="space-y-2">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <Card key={index} className="space-y-2 p-4">
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-3 w-2/3" />
+          <Skeleton className="h-3 w-1/4" />
+        </Card>
+      ))}
+    </div>
+  );
+}
 
 export default function RequestsPage() {
   const { activeTenantId, tenants } = useAuth();
   const queryClient = useQueryClient();
   const router = useRouter();
-  const [showForm, setShowForm] = useState(false);
   const activeTenant = tenants.find((tenant) => tenant.id === activeTenantId);
+  const canManage = MANAGEMENT_ROLES.includes(activeTenant?.role ?? "");
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm<RequestFormValues>({
-    resolver: zodResolver(requestSchema),
-    defaultValues: { priority: "normal", source: "manual" },
-  });
+  const [showForm, setShowForm] = useState(false);
+  const [filters, setFilters] = useState<RequestFilters>(EMPTY_REQUEST_FILTERS);
+  const [sort, setSort] = useState<RequestSortKey>("created");
+  const [direction, setDirection] = useState<SortDirection>("desc");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZE_DEFAULT);
 
   const customersQuery = useQuery({
     queryKey: ["customers", activeTenantId, ""],
@@ -82,25 +71,6 @@ export default function RequestsPage() {
     enabled: Boolean(activeTenantId),
   });
 
-  const createMutation = useMutation({
-    mutationFn: (values: RequestFormValues) =>
-      api.serviceRequests.create(activeTenantId ?? "", {
-        customer_id: values.customer_id,
-        title: values.title,
-        description: values.description || undefined,
-        priority: values.priority,
-        source: values.source,
-      }),
-    onSuccess: () => {
-      toast.success("Solicitud creada");
-      void queryClient.invalidateQueries({ queryKey: ["service-requests"] });
-      reset({ priority: "normal", source: "manual" });
-      setShowForm(false);
-    },
-    onError: (error) =>
-      toast.error(error instanceof ApiError ? error.detail : "No se pudo crear la solicitud"),
-  });
-
   const convertMutation = useMutation({
     mutationFn: (requestId: string) => api.serviceRequests.convert(activeTenantId ?? "", requestId),
     onSuccess: () => {
@@ -110,258 +80,219 @@ export default function RequestsPage() {
       router.push("/orders");
     },
     onError: (error) =>
-      toast.error(error instanceof ApiError ? error.detail : "No se pudo convertir la solicitud"),
+      toast.error(errorMessage(error, "No se pudo convertir la solicitud")),
   });
 
-  if (!activeTenantId) {
-    return <Card className="text-slate p-8 text-sm">No hay una empresa activa.</Card>;
+  const customers = useMemo(() => customersQuery.data?.items ?? [], [customersQuery.data]);
+  const requests = useMemo(() => requestsQuery.data?.items ?? [], [requestsQuery.data]);
+  const total = requestsQuery.data?.total ?? requests.length;
+
+  const lookups = useMemo(
+    () => ({
+      customerName: (customerId: string) =>
+        customers.find((customer) => customer.id === customerId)?.name ?? "",
+    }),
+    [customers],
+  );
+
+  const filtered = useMemo(() => filterRequests(requests, filters, lookups), [requests, filters, lookups]);
+  const sorted = useMemo(
+    () => sortRequests(filtered, sort, direction, lookups),
+    [filtered, sort, direction, lookups],
+  );
+  const pageSlice = paginate(sorted, page, pageSize);
+
+  const urgentCount = requests.filter((request) => request.priority === "urgent").length;
+  const newCount = requests.filter((request) => request.status === "new").length;
+  const convertedCount = requests.filter((request) => request.status === "converted").length;
+  const activeFilterCount = countActiveRequestFilters(filters);
+  const convertingId = convertMutation.isPending ? (convertMutation.variables ?? null) : null;
+  const errorStatus = requestsQuery.error instanceof ApiError ? requestsQuery.error.status : null;
+
+  function updateFilters(patch: Partial<RequestFilters>) {
+    setFilters((current) => ({ ...current, ...patch }));
+    setPage(1);
   }
 
-  const customers = customersQuery.data?.items ?? [];
-  const requests = requestsQuery.data?.items ?? [];
-  const total = requestsQuery.data?.total ?? requests.length;
-  const urgent = requests.filter((request) => request.priority === "urgent").length;
-  const converted = requests.filter((request) => request.status === "converted").length;
-  const customerName = (id: string) =>
-    customers.find((customer) => customer.id === id)?.name ?? "Cliente";
-  const formError =
-    createMutation.error instanceof ApiError
-      ? createMutation.error.detail
-      : createMutation.error
-        ? "No se pudo crear la solicitud"
-        : null;
+  function handleSortChange(nextSort: RequestSortKey) {
+    if (nextSort === sort) {
+      setDirection((current) => (current === "asc" ? "desc" : "asc"));
+      return;
+    }
+    setSort(nextSort);
+    setDirection(nextSort === "created" ? "desc" : "asc");
+  }
+
+  if (!activeTenantId) {
+    return (
+      <Card className="text-text-2 p-8 text-small">
+        No hay una empresa activa. Cerrá sesión y volvé a ingresar.
+      </Card>
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
         eyebrow="Entrada"
         title="Solicitudes"
         description={`Consultas y pedidos de servicio de ${activeTenant?.name ?? "tu empresa"}.`}
         actions={
-          <Button
-            onClick={() => {
-              setShowForm((value) => !value);
-              createMutation.reset();
-            }}
-            variant={showForm ? "outline" : "primary"}
-          >
-            {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-            {showForm ? "Cancelar" : "Nueva solicitud"}
-          </Button>
+          canManage ? (
+            <Button
+              variant={showForm ? "outline" : "primary"}
+              onClick={() => setShowForm((current) => !current)}
+            >
+              {showForm ? (
+                <X className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Plus className="h-4 w-4" aria-hidden="true" />
+              )}
+              {showForm ? "Cancelar" : "Nueva solicitud"}
+            </Button>
+          ) : undefined
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard
-          label="Total"
-          value={total}
-          hint="Solicitudes registradas"
-          icon={Inbox}
-          className="border-ink/10 bg-ink/5"
-        />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Total" value={total} hint="Solicitudes registradas" icon={Inbox} />
+        <StatCard label="Nuevas" value={newCount} hint="Sin clasificar" icon={Inbox} tone="teal" />
         <StatCard
           label="Urgentes"
-          value={urgent}
+          value={urgentCount}
           hint="Prioridad máxima"
-          icon={Inbox}
-          tone="amber"
-          className="border-amber/20 bg-amber/10"
+          icon={AlertTriangle}
+          tone="danger"
         />
         <StatCard
           label="Convertidas"
-          value={converted}
+          value={convertedCount}
           hint="Ya son órdenes de trabajo"
-          icon={Inbox}
-          tone="teal"
-          className="border-teal/15 bg-teal/5"
+          icon={ArrowRightLeft}
+          tone="default"
         />
       </div>
 
-      {showForm && (
-        <Card className="border-teal/20 bg-teal/5">
-          <CardHeader>
-            <CardTitle>Nueva solicitud</CardTitle>
-            <p className="text-slate text-sm">Registrá la consulta antes de comprometer una visita.</p>
-          </CardHeader>
-          <CardContent>
-            <form
-              onSubmit={handleSubmit((values) => createMutation.mutateAsync(values))}
-              className="grid gap-4 sm:grid-cols-2"
-            >
-              <div>
-                <label htmlFor="customer_id" className="text-ink mb-1 block text-sm font-medium">
-                  Cliente *
-                </label>
-                <select
-                  id="customer_id"
-                  className="border-mist text-ink focus:border-teal min-h-11 w-full rounded-xl border bg-white px-3 text-sm"
-                  {...register("customer_id")}
-                >
-                  <option value="">Seleccionar cliente</option>
-                  {customers.map((customer) => (
-                    <option key={customer.id} value={customer.id}>
-                      {customer.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.customer_id && (
-                  <p className="mt-1 text-xs text-red-600">{errors.customer_id.message}</p>
-                )}
-              </div>
-              <div>
-                <label htmlFor="priority" className="text-ink mb-1 block text-sm font-medium">
-                  Prioridad
-                </label>
-                <select
-                  id="priority"
-                  className="border-mist text-ink focus:border-teal min-h-11 w-full rounded-xl border bg-white px-3 text-sm"
-                  {...register("priority")}
-                >
-                  {Object.entries(PRIORITY_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="sm:col-span-2">
-                <label htmlFor="title" className="text-ink mb-1 block text-sm font-medium">
-                  Motivo *
-                </label>
-                <Input
-                  id="title"
-                  placeholder="Ej.: El aire acondicionado no enfría"
-                  {...register("title")}
-                />
-                {errors.title && (
-                  <p className="mt-1 text-xs text-red-600">{errors.title.message}</p>
-                )}
-              </div>
-              <div>
-                <label htmlFor="source" className="text-ink mb-1 block text-sm font-medium">
-                  Origen
-                </label>
-                <select
-                  id="source"
-                  className="border-mist text-ink focus:border-teal min-h-11 w-full rounded-xl border bg-white px-3 text-sm"
-                  {...register("source")}
-                >
-                  <option value="manual">Carga manual</option>
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="phone">Teléfono</option>
-                  <option value="email">Email</option>
-                  <option value="web">Formulario web</option>
-                </select>
-              </div>
-              <div className="sm:col-span-2">
-                <label htmlFor="description" className="text-ink mb-1 block text-sm font-medium">
-                  Descripción
-                </label>
-                <textarea
-                  id="description"
-                  rows={3}
-                  className="border-mist text-ink placeholder:text-slate/60 focus:border-teal focus:ring-teal/20 w-full rounded-xl border bg-white px-3 py-2 text-sm outline-none focus:ring-2"
-                  {...register("description")}
-                />
-              </div>
-              {formError && (
-                <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700 sm:col-span-2">
-                  {formError}
-                </p>
-              )}
-              <div className="flex justify-end gap-2 sm:col-span-2">
-                <Button variant="outline" onClick={() => setShowForm(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={isSubmitting || createMutation.isPending}>
-                  {createMutation.isPending ? "Guardando..." : "Guardar solicitud"}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+      {showForm && canManage && (
+        <RequestForm
+          tenantId={activeTenantId}
+          customers={customers}
+          onCreated={() => setShowForm(false)}
+          onCancel={() => setShowForm(false)}
+        />
       )}
 
-      <Card>
-        {requestsQuery.isLoading ? (
-          <p className="text-slate p-6 text-sm">Cargando solicitudes...</p>
-        ) : requests.length === 0 ? (
-          <div className="p-6">
-            <EmptyState
-              icon={Inbox}
-              title="No hay solicitudes"
-              description="Registrá la primera consulta para iniciar el circuito."
-              action={
+      {requestsQuery.isLoading ? (
+        <RequestsSkeleton />
+      ) : requestsQuery.isError ? (
+        <Card role="alert" className="p-6">
+          <span
+            className={
+              errorStatus === 403
+                ? "bg-warning-soft text-warning-strong flex h-11 w-11 items-center justify-center rounded-full"
+                : "bg-danger-soft text-danger-strong flex h-11 w-11 items-center justify-center rounded-full"
+            }
+          >
+            {errorStatus === 403 ? (
+              <ShieldAlert className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <WifiOff className="h-5 w-5" aria-hidden="true" />
+            )}
+          </span>
+          <h2 className="text-text text-h4 mt-3">
+            {errorStatus === 403 ? "No tenés permiso para ver las solicitudes" : "No pudimos cargar las solicitudes"}
+          </h2>
+          <p className="text-text-2 text-small mt-1">
+            {errorStatus === 403
+              ? "Pedile a un responsable de la empresa que revise tu rol."
+              : errorMessage(requestsQuery.error, "Revisá la conexión e intentá de nuevo.")}
+          </p>
+          {errorStatus !== 403 && (
+            <Button variant="outline" className="mt-4" onClick={() => void requestsQuery.refetch()}>
+              Reintentar
+            </Button>
+          )}
+        </Card>
+      ) : requests.length === 0 ? (
+        <Card className="p-6">
+          <EmptyState
+            icon={Inbox}
+            title="No hay solicitudes"
+            description="Registrá la primera consulta para iniciar el circuito."
+            action={
+              canManage ? (
                 <Button onClick={() => setShowForm(true)}>
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4" aria-hidden="true" />
                   Nueva solicitud
                 </Button>
-              }
+              ) : undefined
+            }
+          />
+        </Card>
+      ) : (
+        <>
+          <RequestsToolbar
+            filters={filters}
+            onFiltersChange={updateFilters}
+            sort={sort}
+            direction={direction}
+            onSortChange={handleSortChange}
+            resultCount={sorted.length}
+            totalCount={requests.length}
+            activeFilterCount={activeFilterCount}
+            onClearFilters={() => {
+              setFilters(EMPTY_REQUEST_FILTERS);
+              setPage(1);
+            }}
+          />
+
+          {total > requests.length && (
+            <p className="text-text-2 bg-surface-2 rounded-ds-md px-3 py-2 text-caption">
+              La API devolvió las primeras {requests.length} de {total} solicitudes. Refiná la búsqueda o los
+              filtros para encontrar otras.
+            </p>
+          )}
+
+          {sorted.length === 0 ? (
+            <Card className="p-6">
+              <EmptyState
+                icon={SearchX}
+                title="Sin resultados"
+                description="No hay solicitudes que coincidan con la búsqueda y los filtros aplicados."
+                action={
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setFilters(EMPTY_REQUEST_FILTERS);
+                      setPage(1);
+                    }}
+                  >
+                    Limpiar filtros
+                  </Button>
+                }
+              />
+            </Card>
+          ) : (
+            <RequestsTable
+              page={pageSlice}
+              total={sorted.length}
+              pageSize={pageSize}
+              customerName={lookups.customerName}
+              sort={sort}
+              direction={direction}
+              onSortChange={handleSortChange}
+              onPageChange={setPage}
+              onPageSizeChange={(nextSize) => {
+                setPageSize(nextSize);
+                setPage(1);
+              }}
+              canConvert={canManage}
+              onConvert={(requestId) => convertMutation.mutate(requestId)}
+              convertingId={convertingId}
             />
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[820px] text-left text-sm">
-              <thead className="bg-paper text-slate text-xs tracking-wide uppercase">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Solicitud</th>
-                  <th className="px-4 py-3 font-medium">Cliente</th>
-                  <th className="px-4 py-3 font-medium">Prioridad</th>
-                  <th className="px-4 py-3 font-medium">Origen</th>
-                  <th className="px-4 py-3 font-medium">Estado</th>
-                  <th className="px-4 py-3 font-medium">Fecha</th>
-                  <th className="px-4 py-3 text-right font-medium">Acción</th>
-                </tr>
-              </thead>
-              <tbody className="divide-mist divide-y">
-                {requests.map((request) => (
-                  <tr key={request.id} className="hover:bg-paper/70 transition-colors">
-                    <td className="px-4 py-3">
-                      <p className="text-ink font-semibold">{request.title}</p>
-                      {request.description && (
-                        <p className="text-slate mt-0.5 max-w-xs truncate text-xs">
-                          {request.description}
-                        </p>
-                      )}
-                    </td>
-                    <td className="text-slate px-4 py-3">{customerName(request.customer_id)}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant={priorityVariant[request.priority] ?? "neutral"}>
-                        {PRIORITY_LABELS[request.priority] ?? request.priority}
-                      </Badge>
-                    </td>
-                    <td className="text-slate px-4 py-3">
-                      {sourceLabels[request.source] ?? request.source}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant={statusVariant[request.status] ?? "neutral"}>
-                        {REQUEST_STATUS_LABELS[request.status] ?? request.status}
-                      </Badge>
-                    </td>
-                    <td className="text-slate px-4 py-3 text-xs">
-                      {formatDate(request.created_at)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {request.status !== "converted" ? (
-                        <Button
-                          size="sm"
-                          onClick={() => convertMutation.mutate(request.id)}
-                          disabled={convertMutation.isPending}
-                        >
-                          Convertir en orden
-                          <ArrowRight className="h-3 w-3" />
-                        </Button>
-                      ) : (
-                        <span className="text-slate text-xs">Convertida</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
+          )}
+        </>
+      )}
     </div>
   );
 }
