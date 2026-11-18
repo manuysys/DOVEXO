@@ -1,59 +1,61 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2, X } from "lucide-react";
-import { useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
-
-import { api, errorMessage, type AutomationExecutionStatus } from "@/lib/api";
-import { useAuth } from "@/lib/auth";
 import {
-  ACTION_TYPE_LABELS,
-  AUTOMATION_ACTION_TYPES,
-  AUTOMATION_EVENT_TYPES,
-  EVENT_TYPE_LABELS,
-  EXECUTION_STATUS_LABELS,
-  automationFormSchema,
-  buildAutomationRuleInput,
-  type AutomationFormValues,
-} from "@/lib/automations";
-import { cn, formatDate } from "@/lib/utils";
+  AlertTriangle,
+  CheckCircle2,
+  MinusCircle,
+  Plus,
+  ShieldAlert,
+  Workflow,
+  X,
+} from "lucide-react";
+import { useState } from "react";
+
+import { AutomationExecutions } from "@/components/automations/automation-executions";
+import { AutomationRuleCard } from "@/components/automations/automation-rule-card";
+import { AutomationRuleForm } from "@/components/automations/automation-rule-form";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { PageHeader } from "@/components/ui/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
+import { StatCard } from "@/components/ui/stat-card";
+import {
+  api,
+  errorMessage,
+  type AutomationExecution,
+  type AutomationRule,
+} from "@/lib/api";
+import { buildAutomationRuleInput, type AutomationFormValues } from "@/lib/automations";
+import { useAuth } from "@/lib/auth";
+import { cn } from "@/lib/utils";
 
 const MANAGE_ROLES = ["owner", "admin"];
 
-const EXECUTION_STATUS_CLASSES: Record<AutomationExecutionStatus, string> = {
-  pending: "bg-amber-50 text-amber-800",
-  success: "bg-emerald-50 text-emerald-700",
-  failed: "bg-red-50 text-red-700",
-  skipped: "bg-zinc-100 text-zinc-700",
-};
+type RuleFilter = "all" | "active" | "inactive";
 
-const EMPTY_VALUES: AutomationFormValues = {
-  name: "",
-  event_type: "quote_approved",
-  action_type: "notify",
-  conditions: "",
-  action_config: "",
-  user_id: "",
-  active: true,
-};
-
-const inputClass =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-900 aria-[invalid=true]:border-red-600";
+const RULE_FILTERS: { value: RuleFilter; label: string }[] = [
+  { value: "all", label: "Todas" },
+  { value: "active", label: "Activas" },
+  { value: "inactive", label: "Inactivas" },
+];
 
 export default function AutomationsPage() {
   const { activeTenantId, tenants } = useAuth();
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<AutomationRule | null>(null);
+  const [ruleFilter, setRuleFilter] = useState<RuleFilter>("all");
   const activeTenant = tenants.find((tenant) => tenant.id === activeTenantId);
   const canManage = MANAGE_ROLES.includes(activeTenant?.role ?? "");
-
-  const form = useForm<AutomationFormValues>({
-    resolver: zodResolver(automationFormSchema),
-    defaultValues: EMPTY_VALUES,
-  });
-  const actionType = useWatch({ control: form.control, name: "action_type" });
 
   const rulesQuery = useQuery({
     queryKey: ["automations", activeTenantId],
@@ -79,7 +81,6 @@ export default function AutomationsPage() {
       api.automations.create(activeTenantId ?? "", buildAutomationRuleInput(values)),
     onSuccess: () => {
       void invalidateAutomations();
-      form.reset(EMPTY_VALUES);
       setShowForm(false);
     },
   });
@@ -91,415 +92,298 @@ export default function AutomationsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (ruleId: string) => api.automations.remove(activeTenantId ?? "", ruleId),
-    onSuccess: () => void invalidateAutomations(),
+    onSuccess: () => {
+      setPendingDelete(null);
+      void invalidateAutomations();
+    },
   });
 
   if (!activeTenantId) {
     return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-sm text-zinc-600">
-        No hay una empresa activa. Cerrá sesión y volvé a ingresar.
-      </div>
+      <EmptyState
+        icon={Workflow}
+        title="No hay una empresa activa"
+        description="Cerrá sesión y volvé a ingresar para gestionar las automatizaciones."
+      />
     );
   }
 
   if (!canManage) {
     return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-8 text-sm text-zinc-600">
-        Solo los administradores de la empresa pueden gestionar automatizaciones.
-      </div>
+      <EmptyState
+        icon={ShieldAlert}
+        title="Sin permiso para gestionar automatizaciones"
+        description="Solo owner y administración pueden crear, activar o eliminar reglas. Pedile acceso a un administrador de la empresa."
+      />
     );
   }
 
   const rules = rulesQuery.data ?? [];
   const executions = executionsQuery.data ?? [];
   const ruleNames = new Map(rules.map((rule) => [rule.id, rule.name]));
+
+  const activeCount = rules.filter((rule) => rule.active).length;
+  const successCount = executions.filter((execution) => execution.status === "success").length;
+  const failedCount = executions.filter((execution) => execution.status === "failed").length;
+  const skippedCount = executions.filter((execution) => execution.status === "skipped").length;
+
+  const visibleRules =
+    ruleFilter === "all"
+      ? rules
+      : rules.filter((rule) => (ruleFilter === "active" ? rule.active : !rule.active));
+
+  const orderedExecutions = [...executions].sort(
+    (left, right) => new Date(right.created_at).getTime() - new Date(left.created_at).getTime(),
+  );
+
+  const executionsByRule = new Map<string, AutomationExecution[]>();
+  const failedByRule = new Map<string, number>();
+  for (const execution of orderedExecutions) {
+    const list = executionsByRule.get(execution.rule_id) ?? [];
+    if (list.length < 5) list.push(execution);
+    executionsByRule.set(execution.rule_id, list);
+
+    if (execution.status === "failed") {
+      failedByRule.set(execution.rule_id, (failedByRule.get(execution.rule_id) ?? 0) + 1);
+    }
+  }
+
   const actionError = toggleMutation.error ?? deleteMutation.error;
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Automatizaciones</h1>
-          <p className="mt-1 text-sm text-zinc-600">
-            {rules.length} regla{rules.length === 1 ? "" : "s"} en{" "}
-            {activeTenant?.name ?? "tu empresa"}.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => {
-            setShowForm((value) => !value);
-            createMutation.reset();
-          }}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700"
-        >
-          {showForm ? (
-            <X className="h-4 w-4" aria-hidden="true" />
-          ) : (
-            <Plus className="h-4 w-4" aria-hidden="true" />
-          )}
-          {showForm ? "Cancelar" : "Nueva regla"}
-        </button>
+      <PageHeader
+        eyebrow="Automatizaciones"
+        title="Reglas que trabajan por vos"
+        description="Cada regla escucha un evento del negocio, evalúa sus condiciones y ejecuta una acción. Revisá qué está activo y qué falló."
+        actions={
+          <Button
+            onClick={() => {
+              setShowForm((value) => !value);
+              createMutation.reset();
+            }}
+          >
+            {showForm ? (
+              <X className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <Plus className="h-4 w-4" aria-hidden="true" />
+            )}
+            {showForm ? "Cancelar" : "Nueva regla"}
+          </Button>
+        }
+      />
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatCard
+          label="Reglas activas"
+          value={rulesQuery.isLoading ? "…" : activeCount}
+          hint={`${rules.length} en total`}
+          icon={Workflow}
+          tone="teal"
+        />
+        <StatCard
+          label="Ejecuciones exitosas"
+          value={executionsQuery.isLoading ? "…" : successCount}
+          hint="Últimas 50"
+          icon={CheckCircle2}
+          tone="default"
+        />
+        <StatCard
+          label="Ejecuciones con error"
+          value={executionsQuery.isLoading ? "…" : failedCount}
+          hint={failedCount > 0 ? "Revisá el historial" : "Sin errores recientes"}
+          icon={AlertTriangle}
+          tone={failedCount > 0 ? "danger" : "default"}
+        />
+        <StatCard
+          label="Omitidas"
+          value={executionsQuery.isLoading ? "…" : skippedCount}
+          hint="Acción no disponible"
+          icon={MinusCircle}
+          tone="amber"
+        />
       </div>
 
       {showForm && (
-        <form
-          onSubmit={form.handleSubmit((values) => createMutation.mutate(values))}
-          noValidate
-          aria-labelledby="automation-form-title"
-          className="rounded-2xl border border-zinc-200 bg-white p-5"
-        >
-          <h2 id="automation-form-title" className="text-sm font-semibold">
-            Nueva regla
-          </h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label htmlFor="automation-name" className="mb-1 block text-sm font-medium">
-                Nombre *
-              </label>
-              <input
-                id="automation-name"
-                aria-invalid={Boolean(form.formState.errors.name)}
-                aria-describedby={form.formState.errors.name ? "automation-name-error" : undefined}
-                className={inputClass}
-                {...form.register("name")}
-              />
-              <FieldError
-                id="automation-name-error"
-                message={form.formState.errors.name?.message}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="automation-event" className="mb-1 block text-sm font-medium">
-                Evento *
-              </label>
-              <select id="automation-event" className={inputClass} {...form.register("event_type")}>
-                {AUTOMATION_EVENT_TYPES.map((eventType) => (
-                  <option key={eventType} value={eventType}>
-                    {EVENT_TYPE_LABELS[eventType]}
-                  </option>
-                ))}
-              </select>
-              <FieldError
-                id="automation-event-error"
-                message={form.formState.errors.event_type?.message}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="automation-action" className="mb-1 block text-sm font-medium">
-                Acción *
-              </label>
-              <select
-                id="automation-action"
-                className={inputClass}
-                {...form.register("action_type")}
-              >
-                {AUTOMATION_ACTION_TYPES.map((actionType) => (
-                  <option key={actionType} value={actionType}>
-                    {ACTION_TYPE_LABELS[actionType]}
-                  </option>
-                ))}
-              </select>
-              <FieldError
-                id="automation-action-error"
-                message={form.formState.errors.action_type?.message}
-              />
-            </div>
-
-            {actionType === "notify_user" && (
-              <div className="sm:col-span-2">
-                <label htmlFor="automation-user" className="mb-1 block text-sm font-medium">
-                  ID del usuario destinatario (UUID) *
-                </label>
-                <input
-                  id="automation-user"
-                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                  autoComplete="off"
-                  spellCheck={false}
-                  aria-invalid={Boolean(form.formState.errors.user_id)}
-                  aria-describedby={
-                    form.formState.errors.user_id ? "automation-user-error" : undefined
-                  }
-                  className={cn(inputClass, "font-mono")}
-                  {...form.register("user_id")}
-                />
-                <p className="mt-1 text-xs text-zinc-500">
-                  También podés indicarlo en la configuración JSON como <code>user_id</code>.
-                </p>
-                <FieldError
-                  id="automation-user-error"
-                  message={form.formState.errors.user_id?.message}
-                />
-              </div>
-            )}
-
-            <div className="sm:col-span-2">
-              <label htmlFor="automation-conditions" className="mb-1 block text-sm font-medium">
-                Condiciones (JSON, opcional)
-              </label>
-              <textarea
-                id="automation-conditions"
-                rows={3}
-                spellCheck={false}
-                aria-invalid={Boolean(form.formState.errors.conditions)}
-                aria-describedby={
-                  form.formState.errors.conditions
-                    ? "automation-conditions-error"
-                    : "automation-conditions-help"
-                }
-                className={cn(inputClass, "font-mono")}
-                {...form.register("conditions")}
-              />
-              <p id="automation-conditions-help" className="mt-1 text-xs text-zinc-500">
-                Un objeto JSON. Vacío = la regla aplica siempre que ocurra el evento.
-              </p>
-              <FieldError
-                id="automation-conditions-error"
-                message={form.formState.errors.conditions?.message}
-              />
-            </div>
-
-            <div className="sm:col-span-2">
-              <label htmlFor="automation-config" className="mb-1 block text-sm font-medium">
-                Configuración de la acción (JSON, opcional)
-              </label>
-              <textarea
-                id="automation-config"
-                rows={3}
-                spellCheck={false}
-                aria-invalid={Boolean(form.formState.errors.action_config)}
-                aria-describedby={
-                  form.formState.errors.action_config ? "automation-config-error" : undefined
-                }
-                className={cn(inputClass, "font-mono")}
-                {...form.register("action_config")}
-              />
-              <FieldError
-                id="automation-config-error"
-                message={form.formState.errors.action_config?.message}
-              />
-            </div>
-
-            <div className="flex items-center gap-2 sm:col-span-2">
-              <input
-                id="automation-active"
-                type="checkbox"
-                className="h-4 w-4 rounded border-zinc-300"
-                {...form.register("active")}
-              />
-              <label htmlFor="automation-active" className="text-sm font-medium">
-                Activar al guardar
-              </label>
-            </div>
-          </div>
-
-          {createMutation.error && (
-            <p role="alert" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-              {errorMessage(createMutation.error, "No se pudo crear la regla")}
-            </p>
-          )}
-
-          <div className="mt-4 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={createMutation.isPending}
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-700 disabled:opacity-60"
-            >
-              {createMutation.isPending ? "Guardando..." : "Guardar regla"}
-            </button>
-          </div>
-        </form>
+        <AutomationRuleForm
+          pending={createMutation.isPending}
+          error={createMutation.error}
+          onCancel={() => {
+            setShowForm(false);
+            createMutation.reset();
+          }}
+          onSubmit={(values) => createMutation.mutate(values)}
+        />
       )}
 
       {actionError && (
-        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p
+          role="alert"
+          className="bg-danger-soft text-danger-strong rounded-ds-md px-4 py-3 text-sm"
+        >
           {errorMessage(actionError, "No se pudo completar la acción")}
         </p>
       )}
 
-      <section
-        aria-labelledby="rules-title"
-        className="rounded-2xl border border-zinc-200 bg-white"
-      >
-        <h2 id="rules-title" className="border-b border-zinc-200 px-4 py-3 text-sm font-semibold">
-          Reglas
-        </h2>
-
-        {rulesQuery.isLoading ? (
-          <p className="p-6 text-sm text-zinc-500">Cargando reglas...</p>
-        ) : rulesQuery.isError ? (
-          <p className="p-6 text-sm text-red-600">
-            {errorMessage(rulesQuery.error, "No se pudieron cargar las reglas.")}
-          </p>
-        ) : rules.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-sm font-medium text-zinc-800">Todavía no hay reglas</p>
-            <p className="mt-1 text-sm text-zinc-500">
-              Creá una regla para avisar automáticamente cuando ocurra algo en el negocio.
+      <section aria-labelledby="rules-title" className="space-y-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 id="rules-title" className="text-h3 text-text">
+              Reglas
+            </h2>
+            <p className="text-text-2 mt-1 text-sm">
+              {activeCount} activa{activeCount === 1 ? "" : "s"} de {rules.length}. Las reglas
+              inactivas no se ejecutan.
             </p>
           </div>
-        ) : (
-          <ul className="divide-y divide-zinc-100">
-            {rules.map((rule) => {
-              const togglePending =
-                toggleMutation.isPending && toggleMutation.variables === rule.id;
-              const deletePending =
-                deleteMutation.isPending && deleteMutation.variables === rule.id;
-              return (
-                <li
-                  key={rule.id}
-                  className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="min-w-0 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium text-zinc-900">{rule.name}</p>
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-xs font-medium",
-                          rule.active
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-zinc-100 text-zinc-700",
-                        )}
-                      >
-                        {rule.active ? "Activa" : "Inactiva"}
-                      </span>
-                    </div>
-                    <p className="text-sm text-zinc-600">
-                      {EVENT_TYPE_LABELS[rule.event_type]} → {ACTION_TYPE_LABELS[rule.action_type]}
-                    </p>
-                    <p className="text-xs text-zinc-500">
-                      Actualizada {formatDate(rule.updated_at)}
-                    </p>
-                  </div>
 
-                  <div className="flex shrink-0 items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => toggleMutation.mutate(rule.id)}
-                      disabled={togglePending}
-                      aria-label={`${rule.active ? "Desactivar" : "Activar"} regla ${rule.name}`}
-                      className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-60"
-                    >
-                      {togglePending ? "Guardando..." : rule.active ? "Desactivar" : "Activar"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (window.confirm(`¿Eliminar la regla "${rule.name}"?`)) {
-                          deleteMutation.mutate(rule.id);
-                        }
-                      }}
-                      disabled={deletePending}
-                      aria-label={`Eliminar regla ${rule.name}`}
-                      className="rounded-lg p-2 text-zinc-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-60"
-                    >
-                      <Trash2 className="h-4 w-4" aria-hidden="true" />
-                    </button>
-                  </div>
-                </li>
-              );
-            })}
+          {rules.length > 0 && (
+            <div
+              role="group"
+              aria-label="Filtrar reglas por estado"
+              className="flex flex-wrap gap-2"
+            >
+              {RULE_FILTERS.map((option) => {
+                const count =
+                  option.value === "all"
+                    ? rules.length
+                    : rules.filter((rule) =>
+                        option.value === "active" ? rule.active : !rule.active,
+                      ).length;
+                const active = ruleFilter === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setRuleFilter(option.value)}
+                    className={cn(
+                      "focus-visible:ring-primary rounded-full border px-3 py-1.5 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none",
+                      active
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-surface text-text-2 hover:bg-surface-2",
+                    )}
+                  >
+                    {option.label} <span className="numeric">({count})</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {rulesQuery.isLoading ? (
+          <div className="space-y-3">
+            <Skeleton className="h-44 w-full" />
+            <Skeleton className="h-44 w-full" />
+          </div>
+        ) : rulesQuery.isError ? (
+          <div className="border-border bg-surface rounded-ds-lg border p-5">
+            <p role="alert" className="text-danger text-sm">
+              {errorMessage(rulesQuery.error, "No se pudieron cargar las reglas.")}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3"
+              onClick={() => void rulesQuery.refetch()}
+            >
+              Reintentar
+            </Button>
+          </div>
+        ) : rules.length === 0 ? (
+          <EmptyState
+            icon={Workflow}
+            title="Todavía no hay reglas"
+            description="Creá una regla para avisar automáticamente cuando se apruebe un presupuesto, cambie una orden o se registre un pago."
+            action={
+              <Button onClick={() => setShowForm(true)}>
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Nueva regla
+              </Button>
+            }
+          />
+        ) : visibleRules.length === 0 ? (
+          <p className="text-text-2 text-sm">
+            No hay reglas {ruleFilter === "active" ? "activas" : "inactivas"} en este momento.
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {visibleRules.map((rule) => (
+              <li key={rule.id}>
+                <AutomationRuleCard
+                  rule={rule}
+                  recentExecutions={executionsByRule.get(rule.id) ?? []}
+                  failedCount={failedByRule.get(rule.id) ?? 0}
+                  togglePending={
+                    toggleMutation.isPending && toggleMutation.variables === rule.id
+                  }
+                  deletePending={
+                    deleteMutation.isPending &&
+                    pendingDelete !== null &&
+                    pendingDelete.id === rule.id
+                  }
+                  onToggle={() => toggleMutation.mutate(rule.id)}
+                  onDelete={() => {
+                    deleteMutation.reset();
+                    setPendingDelete(rule);
+                  }}
+                />
+              </li>
+            ))}
           </ul>
         )}
       </section>
 
-      <section
-        aria-labelledby="executions-title"
-        className="rounded-2xl border border-zinc-200 bg-white"
+      <AutomationExecutions
+        executions={executions}
+        ruleNames={ruleNames}
+        loading={executionsQuery.isLoading}
+        error={executionsQuery.error}
+        onRetry={() => void executionsQuery.refetch()}
+      />
+
+      <Dialog
+        open={pendingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
       >
-        <div className="border-b border-zinc-200 px-4 py-3">
-          <h2 id="executions-title" className="text-sm font-semibold">
-            Historial de ejecuciones
-          </h2>
-          <p className="text-xs text-zinc-500">Últimas 50 ejecuciones.</p>
-        </div>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar regla</DialogTitle>
+            <DialogDescription>
+              Se va a eliminar{" "}
+              <span className="text-text font-semibold">{pendingDelete?.name ?? "la regla"}</span>.
+              El historial de ejecuciones se conserva. Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
 
-        {executionsQuery.isLoading ? (
-          <p className="p-6 text-sm text-zinc-500">Cargando historial...</p>
-        ) : executionsQuery.isError ? (
-          <p className="p-6 text-sm text-red-600">
-            {errorMessage(executionsQuery.error, "No se pudo cargar el historial.")}
-          </p>
-        ) : executions.length === 0 ? (
-          <p className="p-6 text-sm text-zinc-500">Todavía no se ejecutó ninguna automatización.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="border-b border-zinc-200 bg-zinc-50 text-xs tracking-wide text-zinc-500 uppercase">
-                <tr>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Fecha
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Regla
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Evento
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Estado
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Intentos
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Error
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100">
-                {executions.map((execution) => (
-                  <tr key={execution.id} className="align-top hover:bg-zinc-50">
-                    <td className="px-4 py-3 text-xs whitespace-nowrap text-zinc-600">
-                      <time dateTime={execution.created_at}>
-                        {formatDate(execution.created_at)}
-                      </time>
-                    </td>
-                    <td className="px-4 py-3 text-zinc-800">
-                      {ruleNames.get(execution.rule_id) ?? "Regla eliminada"}
-                    </td>
-                    <td className="px-4 py-3 text-zinc-600">
-                      {EVENT_TYPE_LABELS[execution.event_type]}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-1 text-xs font-medium",
-                          EXECUTION_STATUS_CLASSES[execution.status],
-                        )}
-                      >
-                        {EXECUTION_STATUS_LABELS[execution.status]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-zinc-600">{execution.attempts}</td>
-                    <td className="max-w-xs px-4 py-3 text-xs text-red-700">
-                      {execution.error ?? "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+          {deleteMutation.error && (
+            <p
+              role="alert"
+              className="bg-danger-soft text-danger-strong mt-4 rounded-lg px-3 py-2 text-sm"
+            >
+              {errorMessage(deleteMutation.error, "No se pudo eliminar la regla.")}
+            </p>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingDelete(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="danger"
+              disabled={deleteMutation.isPending}
+              onClick={() => {
+                if (pendingDelete) deleteMutation.mutate(pendingDelete.id);
+              }}
+            >
+              {deleteMutation.isPending ? "Eliminando..." : "Eliminar regla"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  );
-}
-
-function FieldError({ id, message }: { id: string; message: string | undefined }) {
-  if (!message) return null;
-  return (
-    <p id={id} className="mt-1 text-xs text-red-600">
-      {message}
-    </p>
   );
 }
