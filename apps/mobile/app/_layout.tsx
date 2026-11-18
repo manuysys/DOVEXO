@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AuthProvider } from "@/src/lib/auth";
-import { colors } from "@/src/lib/theme";
+import { SyncProvider } from "@/src/lib/sync";
+import { colors } from "@/src/theme/tokens";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -32,13 +33,16 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <StatusBar style="dark" />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.paper },
-            }}
-          />
+          <SyncProvider>
+            <StatusBar style="dark" />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: colors.bg },
+                animation: "slide_from_right",
+              }}
+            />
+          </SyncProvider>
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

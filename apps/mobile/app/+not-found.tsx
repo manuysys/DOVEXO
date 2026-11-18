@@ -1,17 +1,21 @@
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors, spacing, type } from "@/src/lib/theme";
+import { Button, EmptyState } from "@/src/components/ui";
+import { colors, spacing } from "@/src/theme/tokens";
 
 export default function NotFoundScreen() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text style={styles.code}>404</Text>
-      <Text style={styles.title}>No encontramos esta pantalla</Text>
-      <Text style={styles.text}>Volvé al inicio de DOVEXO.</Text>
-      <Link href="/" style={styles.link}>
-        <Text style={styles.linkText}>Ir al inicio</Text>
-      </Link>
+      <EmptyState
+        icon="compass-outline"
+        title="No encontramos esta pantalla"
+        description="El enlace puede estar vencido o la pantalla cambió de lugar."
+      />
+      <Button title="Ir al inicio" onPress={() => router.replace("/")} variant="outline" />
     </View>
   );
 }
@@ -19,15 +23,16 @@ export default function NotFoundScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
+    alignItems: "stretch",
     justifyContent: "center",
-    padding: spacing.xl,
-    backgroundColor: colors.paper,
-    gap: spacing.sm,
+    padding: spacing[4],
+    backgroundColor: colors.bg,
+    gap: spacing[3],
   },
-  code: { color: colors.teal, fontSize: type.tiny, fontWeight: "800", letterSpacing: 2 },
-  title: { color: colors.ink, fontSize: type.title, fontWeight: "700", textAlign: "center" },
-  text: { color: colors.slate, fontSize: type.body, textAlign: "center" },
-  link: { marginTop: spacing.md },
-  linkText: { color: colors.teal, fontSize: type.body, fontWeight: "700" },
+  code: {
+    fontSize: 44,
+    fontWeight: "800",
+    color: colors.border,
+    textAlign: "center",
+  },
 });

@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system/legacy";
 
-import { api } from "@/src/lib/api";
+import { api, ApiError } from "@/src/lib/api";
 
 export type PendingAction =
   | {
@@ -10,6 +10,8 @@ export type PendingAction =
       orderId: string;
       notes: string;
       createdAt: string;
+      attempts?: number;
+      lastError?: string;
     }
   | {
       id: string;
@@ -19,6 +21,8 @@ export type PendingAction =
       quantity: string;
       unit: string;
       createdAt: string;
+      attempts?: number;
+      lastError?: string;
     }
   | {
       id: string;
@@ -28,7 +32,18 @@ export type PendingAction =
       name: string;
       mimeType: string;
       createdAt: string;
+      attempts?: number;
+      lastError?: string;
     };
+
+export type FlushResult = {
+  /** Acciones enviadas y confirmadas por el servidor. */
+  sent: number;
+  /** Acciones que siguen en la cola esperando red. */
+  pending: number;
+  /** Acciones rechazadas por el servidor: reintentar no las va a resolver. */
+  failed: number;
+};
 
 function key(tenantId: string) {
   return `dovexo.offline.${tenantId}`;
@@ -38,7 +53,8 @@ export async function getPendingActions(tenantId: string): Promise<PendingAction
   const raw = await AsyncStorage.getItem(key(tenantId));
   if (!raw) return [];
   try {
-    return JSON.parse(raw) as PendingAction[];
+    const parsed = JSON.parse(raw) as PendingAction[];
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
@@ -58,46 +74,101 @@ export async function pendingCount(tenantId: string) {
   return (await getPendingActions(tenantId)).length;
 }
 
-/** Intenta enviar la cola. Si falla por red, deja el resto para el próximo intento. */
-export async function flushPendingActions(tenantId: string): Promise<number> {
+export async function removeAction(tenantId: string, actionId: string): Promise<PendingAction[]> {
   const actions = await getPendingActions(tenantId);
-  if (actions.length === 0) return 0;
+  const next = actions.filter((action) => action.id !== actionId);
+  await savePendingActions(tenantId, next);
+  return next;
+}
+
+/**
+ * Un error se puede reintentar si es de red, del servidor o de límite de
+ * peticiones. Un 4xx de validación no se resuelve reintentando: se informa.
+ */
+export function isRetryableError(error: unknown): boolean {
+  if (error instanceof ApiError) {
+    return error.status >= 500 || error.status === 408 || error.status === 429;
+  }
+  return true;
+}
+
+export function errorMessage(error: unknown): string {
+  if (error instanceof ApiError) return error.message;
+  if (error instanceof Error && error.message) return error.message;
+  return "No pudimos completar la operación.";
+}
+
+export function hasPermanentFailure(action: PendingAction): boolean {
+  return Boolean(action.lastError);
+}
+
+async function sendAction(action: PendingAction, tenantId: string) {
+  if (action.type === "note") {
+    await api.techNote(tenantId, action.orderId, action.notes, action.id);
+    return;
+  }
+  if (action.type === "material") {
+    await api.techCreateMaterial(
+      tenantId,
+      action.orderId,
+      {
+        description: action.description,
+        quantity: action.quantity,
+        unit: action.unit,
+      },
+      action.id,
+    );
+    return;
+  }
+  await api.techUploadAttachment(
+    tenantId,
+    action.orderId,
+    { uri: action.uri, name: action.name, type: action.mimeType },
+    action.id,
+  );
+  await FileSystem.deleteAsync(action.uri, { idempotent: true }).catch(() => undefined);
+}
+
+/**
+ * Intenta enviar la cola completa.
+ *
+ * - Error de red o 5xx: la acción queda pendiente para el próximo intento.
+ * - Error 4xx: la acción queda marcada con `lastError` para que la interfaz
+ *   muestre el fallo real en lugar de un éxito falso.
+ * - El orden se conserva: si una acción falla por red, se corta el envío para
+ *   no adelantar acciones posteriores de la misma orden.
+ */
+export async function flushPendingActions(tenantId: string): Promise<FlushResult> {
+  const actions = await getPendingActions(tenantId);
+  if (actions.length === 0) return { sent: 0, pending: 0, failed: 0 };
 
   const remaining: PendingAction[] = [];
   let sent = 0;
+  let stopped = false;
 
   for (const action of actions) {
-    try {
-      if (action.type === "note") {
-        await api.techNote(tenantId, action.orderId, action.notes, action.id);
-      } else if (action.type === "material") {
-        await api.techCreateMaterial(
-          tenantId,
-          action.orderId,
-          {
-            description: action.description,
-            quantity: action.quantity,
-            unit: action.unit,
-          },
-          action.id,
-        );
-      } else {
-        await api.techUploadAttachment(
-          tenantId,
-          action.orderId,
-          { uri: action.uri, name: action.name, type: action.mimeType },
-          action.id,
-        );
-        await FileSystem.deleteAsync(action.uri, { idempotent: true }).catch(
-          () => undefined,
-        );
-      }
-      sent += 1;
-    } catch {
+    if (stopped) {
       remaining.push(action);
+      continue;
+    }
+    try {
+      await sendAction(action, tenantId);
+      sent += 1;
+    } catch (error) {
+      const retryable = isRetryableError(error);
+      remaining.push({
+        ...action,
+        attempts: (action.attempts ?? 0) + 1,
+        lastError: retryable ? action.lastError : errorMessage(error),
+      });
+      if (retryable) stopped = true;
     }
   }
 
   await savePendingActions(tenantId, remaining);
-  return sent;
+  return {
+    sent,
+    pending: remaining.filter((action) => !action.lastError).length,
+    failed: remaining.filter((action) => Boolean(action.lastError)).length,
+  };
 }
