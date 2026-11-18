@@ -13,25 +13,25 @@ type StatCardProps = {
 };
 
 const toneClasses: Record<NonNullable<StatCardProps["tone"]>, string> = {
-  default: "bg-ink/5 text-ink",
-  teal: "bg-teal/10 text-teal",
-  amber: "bg-amber/15 text-amber-700",
-  danger: "bg-red-100 text-red-700",
+  default: "bg-surface-2 text-text-2",
+  teal: "bg-accent-teal/10 text-accent-teal",
+  amber: "bg-warning-soft text-warning-strong",
+  danger: "bg-danger-soft text-danger-strong",
 };
 
 export function StatCard({ label, value, hint, icon: Icon, tone = "default", className }: StatCardProps) {
   return (
-    <div className={cn("border-mist rounded-2xl border bg-white p-5", className)}>
+    <div className={cn("border-border bg-surface rounded-ds-lg border p-5 shadow-card", className)}>
       <div className="flex items-start justify-between gap-3">
-        <p className="text-slate text-xs font-medium tracking-wide uppercase">{label}</p>
+        <p className="text-text-2 text-label">{label}</p>
         {Icon && (
-          <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl", toneClasses[tone])}>
+          <span className={cn("flex h-9 w-9 items-center justify-center rounded-ds-md", toneClasses[tone])}>
             <Icon className="h-4 w-4" aria-hidden="true" />
           </span>
         )}
       </div>
-      <p className="text-ink font-display mt-3 text-2xl font-semibold tracking-tight">{value}</p>
-      {hint && <p className="text-slate mt-1 text-xs">{hint}</p>}
+      <p className="text-text font-display numeric mt-3 text-2xl font-semibold tracking-tight">{value}</p>
+      {hint && <p className="text-text-2 mt-1 text-xs">{hint}</p>}
     </div>
   );
 }

@@ -9,6 +9,47 @@
   --brand-paper: #f7f5f0;
   --brand-mist: #e7e2d8;
   --brand-slate: #5b6b7a;
+
+  /* Design system DOVEXO — Fase 1 (2026-11-18) */
+  --ds-primary: #315efb;
+  --ds-primary-dark: #1e3a8a;
+  --ds-deep: #17243d;
+  --ds-secondary: #4778ff;
+  --ds-teal: #11a69a;
+  --ds-violet: #7459d9;
+  --ds-cyan: #4cb7d8;
+  --ds-success: #16865a;
+  --ds-success-soft: #e7f5ee;
+  --ds-success-strong: #0f5c3d;
+  --ds-warning: #d69b28;
+  --ds-warning-soft: #fbf3e2;
+  --ds-warning-strong: #7a5312;
+  --ds-danger: #d94848;
+  --ds-danger-soft: #fdecec;
+  --ds-danger-strong: #8f2b2b;
+  --ds-info: #315efb;
+  --ds-info-soft: #eaefff;
+  --ds-info-strong: #1e3a8a;
+  --ds-bg: #f5f7fa;
+  --ds-surface: #ffffff;
+  --ds-surface-2: #f0f3f8;
+  --ds-border: #e3e8f0;
+  --ds-text: #182235;
+  --ds-text-2: #667085;
+
+  --ds-radius-sm: 8px;
+  --ds-radius-md: 12px;
+  --ds-radius-lg: 16px;
+  --ds-radius-xl: 20px;
+
+  --ds-shadow-sm: 0 1px 2px rgb(24 34 53 / 0.06);
+  --ds-shadow-md: 0 4px 12px -2px rgb(24 34 53 / 0.08), 0 1px 3px rgb(24 34 53 / 0.05);
+  --ds-shadow-lg: 0 16px 40px -12px rgb(24 34 53 / 0.18), 0 2px 6px rgb(24 34 53 / 0.06);
+
+  --ds-duration-fast: 140ms;
+  --ds-duration-base: 200ms;
+  --ds-duration-slow: 280ms;
+  --ds-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 @theme inline {
@@ -23,6 +64,112 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-space-grotesk);
+
+  /* Design system DOVEXO */
+  --color-primary: var(--ds-primary);
+  --color-primary-dark: var(--ds-primary-dark);
+  --color-deep: var(--ds-deep);
+  --color-secondary: var(--ds-secondary);
+  --color-accent-teal: var(--ds-teal);
+  --color-violet: var(--ds-violet);
+  --color-cyan: var(--ds-cyan);
+  --color-success: var(--ds-success);
+  --color-success-soft: var(--ds-success-soft);
+  --color-success-strong: var(--ds-success-strong);
+  --color-warning: var(--ds-warning);
+  --color-warning-soft: var(--ds-warning-soft);
+  --color-warning-strong: var(--ds-warning-strong);
+  --color-danger: var(--ds-danger);
+  --color-danger-soft: var(--ds-danger-soft);
+  --color-danger-strong: var(--ds-danger-strong);
+  --color-info: var(--ds-info);
+  --color-info-soft: var(--ds-info-soft);
+  --color-info-strong: var(--ds-info-strong);
+  --color-bg: var(--ds-bg);
+  --color-surface: var(--ds-surface);
+  --color-surface-2: var(--ds-surface-2);
+  --color-border: var(--ds-border);
+  --color-text: var(--ds-text);
+  --color-text-2: var(--ds-text-2);
+
+  --radius-ds-sm: var(--ds-radius-sm);
+  --radius-ds-md: var(--ds-radius-md);
+  --radius-ds-lg: var(--ds-radius-lg);
+  --radius-ds-xl: var(--ds-radius-xl);
+
+  --shadow-card: var(--ds-shadow-sm);
+  --shadow-raised: var(--ds-shadow-md);
+  --shadow-pop: var(--ds-shadow-lg);
+}
+
+@layer utilities {
+  .text-display {
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 5vw, 4rem);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+  }
+
+  .text-h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3vw, 2.5rem);
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    font-weight: 600;
+  }
+
+  .text-h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.625rem, 2.4vw, 2rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+
+  .text-h3 {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 1.8vw, 1.5rem);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+  }
+
+  .text-h4 {
+    font-size: 1.125rem;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+
+  .text-body {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+
+  .text-small {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .text-caption {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .text-label {
+    font-size: 0.75rem;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .numeric {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
 }
 
 * {
