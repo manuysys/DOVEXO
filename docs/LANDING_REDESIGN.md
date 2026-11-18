@@ -166,6 +166,37 @@ no se elige una opción en este documento.
 
 ---
 
+## 5.1. Secciones posteriores al hero (2026-11-18)
+
+Se rediseñaron las secciones restantes de la landing con los tokens nuevos:
+
+- **Section heading / Reveal / Marquee**: tipografía del design system, reveal
+  de 0,45 s con 12 px de desplazamiento, respeto a `prefers-reduced-motion` y
+  marquee fino en `primary`.
+- **Trust strip**: 4 pilares comprobables (aislamiento por empresa, accesos por
+  rol, links de presupuesto revocables, historial auditado), sin logos ni
+  certificaciones inventadas.
+- **Journey**: línea de tiempo estática en `bg-deep`, sin parallax ni GSAP.
+- **Features**: 4 filas alternadas texto/composición en lugar de cards
+  idénticas; WhatsApp aparece como "requiere configuración".
+- **Product tour**: 6 tabs con Radix (Dashboard, Órdenes, Presupuestos, Agenda,
+  Técnico, Portal), altura estable en desktop, scroll horizontal en mobile y
+  transición de 200 ms.
+- **Pricing**: jerarquía por borde/etiqueta, tabla comparativa accesible,
+  límites con números tabulares y notas honestas sobre enforcement y trial.
+- **FAQ**: acordeón nativo con foco visible y encabezado sticky.
+- **CTA final y footer**: dos acciones claras, 4 columnas y enlaces legales
+  existentes.
+
+**Riesgos conocidos:** `lib/marketing/content.ts` conserva exports sin uso
+(`tourTabs`, `productStats`, `featureCards`, `trustItems`) que conviene limpiar;
+las clases custom de tipografía (`text-h1`, `text-body`) se interpretan como
+color en `tailwind-merge` y deben combinarse con template literals; `Reveal`
+renderiza `opacity: 0` en SSR hasta que hidrata. La verificación visual de estas
+secciones queda pendiente.
+
+---
+
 ## 6. Evidencia de verificación
 
 ### Capturas locales

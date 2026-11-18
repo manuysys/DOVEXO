@@ -524,7 +524,7 @@ hacer:
 | Alias legacy | **Implementado** (transitorio) | `ink/teal/amber/paper/mist/slate` conviven con los nuevos; se eliminan al final de la Fase 8 |
 | Escala tipográfica como utilidades | **Implementado** | `.text-display`, `.text-h1`…`.text-h4`, `.text-body`, `.text-small`, `.text-caption`, `.text-label`, `.numeric` |
 | `tabular-nums` en tablas e importes | **Parcial** | Utilidad `.numeric` creada y usada en `StatCard`; falta aplicarla en tablas e importes de módulos |
-| Migración de los 13 componentes a tokens nuevos | **Parcial** | Migrados Button, Card, Badge, Input y StatCard con stories en Storybook; faltan los 8 restantes |
+| Migración de los 13 componentes a tokens nuevos | **Implementado** | Los 13 componentes de `components/ui/` usan tokens nuevos; Button, Card, Badge, Input y StatCard tienen stories en Storybook |
 | Componentes planificados (sección 5.2) | **Pendiente** | Ninguno existe todavía en el repositorio |
 | Matriz de estados aplicada por módulo | **Parcial** | Hay estados ad-hoc; falta `ErrorState`, `PermissionState`, `OfflineBanner`, `SyncStatus` |
 | `prefers-reduced-motion` en producto | **Implementado** | Regla global `*` en `globals.css`; bloque aparte para `.mk-*` |
@@ -533,6 +533,13 @@ hacer:
 
 El avance de la migración se registra en [`PROJECT_STATUS.md`](PROJECT_STATUS.md);
 este documento describe el destino, no el presente.
+
+**Nota de implementación (2026-11-18):** las utilidades de tipografía
+(`.text-h1`, `.text-body`, `.text-label`, etc.) se definen en `@layer utilities`
+y `tailwind-merge` las interpreta como clases de color. Al combinarlas con
+`cn()` junto a un `text-<color>`, se pierde una de las dos. Usar template
+literals o concatenación simple para esos casos, o aplicar el color en un
+elemento padre.
 
 ---
 
