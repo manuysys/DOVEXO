@@ -370,7 +370,7 @@ Una auditoría externa del 2026-11-14 reportó cuatro hallazgos. Verificación c
 | IDs de orden duplicados en la landing (OT-0141/OT-0142) | El HTML desplegado no contiene esos IDs; usa `OT-2026-0001..0003` desde `apps/web/src/lib/marketing/demo-data.ts` | No reproducible en el deploy actual; cerrado |
 | Identidad "Arreglo" en la release del APK | `mobile-apk-4` y `mobile-apk-5` ya se llaman "DOVEXO Android APK (debug)"; solo la release histórica `mobile-apk-3` conserva el título viejo | Corregido en la release actual |
 | Enlace de descarga del APK roto | Las 3 releases tienen `app-release.apk` adjunto (30.819.479 bytes); el enlace roto era el mirror de tmpfiles.org que escribía `mirror-apk.yml`. Workflow eliminado y links actualizados a `mobile-apk-5`. SHA-256: `437FE51EA5284EBD5F9FCE740DA738610B7A9142017CF8096A4BD078AD6EE3D3` | Corregido |
-| Credenciales de demo expuestas (P0-D) | La demo usa datos ficticios, tiene reset por API y rate limiting, pero las credenciales son públicas en landing y docs | Decisión pendiente del fundador: mantener demo abierta con aviso "datos de ejemplo" y separar credenciales de desarrollo, o cerrar el acceso |
+| Credenciales de demo expuestas (P0-D) | La demo usa datos ficticios, tiene reset por API y rate limiting, pero las credenciales son públicas en landing y docs | Decidido 2026-11-17: se mantiene abierta con aviso visible "datos de ejemplo" en el panel del tenant `servicios-demo`; credenciales de plataforma fuera de docs comerciales |
 
 **Hallazgo propio (backup):** las 6 corridas del workflow `Database backup`
 figuran "success" pero **no producen artifact**: `NEON_DATABASE_URL` no está

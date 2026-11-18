@@ -162,11 +162,13 @@
   el mirror de tmpfiles.org que escribía `mirror-apk.yml` (host temporal que expira).
   Workflow eliminado, links actualizados a `mobile-apk-5` y SHA-256 documentado en
   `MOBILE_BUILD.md`. Las releases tienen el asset `app-release.apk` adjunto.
-- **Credenciales de demo públicas (P0-D): decisión pendiente del fundador.** Hoy la
-  demo usa datos ficticios, tiene reset por API y rate limiting. Recomendación:
-  mantenerla abierta durante la preventa con aviso visible de "datos de ejemplo" y
-  separar credenciales de desarrollo de la documentación comercial; alternativa: cerrar
-  el acceso y entregar credenciales por pedido.
+- **Credenciales de demo públicas (P0-D): decisión tomada el 2026-11-17.** Se
+  mantiene la demo abierta durante la preventa con un aviso visible en el panel
+  ("Demo de DOVEXO: datos de ejemplo, no cargar información real") implementado en
+  `app-shell.tsx` para el tenant `servicios-demo`. Las credenciales de plataforma
+  (`founder@`) no están en la documentación comercial de `docs/GO_TO_MARKET/`; solo
+  la cuenta demo pública aparece en el guion de demo. Datos ficticios, reset por
+  API y rate limiting siguen vigentes.
 - **Turno demo relativo calculado en UTC.** `_tomorrow_at` en el seed usa la fecha
   UTC: si la demo se resetea después de las 21:00 de Argentina, el turno "de mañana"
   cae pasado mañana a las 10:00 ARG. Impacto cosmético en la demo; no afecta datos ni

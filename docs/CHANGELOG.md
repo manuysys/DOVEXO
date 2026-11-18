@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-17 — Decisión P0-D: aviso de demo
+
+- Decisión sobre credenciales de demo (auditoría externa): se mantiene la demo
+  abierta durante la preventa con un aviso visible en el panel para el tenant
+  `servicios-demo` ("datos de ejemplo, no cargar información real"),
+  implementado en `apps/web/src/components/app-shell.tsx`.
+- Las credenciales de plataforma (`founder@`) no figuran en la documentación
+  comercial de `docs/GO_TO_MARKET/`; solo la cuenta demo pública aparece en el
+  guion de demo.
+- Sin cambios en API ni base de datos.
+
 ## 2026-11-15 — Paquete de preventa, auditoría externa y verificación integral
 
 - Paquete comercial `docs/GO_TO_MARKET/` (14 archivos): perfil de cliente,
