@@ -167,3 +167,7 @@
   mantenerla abierta durante la preventa con aviso visible de "datos de ejemplo" y
   separar credenciales de desarrollo de la documentación comercial; alternativa: cerrar
   el acceso y entregar credenciales por pedido.
+- **Turno demo relativo calculado en UTC.** `_tomorrow_at` en el seed usa la fecha
+  UTC: si la demo se resetea después de las 21:00 de Argentina, el turno "de mañana"
+  cae pasado mañana a las 10:00 ARG. Impacto cosmético en la demo; no afecta datos ni
+  seguridad. Si molesta, calcularlo con `America/Argentina/Buenos_Aires`.
