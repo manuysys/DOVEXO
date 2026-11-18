@@ -18,8 +18,8 @@ jobs:
       - name: Dump database
         run: |
           if [ -z "$DATABASE_URL" ]; then
-            echo "::warning::NEON_DATABASE_URL no configurada; no se respaldo nada. Ver docs/BACKUP_RESTORE.md."
-            exit 0
+            echo "::error::NEON_DATABASE_URL no configurada; el backup no se ejecuto. Configurar el secreto en Settings > Secrets and variables > Actions. Ver docs/BACKUP_RESTORE.md."
+            exit 1
           fi
           pg_dump "$DATABASE_URL" \
             --format=custom \
