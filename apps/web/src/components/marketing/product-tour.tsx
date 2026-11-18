@@ -3,31 +3,20 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import { Check } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import type { ReactNode } from "react";
+import Image from "next/image";
 import { useState } from "react";
 
-import {
-  demoOperation,
-  demoRefs,
-  getCustomer,
-  getOrder,
-  getQuote,
-  getQuoteBalance,
-  getTechnician,
-} from "@/lib/marketing/demo-data";
-import { formatArs } from "@/lib/marketing/pricing";
-
-import {
-  AgendaMockup,
-  MockFrame,
-  OrdersMockup,
-  PanelMockup,
-  PhoneTechMockup,
-  QuoteMockup,
-} from "./mockups";
 import { SectionHeading } from "./section-heading";
 
 type TourTabId = "dashboard" | "orders" | "quotes" | "agenda" | "tech" | "portal";
+
+type TourVisual = {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+  phone?: boolean;
+};
 
 type TourTab = {
   id: TourTabId;
@@ -35,63 +24,8 @@ type TourTab = {
   title: string;
   text: string;
   bullets: readonly string[];
-  visual: ReactNode;
+  visual: TourVisual;
 };
-
-/** Vista del portal con los datos del mismo dataset: turno, presupuesto y saldo. */
-function PortalPreview({ className }: { className?: string }) {
-  const customer = getCustomer(demoRefs.customerId);
-  const quote = getQuote(demoRefs.pendingQuoteId);
-  const appointment = demoOperation.appointments.find(
-    (item) => item.orderId === demoRefs.activeOrderId,
-  );
-  const balance = getQuoteBalance(demoRefs.approvedQuoteId);
-
-  return (
-    <MockFrame title="Portal del cliente" className={className}>
-      <div className="space-y-3 p-4">
-        <div className="flex items-center gap-2">
-          <span className="grid size-7 place-items-center rounded-full bg-primary text-[10px] font-semibold text-white">
-            {customer.initials}
-          </span>
-          <div className="min-w-0">
-            <p className="truncate text-[11px] font-semibold">{customer.name}</p>
-            <p className="truncate text-[10px] text-white/60">{customer.address}</p>
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-white/10 bg-white/[0.05] p-2.5">
-          <p className="text-[10px] text-white/60">Turno de hoy</p>
-          <p className="mt-0.5 text-[11px] font-semibold">
-            {appointment
-              ? `${appointment.startTime} · ${getOrder(appointment.orderId).title}`
-              : "Sin turno agendado"}
-          </p>
-          <p className="text-[10px] text-white/65">
-            {getTechnician(demoRefs.technicianId).fullName}
-          </p>
-        </div>
-
-        <div className="flex items-center justify-between gap-2 rounded-lg bg-white/[0.05] p-2.5">
-          <div>
-            <p className="text-[10px] text-white/60">Presupuesto {quote.id}</p>
-            <p className="font-mono text-[11px]">{formatArs(quote.total)}</p>
-          </div>
-          <span className="rounded-md bg-primary px-2 py-1 text-[10px] font-semibold text-white">
-            Ver y aprobar
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between rounded-lg border border-white/10 p-2.5">
-          <span className="text-[10px] text-white/65">Saldo pendiente</span>
-          <span className="font-mono text-[11px] font-semibold text-amber">
-            {formatArs(balance)}
-          </span>
-        </div>
-      </div>
-    </MockFrame>
-  );
-}
 
 const tabs: readonly TourTab[] = [
   {
@@ -104,7 +38,12 @@ const tabs: readonly TourTab[] = [
       "Presupuestos pendientes de respuesta",
       "Saldo pendiente de cobro",
     ],
-    visual: <PanelMockup className="w-full max-w-[34rem]" />,
+    visual: {
+      src: "/product-tour/dashboard.webp",
+      width: 1440,
+      height: 900,
+      alt: "Dashboard de DOVEXO con métricas, agenda del día y actividad reciente",
+    },
   },
   {
     id: "orders",
@@ -116,7 +55,12 @@ const tabs: readonly TourTab[] = [
       "Historial con actor y fecha",
       "Materiales y fotos asociados a la orden",
     ],
-    visual: <OrdersMockup className="w-full max-w-[34rem]" />,
+    visual: {
+      src: "/product-tour/orders.webp",
+      width: 1440,
+      height: 900,
+      alt: "Listado de órdenes de trabajo con filtros, tabla y vista de tablero",
+    },
   },
   {
     id: "quotes",
@@ -128,7 +72,12 @@ const tabs: readonly TourTab[] = [
       "Sin cuenta ni contraseña para el cliente",
       "Estado sincronizado con la orden de trabajo",
     ],
-    visual: <QuoteMockup className="w-full max-w-[34rem]" />,
+    visual: {
+      src: "/product-tour/quotes.webp",
+      width: 1440,
+      height: 900,
+      alt: "Listado de presupuestos con estados, importes y vencimientos",
+    },
   },
   {
     id: "agenda",
@@ -140,7 +89,12 @@ const tabs: readonly TourTab[] = [
       "Detección de superposición de horarios",
       "Reprogramación sin perder el historial",
     ],
-    visual: <AgendaMockup className="w-full max-w-[34rem]" />,
+    visual: {
+      src: "/product-tour/agenda.webp",
+      width: 1440,
+      height: 900,
+      alt: "Agenda operativa con vista de día, semana y equipo",
+    },
   },
   {
     id: "tech",
@@ -152,7 +106,13 @@ const tabs: readonly TourTab[] = [
       "Cierre de visita con notas y materiales",
       "Fotos con validación de tipo y tamaño",
     ],
-    visual: <PhoneTechMockup className="w-[15.5rem]" />,
+    visual: {
+      src: "/product-tour/tech.webp",
+      width: 390,
+      height: 844,
+      alt: "PWA del técnico con el próximo trabajo y la agenda del día",
+      phone: true,
+    },
   },
   {
     id: "portal",
@@ -164,17 +124,57 @@ const tabs: readonly TourTab[] = [
       "Presupuestos pendientes y aprobación en el momento",
       "Turnos, órdenes y saldo de la operación",
     ],
-    visual: <PortalPreview className="w-full max-w-[20rem]" />,
+    visual: {
+      src: "/product-tour/portal.webp",
+      width: 1440,
+      height: 900,
+      alt: "Portal del cliente con trabajo activo, próximo turno y presupuestos",
+    },
   },
 ];
 
 const focusRing =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
+function BrowserFrame({ visual }: { visual: TourVisual }) {
+  return (
+    <div className="w-full overflow-hidden rounded-ds-lg border border-border bg-surface shadow-raised">
+      <div className="flex items-center gap-1.5 border-b border-border bg-surface-2 px-3 py-2">
+        <span aria-hidden="true" className="size-2 rounded-full bg-border" />
+        <span aria-hidden="true" className="size-2 rounded-full bg-border" />
+        <span aria-hidden="true" className="size-2 rounded-full bg-border" />
+        <span className="text-caption ml-2 truncate text-text-2">DOVEXO · panel</span>
+      </div>
+      <Image
+        src={visual.src}
+        alt={visual.alt}
+        width={visual.width}
+        height={visual.height}
+        sizes="(min-width: 1024px) 55vw, 92vw"
+        className="h-auto w-full"
+      />
+    </div>
+  );
+}
+
+function PhoneFrame({ visual }: { visual: TourVisual }) {
+  return (
+    <div className="mx-auto w-[16.5rem] max-w-full rounded-[2.25rem] border-[7px] border-[#06121F] bg-[#0B1220] p-1.5 shadow-[0_30px_70px_-30px_rgb(0_0_0/0.8)]">
+      <Image
+        src={visual.src}
+        alt={visual.alt}
+        width={visual.width}
+        height={visual.height}
+        sizes="264px"
+        className="h-auto w-full rounded-[1.7rem]"
+      />
+    </div>
+  );
+}
+
 /*
- * Demo interactiva: seis pantallas del producto en un panel de altura estable
- * para que cambiar de pestaña no mueva el scroll. Las pestañas usan Radix
- * (roles, foco y teclado incluidos) y el contenido entra con un fade corto.
+ * Demo interactiva: seis pantallas reales del producto en un panel de altura
+ * estable. Las capturas salen del tenant demo con datos de ejemplo.
  */
 export function ProductTour() {
   const reduce = useReducedMotion();
@@ -182,12 +182,12 @@ export function ProductTour() {
   const current = tabs.find((tab) => tab.id === active) ?? tabs[0];
 
   return (
-    <section id="producto" aria-labelledby="tour-title" className="scroll-mt-16 bg-surface py-20 sm:py-28">
+    <section id="producto" aria-labelledby="tour-title" className="bg-surface py-20 sm:py-28">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <SectionHeading
           eyebrow="Producto"
           title="Recorré las pantallas principales."
-          text="Dashboard, órdenes, presupuestos, agenda, la vista del técnico y el portal del cliente. Todo con la misma operación de ejemplo."
+          text="Dashboard, órdenes, presupuestos, agenda, la vista del técnico y el portal del cliente. Capturas reales del tenant demo."
           titleId="tour-title"
         />
 
@@ -200,13 +200,13 @@ export function ProductTour() {
         >
           <Tabs.List
             aria-label="Pantallas del producto"
-            className="mt-10 flex gap-1 overflow-x-auto rounded-ds-md border border-border bg-surface-2 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="border-border bg-surface-2 rounded-ds-md mt-10 flex gap-1 overflow-x-auto border p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {tabs.map((tab) => (
               <Tabs.Trigger
                 key={tab.id}
                 value={tab.id}
-                className={`text-small inline-flex min-h-11 shrink-0 items-center justify-center rounded-ds-sm px-3.5 font-medium whitespace-nowrap text-text-2 transition-colors hover:text-text data-[state=active]:bg-surface data-[state=active]:text-text data-[state=active]:shadow-card ${focusRing}`}
+                className={`text-small text-text-2 hover:text-text data-[state=active]:bg-surface data-[state=active]:text-text data-[state=active]:shadow-card rounded-ds-sm inline-flex min-h-11 shrink-0 items-center justify-center px-3.5 font-medium whitespace-nowrap transition-colors ${focusRing}`}
               >
                 {tab.label}
               </Tabs.Trigger>
@@ -219,26 +219,30 @@ export function ProductTour() {
               initial={reduce ? false : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="grid gap-8 rounded-ds-lg border border-border bg-bg p-5 sm:p-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:gap-12"
+              className="border-border bg-bg rounded-ds-lg grid gap-8 border p-5 sm:p-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12"
             >
               <div className="min-w-0">
                 <h3 className="text-h2 text-text text-balance">{current.title}</h3>
-                <p className="text-body mt-3 text-text-2">{current.text}</p>
+                <p className="text-body text-text-2 mt-3">{current.text}</p>
                 <ul className="mt-6 space-y-3">
                   {current.bullets.map((bullet) => (
-                    <li key={bullet} className="text-small flex gap-3 text-text">
-                      <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+                    <li key={bullet} className="text-small text-text flex gap-3">
+                      <Check className="text-primary mt-0.5 size-4 shrink-0" aria-hidden="true" />
                       {bullet}
                     </li>
                   ))}
                 </ul>
-                <p className="text-caption mt-6 text-text-2">
-                  Las pantallas son maquetas con datos ilustrativos, no capturas de clientes reales.
+                <p className="text-caption text-text-2 mt-6">
+                  Capturas reales del tenant demo con datos de ejemplo, no de clientes reales.
                 </p>
               </div>
 
-              <div className="flex min-h-[18rem] items-center justify-center overflow-hidden lg:h-[28rem]">
-                {current.visual}
+              <div className="flex min-h-[18rem] items-center justify-center overflow-hidden lg:h-[30rem]">
+                {current.visual.phone ? (
+                  <PhoneFrame visual={current.visual} />
+                ) : (
+                  <BrowserFrame visual={current.visual} />
+                )}
               </div>
             </motion.div>
           </Tabs.Content>

@@ -1,6 +1,12 @@
+"use client";
+
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useEffect, useRef } from "react";
+
 import { journeySteps } from "@/lib/marketing/content";
 
-import { Reveal } from "./reveal";
+gsap.registerPlugin(ScrollTrigger);
 
 const total = journeySteps.length;
 
@@ -9,22 +15,77 @@ function pad(value: number) {
 }
 
 /*
- * Recorrido del trabajo como línea de tiempo estática: sin pin, sin parallax y
- * sin scroll secuestrado. Cada etapa entra con un reveal corto que respeta
- * `prefers-reduced-motion`.
+ * Recorrido del trabajo con una línea de progreso que se dibuja con el scroll
+ * (GSAP ScrollTrigger, scrub) y entrada escalonada de cada etapa. Respeta
+ * `prefers-reduced-motion`: en ese caso queda todo estático y visible.
  */
 export function Journey() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const listRef = useRef<HTMLOListElement>(null);
+  const lineRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const context = gsap.context(() => {
+      gsap.from(".journey-step", {
+        y: 26,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: listRef.current,
+          start: "top 78%",
+          once: true,
+        },
+      });
+
+      gsap.fromTo(
+        lineRef.current,
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: listRef.current,
+            start: "top 72%",
+            end: "bottom 62%",
+            scrub: 0.6,
+          },
+        },
+      );
+
+      gsap.to(".journey-grid", {
+        yPercent: 10,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    }, sectionRef);
+
+    return () => context.revert();
+  }, []);
+
   return (
     <section
+      ref={sectionRef}
       id="recorrido"
       aria-labelledby="journey-title"
-      className="relative isolate scroll-mt-16 overflow-hidden bg-deep py-20 text-white sm:py-28"
+      className="bg-deep relative isolate scroll-mt-16 overflow-hidden py-20 text-white sm:py-28"
     >
-      <div aria-hidden="true" className="mk-grid-dark mk-grid-fade absolute inset-0 -z-10 opacity-60" />
+      <div
+        aria-hidden="true"
+        className="journey-grid mk-grid-dark mk-grid-fade absolute inset-0 -z-10 opacity-60"
+      />
 
       <div className="mx-auto grid max-w-6xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <p className="text-label inline-flex items-center gap-3 text-mk-teal">
+          <p className="text-label text-accent-teal inline-flex items-center gap-3">
             <span aria-hidden="true" className="h-px w-6 bg-current" />
             Recorrido
           </p>
@@ -60,21 +121,21 @@ export function Journey() {
           </p>
         </div>
 
-        <ol className="relative">
+        <ol ref={listRef} className="relative">
+          <span
+            ref={lineRef}
+            aria-hidden="true"
+            className="bg-primary/40 absolute top-0 left-4 h-full w-px origin-top sm:left-5"
+          />
           {journeySteps.map((step, index) => (
-            <li key={step.id} className="flex gap-4 pb-8 last:pb-0 sm:gap-5">
-              <div className="flex flex-col items-center">
-                <span className="numeric text-xs grid size-8 shrink-0 place-items-center rounded-full border border-white/15 bg-white/5 font-semibold text-white sm:size-10">
-                  {pad(index + 1)}
-                </span>
-                {index < total - 1 && (
-                  <span aria-hidden="true" className="mt-2 w-px flex-1 bg-white/10" />
-                )}
-              </div>
-              <Reveal delay={Math.min(index * 0.04, 0.2)} className="min-w-0 flex-1">
+            <li key={step.id} className="journey-step relative flex gap-4 pb-8 last:pb-0 sm:gap-5">
+              <span className="numeric bg-deep relative z-10 grid size-8 shrink-0 place-items-center rounded-full border border-white/20 font-semibold text-white sm:size-10">
+                {pad(index + 1)}
+              </span>
+              <div className="min-w-0 flex-1">
                 <h3 className="text-h3">{step.title}</h3>
                 <p className="text-body mt-1.5 max-w-lg text-white/70">{step.text}</p>
-              </Reveal>
+              </div>
             </li>
           ))}
         </ol>

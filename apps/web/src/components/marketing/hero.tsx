@@ -19,12 +19,15 @@ export function Hero() {
     <section
       id="contenido"
       aria-labelledby="hero-title"
-      className="relative isolate flex min-h-[100svh] scroll-mt-16 items-center overflow-hidden bg-deep pt-24 pb-14 text-white sm:pb-20 lg:pt-28"
+      className="relative isolate flex min-h-[100svh] scroll-mt-16 items-center overflow-hidden bg-[#0B1220] pt-24 pb-14 text-white sm:pb-20 lg:pt-28"
     >
       <div aria-hidden="true" className="mk-grid-dark mk-grid-fade absolute inset-0 -z-10" />
-      <div aria-hidden="true" className="mk-scan" />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_50%_at_70%_45%,rgb(49_94_251/0.18),transparent_70%)]"
+      />
 
-      <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.02fr_1fr] lg:gap-10">
+      <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8">
         <div>
           <p
             className="mk-rise inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/85"

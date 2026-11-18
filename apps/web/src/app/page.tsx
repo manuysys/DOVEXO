@@ -5,7 +5,6 @@ import { FeaturesBento } from "@/components/marketing/features-bento";
 import { FinalCta } from "@/components/marketing/final-cta";
 import { Hero } from "@/components/marketing/hero";
 import { Journey } from "@/components/marketing/journey";
-import { Marquee } from "@/components/marketing/marquee";
 import { Pricing } from "@/components/marketing/pricing";
 import { ProductTour } from "@/components/marketing/product-tour";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -45,7 +44,6 @@ export default function HomePage() {
       <SiteHeader />
       <main className="overflow-x-clip">
         <Hero />
-        <Marquee />
         <TrustStrip />
         <Journey />
         <FeaturesBento />
