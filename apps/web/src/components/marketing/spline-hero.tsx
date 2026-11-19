@@ -42,7 +42,17 @@ export function SplineHero({ onReady }: SplineHeroProps) {
     <Spline
       scene="https://prod.spline.design/4zymsRJr14mnwaEJ/scene.splinecode"
       onLoad={onReady}
-      className="h-full w-full"
+      /*
+       * Render a 2x y escalar a la mitad: el runtime dibuja el canvas al tamaño
+       * del contenedor, así que un contenedor al 200% con `scale(0.5)` duplica
+       * la resolución efectiva y suaviza los bordes del render 3D.
+       */
+      style={{
+        width: "200%",
+        height: "200%",
+        transform: "scale(0.5)",
+        transformOrigin: "top left",
+      }}
     />
   );
 }

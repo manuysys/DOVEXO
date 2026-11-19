@@ -71,7 +71,7 @@ export function HeroVisual() {
     <div className="relative mx-auto aspect-[4/4.4] w-full max-w-[38rem] sm:aspect-[5/4] lg:aspect-[6/5] lg:max-w-none">
       <div className="absolute inset-0 overflow-hidden rounded-[2rem]">
         <Image
-          src="/spline-hero-clean.webp"
+          src="/spline-hero-2x.webp"
           alt=""
           aria-hidden="true"
           fill
