@@ -186,7 +186,8 @@ Estado al cierre del día. Detalle en `CHANGELOG.md` y `PROJECT_STATUS.md`.
   producción con 200.
 - **Badge "Built with Spline" (abierto).** La escena de la landing muestra el badge
   por la licencia del plan Free. Solo se quita con el plan Hobby ($15/mes mensual o
-  $12/mes anual, precios informados el 2026-11-18). Decisión pendiente del fundador.
+  $12/mes anual, precios informados el 2026-11-18). El render 2x lo reduce
+  visualmente, pero no lo elimina. Decisión pendiente del fundador.
   Ver ADR-018 y `COSTS_2026-11-18.md`.
 - **Spline y `prefers-reduced-motion` (cerrado).** `spline-hero.tsx` solo monta la
   escena con `(min-width: 1024px) and (prefers-reduced-motion: no-preference)`; con

@@ -4,8 +4,9 @@
 
 - Landing v2 (commit `4ed02eb`): escena 3D de Spline publicada e integrada en
   `apps/web/src/components/marketing/spline-hero.tsx` (`@splinetool/react-spline`
-  ^4.2.0). Solo desktop (`min-width: 1024px`), carga dinámica; mobile y estado de
-  carga usan el poster `public/spline-hero-clean.webp`. El badge "Built with
+  ^4.2.0). Solo desktop (`min-width: 1024px`), carga dinámica y render 2x con
+  `scale(0.5)` para suavizar bordes; mobile y estado de carga usan el poster
+  `public/spline-hero-2x.webp` (1126x938). El badge "Built with
   Spline" queda visible por la licencia del plan Free.
 - Tour de producto con capturas reales del tenant demo en
   `public/product-tour/*.webp` (dashboard, órdenes, presupuestos, agenda, técnico,

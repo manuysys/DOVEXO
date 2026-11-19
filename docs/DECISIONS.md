@@ -316,7 +316,10 @@ de LCP. El héroe necesitaba un recurso 3D sin penalizar mobile ni el primer ren
 - Integración con `@splinetool/react-spline` ^4.2.0 en
   `apps/web/src/components/marketing/spline-hero.tsx`, con carga dinámica.
 - Solo en desktop (`min-width: 1024px`). En mobile y mientras carga se muestra el
-  poster estático `apps/web/public/spline-hero-clean.webp`.
+  poster estático `apps/web/public/spline-hero-2x.webp` (1126x938).
+- El canvas se renderiza al 200% del contenedor y se escala al 50%
+  (`transform: scale(0.5)`, `transformOrigin: top left`) para duplicar la
+  resolución efectiva y reducir el dentado del render 3D.
 
 **Consecuencias:**
 

@@ -289,7 +289,7 @@ landing v2: `4ed02eb`. Decisión: ADR-018.
 | Runtime | `https://prod.spline.design/4zymsRJr14mnwaEJ/scene.splinecode` |
 | Paquete | `@splinetool/react-spline` ^4.2.0 |
 | Componente | `apps/web/src/components/marketing/spline-hero.tsx` |
-| Poster estático | `apps/web/public/spline-hero-clean.webp` |
+| Poster estático | `apps/web/public/spline-hero-2x.webp` (1126x938) |
 
 **Reglas de fallback (implementadas):**
 

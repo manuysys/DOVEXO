@@ -221,8 +221,8 @@ propio está pendiente.
 - [x] Tokens en `expo-secure-store`; refresh rotativo persistido.
 - [x] `pnpm exec tsc --noEmit`, `expo export --platform android` y
   `expo-doctor` 20/20.
-- [x] APK release arm64 generado en GitHub Actions (release `mobile-apk-5`,
-  30.8 MB, identidad DOVEXO).
+- [x] APK release arm64 generado en GitHub Actions (release `mobile-apk-6`,
+  31.8 MB, identidad DOVEXO; incluye el single-flight de refresh).
 - [x] AAB firmado con keystore de release generado y verificado en GitHub
   Actions (artifact `dovexo-android-aab`, 36 MB).
 - [ ] APK instalado y probado en un dispositivo físico.
@@ -439,6 +439,7 @@ estado de cada punto:
 | Punto | Estado | Evidencia |
 |---|---|---|
 | Héroe 3D con Spline (desktop, poster estático en mobile) | Implementado y desplegado | Commit `4ed02eb`; ADR-018; `LANDING_REDESIGN.md` §9 |
+| Nitidez del héroe 3D | Corregido y desplegado | Commits `42f88f0`/`0af4c88`; canvas 1126x938 y poster 792x660 en producción |
 | Badge "Built with Spline" visible | Vigente (plan Free) | Se oculta solo con plan pago; no contratado |
 | Tour de producto con capturas reales del tenant demo | Implementado y desplegado | `apps/web/public/product-tour/*.webp` |
 | GSAP ScrollTrigger en `journey.tsx` con reduced motion | Implementado; stagger verificado en producción | Commit `4ed02eb`; pasos con `opacity 0 → 1` al hacer scroll |
@@ -502,7 +503,7 @@ credenciales de Meta).
 - Admin demo: `demo@saasgestion.com` / `Demo12345!`.
 - Técnico demo: `tecnico@saasgestion.com` / `Tecnico12345!`.
 - Cliente demo del portal: empresa `servicios-demo`, `carlos@example.com`.
-- APK Android de prueba: https://github.com/manuysys/SAAS_GESTION_APP/releases/tag/mobile-apk-5
+- APK Android de prueba: https://github.com/manuysys/SAAS_GESTION_APP/releases/tag/mobile-apk-6
   (asset directo `app-release.apk`, SHA-256 en `docs/MOBILE_BUILD.md`)
 
 Ver `docs/DEMO.md`. La demo ya no depende de esta máquina. Limitación: el plan
@@ -543,8 +544,8 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
 
 1. Autorizar y enviar los primeros mensajes (El Mejor Clima, TOTALAIR, UBE) y
    coordinar las primeras entrevistas.
-2. Probar el APK `mobile-apk-5` en un dispositivo Android real y corregir lo que
-   falle. Antes, compilar un APK nuevo con el cliente de refresh corregido.
+2. Probar el APK `mobile-apk-6` en un dispositivo Android real y corregir lo que
+   falle. Ya incluye el cliente de refresh corregido.
 3. Configurar `NEON_DATABASE_URL` en GitHub y verificar un backup real con
    restauración.
 4. Registrar `dovexo.com.ar` (libre según RDAP 2026-11-15), verificarlo en Resend
@@ -567,7 +568,7 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
 - La suscripción se crea en modo `trialing` de 14 días, pero todavía no se cobra.
 - Los cold starts de Vercel pueden agregar latencia a la primera request.
 - Falta RLS, 2FA y recuperación de contraseña con email.
-- El APK `mobile-apk-5` usa firma de debug; el AAB firmado con release existe
+- El APK `mobile-apk-6` usa firma de debug; el AAB firmado con release existe
   como artifact, pero todavía no se subió a Play.
 - Resend está implementado, pero sin dominio verificado el proveedor productivo
   no puede entregar. En producción se usa `console` y el enlace se copia a mano.
