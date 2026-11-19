@@ -1,7 +1,6 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { useCallback, useState } from "react";
 
@@ -9,7 +8,8 @@ import { demoRefs, getQuote } from "@/lib/marketing/demo-data";
 import { formatArs } from "@/lib/marketing/pricing";
 import { cn } from "@/lib/utils";
 
-import { SplineHero } from "./spline-hero";
+import { HeroFallback } from "./hero-fallback";
+import { HeroScene } from "./hero-scene";
 
 type ChipProps = {
   className: string;
@@ -57,32 +57,26 @@ function Chip({ className, delay, accent, title, children }: ChipProps) {
 }
 
 /*
- * Visual del héroe: escena 3D de Spline (oficina → van → técnico → casa) con
- * tarjetas de producto flotando. En mobile o con reduced motion se usa el
- * fallback isométrico en SVG. Los datos salen de demo-data.ts.
+ * Visual del héroe: escena isométrica propia (Three.js en desktop, SVG en
+ * mobile/reduced motion) con tarjetas de producto flotando. Sin watermark de
+ * terceros y con la misma paleta del design system. Los datos salen de
+ * demo-data.ts.
  */
 export function HeroVisual() {
   const [sceneReady, setSceneReady] = useState(false);
-  const reduce = useReducedMotion();
   const handleReady = useCallback(() => setSceneReady(true), []);
   const approvedQuote = getQuote(demoRefs.approvedQuoteId);
 
   return (
     <div className="relative mx-auto aspect-[4/4.4] w-full max-w-[38rem] sm:aspect-[5/4] lg:aspect-[6/5] lg:max-w-none">
       <div className="absolute inset-0 overflow-hidden rounded-[2rem]">
-        <Image
-          src="/spline-hero-2x.webp"
-          alt=""
-          aria-hidden="true"
-          fill
-          priority
-          sizes="(min-width: 1024px) 55vw, 92vw"
+        <HeroFallback
           className={cn(
-            "object-cover transition-opacity duration-700",
+            "transition-opacity duration-700",
             sceneReady && "lg:opacity-0",
           )}
         />
-        <SplineHero onReady={handleReady} />
+        <HeroScene onReady={handleReady} />
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,#0B1220_100%)]"
