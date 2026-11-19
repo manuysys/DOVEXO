@@ -23,8 +23,9 @@ Este script **no respalda producción**.
   el repositorio.
 - `pg_dump --format=custom --no-owner --no-privileges` a `backup.dump`.
 - Sube el archivo como artifact `neon-backup-<run_id>` con retención de **14 días**.
-- Si `NEON_DATABASE_URL` no está configurada, imprime un mensaje y termina con
-  éxito: el run queda verde aunque no se haya respaldado nada.
+- Si `NEON_DATABASE_URL` no está configurada, imprime el error y termina con
+  **código 1**: el run queda en rojo y no simula un backup exitoso (cambiado el
+  2026-11-15).
 
 ### 3. Neon
 
