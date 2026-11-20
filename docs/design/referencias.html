@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DOVEXO · Tablero de referencias</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62.5..125,100..900&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#F3F0E6;--paper2:#FAF8F0;--ink:#123B31;--signal:#D9541E;--slate:#5A665F;--line:#D8D2C2}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:Archivo,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1280px;margin:0 auto;padding:40px 32px 80px}
+  .top{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:32px}
+  .label{font-stretch:75%;font-weight:700;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--slate)}
+  h1{font-size:44px;line-height:1.04;letter-spacing:-.03em;margin:8px 0 0;max-width:20ch}
+  .meta{text-align:right;font-size:12px;color:var(--slate);line-height:1.6}
+  .group{margin:44px 0 16px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line);padding-bottom:10px}
+  .group b{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  .group span{font-size:12px;color:var(--slate)}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 22px}
+  .card{background:var(--paper2);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .shot{height:190px;overflow:hidden;background:#e8e3d6;border-bottom:1px solid var(--line)}
+  .shot img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .body{padding:12px 14px 14px}
+  .tag{display:inline-block;font-stretch:75%;font-weight:700;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+       color:var(--signal);border:1px solid rgba(217,84,30,.45);border-radius:2px;padding:3px 6px;margin-bottom:8px}
+  .body h2{font-size:15px;line-height:1.25;margin:0 0 4px;font-weight:700}
+  .body p{font-size:12px;line-height:1.5;color:var(--slate);margin:0}
+  .note{display:flex;gap:10px;align-items:flex-start;margin-top:36px;border:1px solid var(--line);border-left:3px solid var(--signal);
+        padding:14px 16px;background:var(--paper2);font-size:12px;line-height:1.6;color:var(--slate)}
+  .note b{color:var(--ink)}
+  @media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}.top{flex-direction:column;align-items:flex-start;gap:12px}.meta{text-align:left}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="label">DOVEXO · Dirección de arte · 2026-11-20</div>
+      <h1>Tablero de referencias</h1>
+    </div>
+    <div class="meta">10 sitios · 1440×900 y 390×844<br>Capturas propias con Playwright<br>Sin copiar layouts: se estudia el sistema</div>
+  </div>
+
+  <div class="group"><b>Servicios técnicos</b><span>Venden el resultado con personas y un acento de alta visibilidad.</span></div>
+  <div class="grid">
+    <article class="card"><div class="shot"><img src="../research/ref-jobber-desktop.png" alt="Jobber"></div><div class="body"><span class="tag">Hero + nav</span><h2>Jobber</h2><p>Header opaco de 73 px, héroe oscuro con retratos reales, lima #A8E300 como único acento y ratings como prueba.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/sec-jobber-pricing.png" alt="Jobber precios"></div><div class="body"><span class="tag">Precios</span><h2>Jobber · Pricing</h2><p>Banda oscura con borde de papel rasgado, selector de equipo, tres planes, el del medio con borde y sello “Recommended”.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/ref-jobber-mobile.png" alt="Jobber mobile"></div><div class="body"><span class="tag">Responsive</span><h2>Jobber · Mobile</h2><p>Mismo héroe, H1 40 px en dos líneas, CTAs full-width y la foto debajo. El header no cambia de altura.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/ref-housecallpro-desktop.png" alt="Housecall Pro"></div><div class="body"><span class="tag">Hero + nav</span><h2>Housecall Pro</h2><p>Tipografía condensada de 70 px sobre foto full-bleed, captura de email en el héroe y notificaciones flotantes del producto.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/ref-maintainx-desktop.png" alt="MaintainX"></div><div class="body"><span class="tag">Hero</span><h2>MaintainX</h2><p>Azul #246CFF con grilla de 32 px, Inter 56/700, foto real pequeña y dos CTAs. Prueba social en badges, no en texto.</p></div></article>
+  </div>
+
+  <div class="group"><b>Software de craft</b><span>Tipografía, producto y un solo motivo visual. Menos es más.</span></div>
+  <div class="grid">
+    <article class="card"><div class="shot"><img src="../research/ref-attio-desktop.png" alt="Attio"></div><div class="body"><span class="tag">Producto</span><h2>Attio</h2><p>Nav pill flotante de 116 px, hero centrado de 64 px y la UI real a 1:1 empezando a 580 px. Sin sombras: borde y aire.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/ref-stripe-desktop.png" alt="Stripe"></div><div class="body"><span class="tag">Tipografía</span><h2>Stripe</h2><p>H1 44/300 (peso liviano, raro en SaaS), párrafo con color, cinta aurora como único motivo y logo strip debajo.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/sec-stripe-pricing.png" alt="Stripe precios"></div><div class="body"><span class="tag">Precios</span><h2>Stripe · Pricing</h2><p>Dos tarjetas horizontales, una blanca y una oscura. La comparación es tipográfica, no una tabla de features.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/ref-stripe-mobile.png" alt="Stripe mobile"></div><div class="body"><span class="tag">Responsive</span><h2>Stripe · Mobile</h2><p>El motivo ocupa el héroe; H1 40 px, dos botones full-width. Los logos se desbordan: error a no repetir.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/ref-raycast-desktop.png" alt="Raycast"></div><div class="body"><span class="tag">Hero</span><h2>Raycast</h2><p>Nav pill de 64 px, hero centrado de 64 px y un solo gradiente rojo dramático. El texto chico da precisión técnica.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/ref-linear-desktop-2.png" alt="Linear"></div><div class="body"><span class="tag">Contraste</span><h2>Linear</h2><p>Inter Variable 64/510, secciones de 128 px y negro #08090A. El héroe no renderizó en headless: mucha animación, poca resiliencia.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/sec-linear-features.png" alt="Linear features"></div><div class="body"><span class="tag">Motion</span><h2>Linear · Features</h2><p>Grilla de íconos que aparece al scroll. Impactante en vivo; en captura, casi invisible. El motion no puede ser el contenido.</p></div></article>
+  </div>
+
+  <div class="group"><b>Editorial y galerías</b><span>Retícula, líneas de 1 px y tipografía como estructura.</span></div>
+  <div class="grid">
+    <article class="card"><div class="shot"><img src="../research/ref-wda-categories.png" alt="Website Design Awards"></div><div class="body"><span class="tag">Retícula</span><h2>Website Design Awards</h2><p>Fondo crema, etiquetas mono, reglas de 1 px, H1 64 px y previews de sitios como evidencia. Cero cards con sombra.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/ref-saasframe-desktop.png" alt="SaaSFrame"></div><div class="body"><span class="tag">Producto</span><h2>SaaSFrame</h2><p>Titular de dos tonos, buscador central, chips y un muro de pantallas reales. La captura es el contenido, no el adorno.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/ref-awwwards-desktop.png" alt="Awwwards"></div><div class="body"><span class="tag">Hero</span><h2>Awwwards</h2><p>El sitio ganador ocupa el héroe. Tipografía enorme y navegación mínima: la obra manda.</p></div></article>
+  </div>
+
+  <div class="group"><b>DOVEXO hoy</b><span>Lo que se conserva y lo que se cambia.</span></div>
+  <div class="grid">
+    <article class="card"><div class="shot"><img src="../research/dovexo-hero-1440.png" alt="DOVEXO hero actual"></div><div class="body"><span class="tag">Hero</span><h2>DOVEXO · Héroe</h2><p>73,6 px en cuatro líneas, escena 3D decorativa, seis elementos en el fold y WebGL en el LCP.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/dovexo-mobile-hero.png" alt="DOVEXO mobile"></div><div class="body"><span class="tag">Responsive</span><h2>DOVEXO · Mobile</h2><p>40 px correcto, pero 100svh empujan el producto fuera de pantalla. El peeking es la oportunidad.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/dovexo-tour.png" alt="DOVEXO tour"></div><div class="body"><span class="tag">Producto</span><h2>DOVEXO · Tour</h2><p>Capturas reales arruinadas por chrome falso, borde, sombra y el scrollbar interno de la app.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/dovexo-pricing.png" alt="DOVEXO precios"></div><div class="body"><span class="tag">Precios</span><h2>DOVEXO · Precios</h2><p>La estructura funciona. Falla el glow azul y la contradicción “14 días” vs “en implementación”.</p></div></article>
+    <article class="card"><div class="shot"><img src="../research/dovexo-border-check.png" alt="DOVEXO borde"></div><div class="body"><span class="tag">Bug</span><h2>DOVEXO · Cabecera</h2><p>Fondo al 85 % + blur + borde de 0,67 px: el contenido de atrás se transparenta y aparece el rectángulo.</p></div></article>
+  </div>
+
+  <div class="note"><b>Lectura:</b> ninguna referencia mezcla cuatro acentos, 3D decorativo y capturas chicas. Las de servicios ganan con personas; las de craft, con tipografía y producto. DOVEXO puede ganar con lo que ya tiene: producto real, copy concreto y una identidad de documento.</div>
+</div>
+</body>
+</html>

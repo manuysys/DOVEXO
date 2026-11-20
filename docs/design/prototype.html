@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DOVEXO · Prototipo de dirección de arte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62.5..125,100..900;1,62.5..125,100..900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3F0E6; --paper2:#FAF8F0; --ink:#123B31; --ink-2:#0C2C25;
+    --signal:#D9541E; --signal-strong:#A63C10; --slate:#5A665F; --body:#2E3D37;
+    --line:#D8D2C2; --line-soft:#E4DFD2;
+    --success:#2F7D4F; --warn:#B4690E; --danger:#A32A22; --info:#1E4E8C;
+    --r-sm:4px; --r-md:8px; --r-lg:12px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:Archivo,system-ui,sans-serif;
+       -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 32px}
+  .label{font-family:Archivo;font-stretch:75%;font-weight:700;font-size:11px;line-height:1.2;
+         letter-spacing:.14em;text-transform:uppercase}
+
+  /* ---------- header ---------- */
+  header{height:64px;border-bottom:1px solid var(--line);background:var(--paper);position:sticky;top:0;z-index:20}
+  .nav{height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:-.02em}
+  .mark{width:26px;height:26px;border:1.5px solid var(--ink);border-radius:3px;display:grid;place-items:center;
+        font-size:13px;font-weight:800;line-height:1}
+  .links{display:flex;gap:26px;font-size:14px;font-weight:500;color:#33423B}
+  .links a:hover{color:var(--signal-strong)}
+  .nav-right{display:flex;align-items:center;gap:18px;font-size:14px}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;border-radius:var(--r-md);
+       padding:12px 18px;font-size:14px;font-weight:600;line-height:1;cursor:pointer}
+  .btn-primary{background:var(--ink);color:var(--paper)}
+  .btn-primary:hover{background:var(--ink-2)}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--ink)}
+  .btn-ghost:hover{background:rgba(18,59,49,.06)}
+
+  /* ---------- hero ---------- */
+  .hero-band{position:relative;overflow:hidden}
+  .hero{padding-block:72px 88px}
+  .hero-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;align-items:start}
+  .hero-grid > *{min-width:0}
+  .eyebrow{display:inline-block;border:1px solid var(--line);border-radius:var(--r-sm);
+           padding:6px 9px;color:#3B4A43;background:rgba(250,248,240,.6)}
+  h1{font-size:76px;line-height:.98;letter-spacing:-.035em;font-weight:700;margin:22px 0 0;max-width:11ch}
+  h1 .rule{position:relative;display:inline-block}
+  h1 .rule::after{content:"";position:absolute;left:0;right:2px;bottom:-6px;height:3px;background:var(--signal);border-radius:2px}
+  .lede{font-size:19px;line-height:1.55;color:var(--body);margin:26px 0 0;max-width:44ch}
+  .ctas{display:flex;gap:12px;margin-top:30px}
+  .micro{font-size:13px;color:var(--slate);margin-top:12px}
+  .proof{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 18px;
+         font-size:12px;color:var(--slate);letter-spacing:.01em}
+  .proof span{display:inline-flex;align-items:center;gap:8px}
+  .proof span::before{content:"";width:4px;height:4px;background:var(--signal);border-radius:50%}
+
+  .visual{position:relative;padding-top:4px}
+  .capture{position:relative;z-index:1;border:1px solid rgba(18,59,49,.2);border-radius:var(--r-md);
+           background:#fff;overflow:hidden;height:440px;box-shadow:0 24px 48px -40px rgba(18,59,49,.35)}
+  .capture img{display:block;width:1152px;max-width:none;height:auto;margin:-4px 0 0 -8px}
+  .caption{position:relative;z-index:1;margin-top:10px;font-size:11px;color:var(--slate);text-align:right}
+  .pin{position:absolute;z-index:2;display:block}
+  .pin b{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--signal);
+         color:var(--paper);font-family:Archivo;font-weight:700;font-size:10px;line-height:1;
+         border:2px solid var(--paper);box-shadow:0 1px 3px rgba(18,59,49,.3)}
+  .pin.p1{top:14%;left:36%}
+  .pin.p2{top:70%;left:37%}
+  .pin.p3{top:87%;left:5%}
+  .legend{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:flex-end;
+          margin-top:8px;font-size:11px;color:var(--slate)}
+  .legend b{color:var(--signal-strong);font-weight:700}
+
+  /* ---------- section shell ---------- */
+  section{border-top:1px solid var(--line)}
+  .sec-head{display:grid;grid-template-columns:220px 1fr;gap:32px;padding:64px 0 40px;align-items:start}
+  .folio{display:flex;align-items:center;gap:12px;color:var(--slate)}
+  .folio b{font-weight:700;color:var(--signal-strong)}
+  .folio .dash{width:32px;height:1px;background:var(--signal);display:inline-block}
+  h2{font-size:44px;line-height:1.06;letter-spacing:-.03em;font-weight:700;margin:0;max-width:20ch}
+  .sec-head p{margin:16px 0 0;font-size:17px;line-height:1.6;color:var(--body);max-width:58ch}
+
+  /* ---------- rail ---------- */
+  .rail{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative;padding:8px 0 72px}
+  .rail::before{content:"";position:absolute;top:26px;left:6%;right:6%;height:1px;background:var(--line)}
+  .station{position:relative;min-width:0}
+  .num{position:relative;z-index:1;width:36px;height:36px;border:1px solid var(--line);background:var(--paper);border-radius:50%;
+       display:grid;place-items:center;font-weight:700;font-size:12px;margin-bottom:18px}
+  .shot{border:1px solid rgba(18,59,49,.18);border-radius:6px;overflow:hidden;background:#fff}
+  .shot img{display:block;width:100%;height:132px;object-fit:cover;object-position:top left}
+  .st-title{font-size:18px;font-weight:700;letter-spacing:-.01em;margin:14px 0 4px}
+  .st-text{font-size:14px;line-height:1.5;color:var(--body);margin:0;min-height:42px}
+  .ot{margin-top:12px;font-family:"Geist Mono",ui-monospace,monospace;font-size:11px;color:var(--slate);letter-spacing:.02em}
+  .stamp{display:inline-block;margin-top:10px;border:1.5px solid var(--signal-strong);color:var(--signal-strong);
+         padding:4px 7px;font-stretch:75%;font-weight:700;font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+         transform:rotate(-2deg);border-radius:2px;background:rgba(217,84,30,.04)}
+
+  /* ---------- responsive frame ---------- */
+  .mobile-band{background:var(--paper2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:56px 0}
+  .mobile-row{display:grid;grid-template-columns:1fr 390px;gap:64px;align-items:center}
+  .mobile-note h2{font-size:36px}
+  .mobile-note p{font-size:16px;line-height:1.6;color:var(--body);max-width:44ch;margin-top:12px}
+  .mobile-note .label{color:var(--slate);margin-bottom:10px}
+  .phone{width:390px;border:1px solid rgba(18,59,49,.25);border-radius:20px;background:var(--paper);overflow:hidden;
+         box-shadow:0 30px 60px -50px rgba(18,59,49,.5)}
+  .phone .pnav{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line)}
+  .burger{width:36px;height:36px;border:1px solid var(--line);border-radius:6px;display:grid;place-items:center;gap:3px}
+  .burger i{display:block;width:14px;height:1.5px;background:var(--ink)}
+  .nav-burger{display:none;background:transparent}
+  .phone .pbody{padding:26px 18px 0}
+  .phone h3{font-size:40px;line-height:1.04;letter-spacing:-.035em;margin:14px 0 0;font-weight:700}
+  .phone .pbody p{font-size:16px;line-height:1.5;color:var(--body);margin:14px 0 0}
+  .phone .ctas{flex-direction:column;margin-top:20px}
+  .phone .btn{justify-content:center;width:100%;padding:14px 18px}
+  .phone .peek{margin-top:24px;border-top:1px solid rgba(18,59,49,.2);border-radius:8px 8px 0 0;overflow:hidden}
+  .phone .peek img{display:block;width:100%;height:170px;object-fit:cover;object-position:top center}
+  .phone-cap{font-size:11px;color:var(--slate);margin-top:10px;text-align:center}
+
+  /* ---------- system tile ---------- */
+  .system{padding:56px 0 80px}
+  .sys-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:56px}
+  .swatches{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .sw{border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--paper2)}
+  .sw .chip{height:64px}
+  .sw .meta{padding:8px 10px;font-size:11px;color:var(--slate)}
+  .sw .meta b{display:block;color:var(--ink);font-size:12px;margin-bottom:2px}
+  .type-row{display:flex;align-items:baseline;gap:16px;border-top:1px solid var(--line);padding:10px 0}
+  .type-row span:first-child{width:64px;color:var(--slate);font-size:11px}
+  .type-row .big{font-size:56px;font-weight:700;letter-spacing:-.035em;line-height:1}
+  .type-row .mid{font-size:28px;font-weight:700;letter-spacing:-.02em}
+  .type-row .small{font-size:16px;color:var(--body)}
+  .type-row .lab{font-stretch:75%;font-weight:700;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .bits{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+  .tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 9px;border-radius:4px;border:1px solid transparent}
+  .tag.ok{background:#E7F1EA;color:#1F5C3A;border-color:#C6DCCD}
+  .tag.warn{background:#F8EEDC;color:#7A4A0C;border-color:#E8D6B6}
+  .tag.info{background:#E7EDF7;color:#1B3F73;border-color:#C8D6EA}
+  .foot{border-top:1px solid var(--line);padding:24px 0 48px;font-size:12px;color:var(--slate);display:flex;justify-content:space-between;gap:16px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+  @media (max-width:1100px){
+    .hero-grid{grid-template-columns:1fr;gap:40px}
+    h1{font-size:60px;max-width:14ch}
+    .visual{margin-right:0}
+    .rail{grid-template-columns:repeat(2,1fr);gap:36px 24px}
+    .rail::before{display:none}
+    .mobile-row{grid-template-columns:1fr;gap:32px}
+    .sec-head{grid-template-columns:1fr;gap:16px}
+    .sys-grid{grid-template-columns:1fr}
+  }
+  @media (max-width:640px){
+    .wrap{padding:0 18px}
+    .links,.nav-right .btn{display:none}
+    .nav-burger{display:grid}
+    .nav-right{gap:12px}
+    h1{font-size:40px;letter-spacing:-.03em}
+    .hero{padding-block:44px 56px}
+    .lede{font-size:17px}
+    .rail{grid-template-columns:1fr}
+    .phone{width:100%}
+    .pin{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#"><span class="mark">D</span>DOVEXO</a>
+    <nav class="links" aria-label="Principal">
+      <a href="#producto">Producto</a><a href="#funciones">Funciones</a><a href="#precios">Precios</a><a href="#demo">Demo</a>
+    </nav>
+    <div class="nav-right">
+      <a href="#">Ingresar</a>
+      <a class="btn btn-primary" href="#">Crear mi empresa</a>
+      <button class="burger nav-burger" type="button" aria-label="Abrir menú"><i></i><i></i><i></i></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero-band" style="border-top:0">
+    <div class="wrap hero">
+      <div class="hero-grid">
+        <div>
+          <span class="eyebrow label">Para empresas de servicios técnicos</span>
+          <h1>El oficio,<br><span class="rule">en orden.</span></h1>
+          <p class="lede">Solicitudes, turnos, presupuestos y cobros en un solo lugar. Lo que pasa en la calle se ve en la oficina.</p>
+          <div class="ctas">
+            <a class="btn btn-primary" href="#">Crear mi empresa <span aria-hidden="true">→</span></a>
+            <a class="btn btn-ghost" href="#">Ver la demo</a>
+          </div>
+          <p class="micro">14 días. Sin tarjeta.</p>
+          <div class="proof">
+            <span>Datos aislados por empresa</span>
+            <span>Link de presupuesto</span>
+            <span>Historial de cada trabajo</span>
+          </div>
+        </div>
+
+        <div class="visual">
+          <div class="capture">
+            <img src="../../apps/web/public/product-tour/dashboard.webp" alt="Panel de DOVEXO con órdenes, presupuestos y cobros del día">
+            <span class="pin p1"><b>1</b></span>
+            <span class="pin p2"><b>2</b></span>
+          </div>
+          <div class="legend">
+            <span><b>1</b> Operación del día</span>
+            <span><b>2</b> Primeros pasos</span>
+          </div>
+          <p class="caption">Captura real del tenant demo. Datos de ejemplo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="producto">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="folio"><b class="label">02</b><span class="dash"></span><span class="label">Una sola orden</span></div>
+        <div>
+          <h2>Del primer llamado al último cobro, la misma orden.</h2>
+          <p>La orden es el hilo: nace en una solicitud, se agenda, se presupuesta y se cobra. Cada paso queda registrado con su actor y su fecha.</p>
+        </div>
+      </div>
+
+      <div class="rail">
+        <article class="station">
+          <div class="num">01</div>
+          <div class="shot"><img src="../../apps/web/public/product-tour/orders.webp" alt="Órdenes de trabajo"></div>
+          <h3 class="st-title">Solicitud</h3>
+          <p class="st-text">Entra por WhatsApp, teléfono o el portal del cliente.</p>
+          <div class="ot">OT-2026-0001</div>
+          <span class="stamp">Recibida</span>
+        </article>
+        <article class="station">
+          <div class="num">02</div>
+          <div class="shot"><img src="../../apps/web/public/product-tour/agenda.webp" alt="Agenda del día"></div>
+          <h3 class="st-title">Turno</h3>
+          <p class="st-text">Se asigna el técnico y se controla el solapamiento.</p>
+          <div class="ot">OT-2026-0001</div>
+          <span class="stamp">Agendada</span>
+        </article>
+        <article class="station">
+          <div class="num">03</div>
+          <div class="shot"><img src="../../apps/web/public/product-tour/quotes.webp" alt="Presupuestos"></div>
+          <h3 class="st-title">Presupuesto</h3>
+          <p class="st-text">El cliente lo aprueba desde un link, sin crear cuenta.</p>
+          <div class="ot">OT-2026-0001</div>
+          <span class="stamp">Aprobado</span>
+        </article>
+        <article class="station">
+          <div class="num">04</div>
+          <div class="shot"><img src="../../apps/web/public/product-tour/portal.webp" alt="Portal del cliente con pagos"></div>
+          <h3 class="st-title">Cobro</h3>
+          <p class="st-text">Total o parcial. El saldo queda a la vista.</p>
+          <div class="ot">OT-2026-0001</div>
+          <span class="stamp">Cobrado</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="mobile-band" id="funciones">
+    <div class="wrap mobile-row">
+      <div class="mobile-note">
+        <div class="label">390 px · lectura outdoor</div>
+        <h2>En el celular, primero lo que importa.</h2>
+        <p>El técnico abre el link, ve su turno y cierra la visita. Sin instalar nada, sin scroll lateral y con contraste para el sol.</p>
+      </div>
+      <div>
+        <div class="phone">
+          <div class="pnav">
+            <span class="brand" style="font-size:16px"><span class="mark" style="width:22px;height:22px;font-size:11px">D</span>DOVEXO</span>
+            <span class="burger" aria-hidden="true"><i></i><i></i><i></i></span>
+          </div>
+          <div class="pbody">
+            <span class="eyebrow label" style="font-size:10px">Servicios técnicos</span>
+            <h3>El oficio,<br>en orden.</h3>
+            <p>Solicitudes, turnos, presupuestos y cobros en un solo lugar.</p>
+            <div class="ctas">
+              <a class="btn btn-primary" href="#">Crear mi empresa</a>
+              <a class="btn btn-ghost" href="#">Ver la demo</a>
+            </div>
+            <div class="peek"><img src="../../apps/web/public/product-tour/tech.webp" alt="PWA del técnico en mobile"></div>
+          </div>
+        </div>
+        <p class="phone-cap">El producto asoma en el primer viewport; no queda debajo del fold.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="system" id="precios">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="folio"><b class="label">03</b><span class="dash"></span><span class="label">Sistema</span></div>
+        <div>
+          <h2>Papel, tinta y una sola señal.</h2>
+          <p>Archivo (Omnibus-Type, Buenos Aires) para todo. Etiquetas condensadas, números tabulares y reglas de 1 px. El naranja marca; nunca rellena un botón.</p>
+        </div>
+      </div>
+
+      <div class="sys-grid">
+        <div>
+          <div class="swatches">
+            <div class="sw"><div class="chip" style="background:#F3F0E6"></div><div class="meta"><b>Papel</b>#F3F0E6</div></div>
+            <div class="sw"><div class="chip" style="background:#123B31"></div><div class="meta"><b>Tinta</b>#123B31</div></div>
+            <div class="sw"><div class="chip" style="background:#D9541E"></div><div class="meta"><b>Señal</b>#D9541E</div></div>
+            <div class="sw"><div class="chip" style="background:#A63C10"></div><div class="meta"><b>Señal texto</b>#A63C10</div></div>
+            <div class="sw"><div class="chip" style="background:#5A665F"></div><div class="meta"><b>Pizarra</b>#5A665F</div></div>
+            <div class="sw"><div class="chip" style="background:#D8D2C2"></div><div class="meta"><b>Línea</b>#D8D2C2</div></div>
+          </div>
+          <div class="bits">
+            <span class="stamp" style="margin:0">Aprobado</span>
+            <span class="tag ok">Cobrado</span>
+            <span class="tag warn">Vence hoy</span>
+            <span class="tag info">En curso</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="type-row"><span>76/72</span><span class="big">El oficio</span></div>
+          <div class="type-row"><span>44/46</span><span class="mid">Una sola orden</span></div>
+          <div class="type-row"><span>17/28</span><span class="small">Lo que pasa en la calle se ve en la oficina.</span></div>
+          <div class="type-row"><span>11</span><span class="lab">Presupuestos y cobros</span></div>
+          <p class="caption" style="text-align:left;margin-top:16px">Archivo variable · wdth 75 para etiquetas · Geist Mono para IDs</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap" style="display:flex;justify-content:space-between;gap:16px;width:100%">
+    <span>DOVEXO · Prototipo de dirección de arte · 2026-11-20</span>
+    <span>Sin gradientes · sin 3D · sin animación decorativa</span>
+  </div>
+</footer>
+
+</body>
+</html>
