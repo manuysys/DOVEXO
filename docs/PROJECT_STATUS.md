@@ -540,7 +540,8 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
 ## Próximo paso concreto
 
 1. Autorizar y enviar los primeros mensajes (El Mejor Clima, TOTALAIR, UBE) y
-   coordinar las primeras entrevistas.
+   coordinar las primeras entrevistas. Textos listos para copiar/pegar en
+   `docs/GO_TO_MARKET/OUTREACH_READY_2026-11-19.md`.
 2. Probar el APK `mobile-apk-6` en un dispositivo Android real y corregir lo que
    falle. Ya incluye el cliente de refresh corregido.
 3. Configurar `NEON_DATABASE_URL` en GitHub y verificar un backup real con
