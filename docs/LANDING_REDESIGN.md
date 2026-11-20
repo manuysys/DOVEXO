@@ -283,6 +283,9 @@ landing v2: `4ed02eb`. Decisión: ADR-018.
 
 ### Héroe 3D con Spline
 
+> Reemplazado el 2026-11-19 por la escena isométrica propia (ADR-020). Esta
+> sección queda como registro histórico de la integración con Spline.
+
 | Elemento | Valor |
 |---|---|
 | Viewer publicado | `https://my.spline.design/dovexoheroservice-Vy1dJ8IKuodt02Zjwk4P0sbI/` |

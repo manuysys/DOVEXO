@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-19 — Héroe propio sin watermark y contenedor más ancho
+
+- El héroe de la landing deja Spline y vuelve a la escena isométrica propia:
+  `HeroScene` (Three.js en desktop, después de idle y sin reduced motion) y
+  `HeroFallback` (SVG en mobile/reduced motion). Sin badge ni runtime de terceros.
+  Commit `4b27ea0`; ADR-020. `spline-hero.tsx`, el paquete y el poster quedan sin
+  uso, para una eventual vuelta con plan Hobby.
+- Contenedor de marketing ampliado de `max-w-6xl` (1152 px) a `max-w-7xl`
+  (1280 px) en header, hero y secciones; menos margen lateral en pantallas anchas.
+- Verificado con typecheck, build y ESLint de marketing; deploy web
+  `saas-gestion-5zlid2yi1` (Production). El badge de Spline deja de aplicar.
+
 ## 2026-11-18 — Landing v2, hardening de seguridad y deploy a producción
 
 - Landing v2 (commit `4ed02eb`): escena 3D de Spline publicada e integrada en

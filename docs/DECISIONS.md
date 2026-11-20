@@ -301,8 +301,10 @@ XLSX comprimido de forma abusiva o filas que dupliquen clientes existentes.
 ## ADR-018 — Héroe 3D con Spline publicado y fallback estático
 
 **Fecha:** 2026-11-18
-**Estado:** aceptada. Reemplaza la decisión pendiente de `LANDING_REDESIGN.md` §5
-("definir si se usa como embed o render estático; no integrado").
+**Estado:** obsoleta para el héroe desde el 2026-11-19: el badge del plan Free y el
+dentado del render llevaron a reemplazarla por la escena isométrica propia
+(ADR-020). Se conserva como registro; el código y el poster de Spline quedan en
+el repo para una eventual vuelta con plan Hobby.
 
 **Contexto:** la fase 1 del rediseño de la landing dejó Spline sin decidir: la
 escena existía en el editor, no estaba publicada y no había medición de peso ni
@@ -383,3 +385,33 @@ webhook de WhatsApp sin secreto global y sin tope de tamaño. Detalle en
   sesión. Un token rotado y reusado dentro de esa ventana tampoco dispara la
   revocación. Faltan tests de reuso fuera de la ventana.
 - `revoke_refresh_token` (logout) todavía no toma lock. Pendiente.
+
+## ADR-020 — Héroe isométrico propio sin watermark de terceros
+
+**Fecha:** 2026-11-19
+**Estado:** aceptada. Reemplaza ADR-018 para el héroe de la landing.
+
+**Contexto:** la escena de Spline se publicó e integró el 2026-11-18, pero en la
+revisión visual el render se vio dentado y el badge "Built with Spline" del plan
+Free quedó grande. Cubrir el badge con un elemento de la UI equivale a quitar el
+watermark y no es una opción válida. El repo ya tenía una escena isométrica
+propia (`hero-canvas.tsx` con Three.js y `hero-fallback.tsx` en SVG) con la
+paleta del design system.
+
+**Decisión:**
+
+- El héroe usa `HeroScene` (`hero-scene.tsx`): Three.js en desktop, después de
+  idle y sin reduced motion; `HeroFallback` (SVG) en mobile, con reduced motion
+  o mientras carga.
+- Se quita Spline del héroe. `spline-hero.tsx`, `@splinetool/react-spline` y el
+  poster `spline-hero-2x.webp` quedan en el repo sin uso, para poder volver si se
+  contrata Hobby.
+- Los chips de producto y el gradiente se mantienen.
+
+**Consecuencias:**
+
+- Sin watermark, sin dependencia de `prod.spline.design` y sin el costo de Spline.
+- La escena es más abstracta que el diorama literal de Spline (oficina, van,
+  casa); no hay interacción 3D con la escena.
+- Si se contrata Spline Hobby, revertir es un cambio acotado: volver a
+  `SplineHero` en `hero-visual.tsx` y restaurar el poster.

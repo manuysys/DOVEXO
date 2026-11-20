@@ -184,18 +184,13 @@ Estado al cierre del día. Detalle en `CHANGELOG.md` y `PROJECT_STATUS.md`.
 - **`/api/v1/ai/usage` devolvía 500: cerrado.** La causa era `AIUsageItem` sin
   `from_attributes`. Corregido (commit `85239e0`), deployado y verificado en
   producción con 200.
-- **Badge "Built with Spline" (abierto).** La escena de la landing muestra el badge
-  por la licencia del plan Free. Solo se quita con el plan Hobby ($15/mes mensual o
-  $12/mes anual, precios informados el 2026-11-18). El render 2x lo reduce
-  visualmente, pero no lo elimina. Decisión pendiente del fundador.
-  Ver ADR-018 y `COSTS_2026-11-18.md`.
-- **Spline y `prefers-reduced-motion` (cerrado).** `spline-hero.tsx` solo monta la
-  escena con `(min-width: 1024px) and (prefers-reduced-motion: no-preference)`; con
-  reduced motion se muestra el poster. El reporte inicial de esta sesión decía lo
-  contrario por un error de lectura.
-- **Spline sin medición (abierto).** No hay medición de peso, LCP ni Lighthouse de la
-  landing v2. Tampoco se probó qué pasa si el runtime de `prod.spline.design` no
-  responde.
+- **Badge "Built with Spline" (cerrado).** El héroe ya no usa Spline: se
+  reemplazó por la escena isométrica propia (ADR-020). `spline-hero.tsx`, el
+  paquete `@splinetool/react-spline` y `spline-hero-2x.webp` quedan en el repo
+  sin uso, para una eventual vuelta con plan Hobby. Ya no hay badge en la landing.
+- **Héroe propio sin medición (abierto).** No hay medición de peso, LCP ni
+  Lighthouse del héroe Three.js/SVG. Tampoco se probó el comportamiento en
+  dispositivos de gama baja.
 - **`WHATSAPP_APP_SECRET` sin configurar en producción (abierto).** El webhook de
   WhatsApp responde 503 a propósito. Acción: cargar el secreto de la app de Meta en
   Vercel (API, Production). Ver ADR-019 y `DEPLOY_VERCEL.md`.

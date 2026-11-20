@@ -1,9 +1,9 @@
 # Estado del proyecto
 
-**Última actualización:** 2026-11-18
+**Última actualización:** 2026-11-19
 **Fase:** preventa / customer discovery activa (GO_TO_MARKET) + landing v2 con
-héroe 3D de Spline y hardening de seguridad del backend (desplegados el
-2026-11-18; `main`, commit `440737c`). Base técnica: Hito 2
+héroe isométrico propio (Three.js + SVG, sin watermark) y hardening de seguridad
+del backend (desplegados el 2026-11-18/19; `main`, commit `4b27ea0`). Base técnica: Hito 2
 completo + PWA, app móvil Android DOVEXO, portal del cliente, dashboard
 operativo, automatizaciones, IA con Groq, suscripciones, panel global, WhatsApp,
 importador CSV/XLSX, onboarding y reset de demo (pilot-ready).
@@ -166,7 +166,7 @@ propio está pendiente.
 - [x] Landing pública de producto con identidad **DOVEXO** (nombre histórico: Arreglo; ADR-016).
 - [x] Hero oscuro full-bleed con Three.js isométrico lazy, scanlines, tarjetas
   flotantes y contadores. _(Estado del 2026-11-09. Desde 2026-11-18 la landing v2
-  quitó scanlines y Marquee y usa Spline en desktop; ver la sección nueva.)_
+  quitó scanlines y Marquee y usa la escena isométrica propia en desktop; ver la sección nueva.)_
 - [x] GSAP ScrollTrigger con recorrido fijado, Lenis smooth scroll, marquee,
   tilt 3D y Motion para microinteracciones. _(Marquee eliminado el 2026-11-18;
   `journey.tsx` usa ScrollTrigger con scrub y stagger.)_
@@ -438,12 +438,11 @@ estado de cada punto:
 
 | Punto | Estado | Evidencia |
 |---|---|---|
-| Héroe 3D con Spline (desktop, poster estático en mobile) | Implementado y desplegado | Commit `4ed02eb`; ADR-018; `LANDING_REDESIGN.md` §9 |
-| Nitidez del héroe 3D | Corregido y desplegado | Commits `42f88f0`/`0af4c88`; canvas 1126x938 y poster 792x660 en producción |
-| Badge "Built with Spline" visible | Vigente (plan Free) | Se oculta solo con plan pago; no contratado |
+| Héroe isométrico propio (Three.js en desktop, SVG en mobile) | Implementado y desplegado | Commit `4b27ea0`; ADR-020; `hero-scene.tsx`, `hero-fallback.tsx` |
+| Nitidez y watermark | Resuelto: sin badge y sin runtime de terceros | El render 2x de Spline quedó en el historial (ADR-018) |
 | Tour de producto con capturas reales del tenant demo | Implementado y desplegado | `apps/web/public/product-tour/*.webp` |
 | GSAP ScrollTrigger en `journey.tsx` con reduced motion | Implementado; stagger verificado en producción | Commit `4ed02eb`; pasos con `opacity 0 → 1` al hacer scroll |
-| 10 hallazgos de auditoría de backend | Corregidos y desplegados (API); el cliente móvil corregido está en `main` sin APK nuevo | `SECURITY_AUDIT.md` §8 |
+| 10 hallazgos de auditoría de backend | Corregidos y desplegados (API); cliente móvil corregido y APK `mobile-apk-6` generado | `SECURITY_AUDIT.md` §8; `MOBILE_BUILD.md` |
 | `/ai/usage` devolvía 500 | Corregido (commit `85239e0`); producción 200 | Evidencia de la API abajo |
 | `TRUST_PROXY_HEADERS` en producción | Configurado en Vercel (API) | ADR-019 |
 | `WHATSAPP_APP_SECRET` en producción | **No configurado**: webhook responde 503 a propósito | ADR-019; `KNOWN_ISSUES.md` |
@@ -481,7 +480,7 @@ GET  /api/v1/quotes/{id}/pdf                   -> 200
 Evidencia de la web (HTTP y navegador):
 
 ```text
-GET  /                                  -> 200 (Spline y product-tour presentes)
+GET  /                                  -> 200 (héroe propio y product-tour presentes)
 GET  /login                             -> 200
 Login demo -> /dashboard                -> OK, sin errores de consola
 GET  /tech                              -> 200
@@ -490,8 +489,8 @@ GET  /privacy, /terms, /onboarding,
      /settings/import                   -> 200
 ```
 
-**No verificado en esta entrada:** medición de peso y LCP de Spline, Lighthouse,
-auditoría de a11y, comportamiento ante caída del runtime de Spline, prueba del
+**No verificado en esta entrada:** medición de peso y LCP del héroe propio, Lighthouse,
+auditoría de a11y, comportamiento en dispositivos de gama baja, prueba del
 APK con el cliente de refresh corregido, y flujo WhatsApp end-to-end (sigue sin
 credenciales de Meta).
 
@@ -532,8 +531,6 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
   configurar Resend y política de privacidad.
 - [ ] Configurar `WHATSAPP_APP_SECRET` en Vercel (API, Production). Sin él, el
   webhook de WhatsApp responde 503 (ADR-019).
-- [ ] Decidir el badge de Spline: aceptarlo con plan Free o contratar Hobby
-  (costos en `COSTS_2026-11-18.md`).
 - [ ] Agregar lock en `revoke_refresh_token` (logout), que hoy solo se bloquea
   en la rotación.
 - [ ] Agregar test de reuso de refresh fuera de la ventana de gracia de 10 s.
@@ -581,7 +578,8 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
 - El webhook de WhatsApp está cerrado sin `WHATSAPP_APP_SECRET` (503). Eso es
   intencional, pero significa que WhatsApp no recibe eventos hasta configurar el
   secreto.
-- El badge "Built with Spline" aparece en la landing mientras el plan sea Free.
+- El héroe isométrico propio no tiene watermark. Spline quedó sin uso desde el
+  2026-11-19; el código y el poster se conservan para una eventual vuelta con Hobby.
 - `revoke_refresh_token` (logout) no toma lock; solo la rotación lo hace.
 - La ventana de gracia de refresh (10 s) acepta un token ya rotado dentro de ese
   plazo sin revocar la familia (ADR-019).
