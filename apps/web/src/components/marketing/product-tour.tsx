@@ -183,7 +183,7 @@ export function ProductTour() {
 
   return (
     <section id="producto" aria-labelledby="tour-title" className="bg-surface py-20 sm:py-28">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeading
           eyebrow="Producto"
           title="Recorré las pantallas principales."

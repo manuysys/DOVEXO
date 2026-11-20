@@ -83,7 +83,7 @@ export function Journey() {
         className="journey-grid mk-grid-dark mk-grid-fade absolute inset-0 -z-10 opacity-60"
       />
 
-      <div className="mx-auto grid max-w-6xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+      <div className="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
         <div className="lg:sticky lg:top-24 lg:self-start">
           <p className="text-label text-accent-teal inline-flex items-center gap-3">
             <span aria-hidden="true" className="h-px w-6 bg-current" />

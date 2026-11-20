@@ -12,7 +12,7 @@ const focusRing =
 export function Faq() {
   return (
     <section id="faq" aria-labelledby="faq-title" className="scroll-mt-16 bg-surface py-20 sm:py-28">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
         <div className="lg:sticky lg:top-24 lg:self-start">
           <SectionHeading
             eyebrow="Preguntas frecuentes"

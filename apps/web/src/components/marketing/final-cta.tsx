@@ -16,7 +16,7 @@ export function FinalCta() {
     >
       <div aria-hidden="true" className="mk-grid-dark mk-grid-fade absolute inset-0 -z-10 opacity-60" />
 
-      <div className="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 sm:py-24 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-16">
+      <div className="mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 sm:py-24 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-16">
         <div>
           <p className="text-label inline-flex items-center gap-3 text-mk-teal">
             <span aria-hidden="true" className="h-px w-6 bg-current" />
