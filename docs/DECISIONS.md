@@ -415,3 +415,42 @@ paleta del design system.
   casa); no hay interacción 3D con la escena.
 - Si se contrata Spline Hobby, revertir es un cambio acotado: volver a
   `SplineHero` en `hero-visual.tsx` y restaurar el poster.
+
+## ADR-021 — Identidad de marketing “Oficio en orden”
+
+**Fecha:** 2026-11-20
+**Estado:** aceptada
+
+**Contexto:** la landing mezclaba tres épocas (héroe 3D oscuro, secciones claras,
+panel azul), seis acentos y una cabecera translúcida con un borde visible al
+scrollear. El público son técnicos, instaladores y empresas chicas de servicios
+argentinas, no equipos de producto.
+
+**Decisión:**
+
+- Papel obra `#F3F0E6`, tinta verde `#123B31` y una sola señal naranja `#D9541E`.
+  El naranja nunca es fondo de botón: marca folios, reglas, focos y sellos.
+- **Archivo** (Omnibus-Type, Buenos Aires) como única familia de la landing, con
+  eje de ancho para etiquetas. `.mk-root` acota el cambio de cuerpo y color; la
+  familia display pasa a Archivo también en el panel y se deja de cargar Space
+  Grotesk.
+- Héroe claro con captura real del producto (dashboard del tenant demo) al 175 %
+  y dos llamadas numeradas. Sin 3D, gradientes ni animación de entrada.
+- Se retiran de la landing `SmoothScroll` (Lenis), `Journey` (GSAP),
+  `FeaturesBento` y `TrustStrip`. La narrativa pasa a `OrderRail` (la misma OT en
+  solicitud, turno, presupuesto y cobro) y `ModuleIndex` (índice de módulos).
+- Cabecera de papel opaca, sin `border-b` ni `backdrop-blur`.
+
+**Consecuencias:**
+
+- Menos JS en la landing: el LCP es texto más una imagen `priority`.
+- La app conserva colores, radios y componentes; solo cambia la familia display,
+  que pasa a Archivo y deja de cargar Space Grotesk. La migración de tokens de
+  color del panel queda para la fase 2.
+- `journey.tsx`, `features-bento.tsx`, `trust-strip.tsx`, `hero-scene.tsx`,
+  `hero-canvas.tsx` y `spline-hero.tsx` quedan sin uso. No se borran para no
+  perder el trabajo; se pueden eliminar cuando la dirección valide en producción.
+- El naranja sobre papel no llega a 4.5:1. Se usa en textos ≥24 px/700, iconos,
+  reglas y focos; para texto pequeño va `#A63C10`.
+- La prueba de 14 días se comunica como activa al registrarse. Si el flujo de
+  trial cambia, hay que corregir héroe, precios y FAQ a la vez.

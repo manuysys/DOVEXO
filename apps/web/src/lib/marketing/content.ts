@@ -14,10 +14,11 @@ export const navLinks = [
 ] as const;
 
 export const heroCopy = {
-  eyebrow: "Software para servicios técnicos a domicilio",
-  title: "Del primer llamado al último cobro,",
-  titleAccent: "todo en orden.",
-  description: brand.description,
+  eyebrow: "Para empresas de servicios técnicos",
+  title: "El oficio,",
+  titleAccent: "en orden.",
+  description:
+    "Solicitudes, turnos, presupuestos y cobros en un solo lugar. Lo que pasa en la calle se ve en la oficina.",
 } as const;
 
 /** Frases de la franja animada. Describen funciones, no clientes ni resultados. */
@@ -225,7 +226,7 @@ export const faqItems = [
   {
     question: "¿Cuánto cuesta y hay prueba gratis?",
     answer:
-      "Los precios son de lanzamiento, en ARS por mes. La prueba gratuita de 14 días está en implementación. Hoy no se cobra al registrarse, y los medios de pago y la facturación se informarán antes de cualquier cobro.",
+      "Los precios son de lanzamiento, en ARS por mes. Al registrarte se activa una prueba de 14 días. Hoy no se cobra al registrarse, y los medios de pago y la facturación se informarán antes de cualquier cobro.",
   },
   {
     question: "¿Puedo cambiar de plan?",
@@ -251,7 +252,7 @@ export const faqItems = [
 export const pricingCopy = {
   title: "Precios de lanzamiento",
   description:
-    "Montos en pesos argentinos por mes. La prueba gratuita de 14 días está en implementación. Hoy no se cobra al registrarse.",
+    "Montos en pesos argentinos por mes. Al registrarte se activa la prueba de 14 días. Hoy no se cobra.",
   limitsNote:
     "Los límites por plan todavía no se aplican en toda la plataforma. Hoy el límite mensual del asistente de IA es el mismo para todas las empresas.",
   included: "Incluido en todos los planes",

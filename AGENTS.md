@@ -112,6 +112,20 @@ corregirlo antes de continuar.
 - Si algo falla, mostrar el error concreto y el fix aplicado.
 - Evitar texto largo salvo que el usuario lo pida explícitamente.
 
+## Subagentes, skills y MCP
+
+- **Modelo obligatorio de subagentes:** `opencode-go/deepseek-v4.1-flash`, salvo que
+  el usuario pida explícitamente otro. No volver a preguntarlo.
+- Antes de implementar, cargar la skill que corresponda: `project-context`,
+  `frontend-nextjs`, `backend-fastapi`, `database-postgres`, `qa-verification`,
+  `multi-tenant-security`, `git-workflow`, etc.
+- Usar los MCP disponibles cuando aporten evidencia: Playwright para verificar
+  la UI real y capturar pantallas; Figma para prototipos y tableros; Context7
+  para documentación de librerías; Expo para la app móvil; Chromatic si el
+  proyecto lo configura.
+- Todo subagente debe devolver comandos ejecutados, salidas y rutas de las
+  capturas. Sin evidencia, el trabajo no se acepta.
+
 ## Flujo de trabajo con OpenCode
 
 - Antes de una tarea grande, usar el skill `project-context`.

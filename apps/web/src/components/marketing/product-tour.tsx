@@ -134,16 +134,16 @@ const tabs: readonly TourTab[] = [
 ];
 
 const focusRing =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mk-signal";
 
 function BrowserFrame({ visual }: { visual: TourVisual }) {
   return (
-    <div className="w-full overflow-hidden rounded-ds-lg border border-border bg-surface shadow-raised">
-      <div className="flex items-center gap-1.5 border-b border-border bg-surface-2 px-3 py-2">
-        <span aria-hidden="true" className="size-2 rounded-full bg-border" />
-        <span aria-hidden="true" className="size-2 rounded-full bg-border" />
-        <span aria-hidden="true" className="size-2 rounded-full bg-border" />
-        <span className="text-caption ml-2 truncate text-text-2">DOVEXO · panel</span>
+    <div className="w-full overflow-hidden rounded-md border border-mk-ink/20 bg-white">
+      <div className="flex items-center gap-1.5 border-b border-mk-line bg-mk-paper-2 px-3 py-2">
+        <span aria-hidden="true" className="size-2 rounded-full bg-mk-line" />
+        <span aria-hidden="true" className="size-2 rounded-full bg-mk-line" />
+        <span aria-hidden="true" className="size-2 rounded-full bg-mk-line" />
+        <span className="ml-2 truncate text-[11px] text-mk-slate">DOVEXO · panel</span>
       </div>
       <Image
         src={visual.src}
@@ -151,7 +151,7 @@ function BrowserFrame({ visual }: { visual: TourVisual }) {
         width={visual.width}
         height={visual.height}
         sizes="(min-width: 1024px) 55vw, 92vw"
-        className="h-auto w-full"
+        className="h-auto w-[101.5%] max-w-none"
       />
     </div>
   );
@@ -159,7 +159,7 @@ function BrowserFrame({ visual }: { visual: TourVisual }) {
 
 function PhoneFrame({ visual }: { visual: TourVisual }) {
   return (
-    <div className="mx-auto w-[16.5rem] max-w-full rounded-[2.25rem] border-[7px] border-[#06121F] bg-[#0B1220] p-1.5 shadow-[0_30px_70px_-30px_rgb(0_0_0/0.8)]">
+    <div className="mx-auto w-[16.5rem] max-w-full rounded-[2.25rem] border-[7px] border-mk-ink bg-mk-ink p-1.5 shadow-[0_30px_70px_-30px_rgb(18_59_49/0.5)]">
       <Image
         src={visual.src}
         alt={visual.alt}
@@ -182,7 +182,7 @@ export function ProductTour() {
   const current = tabs.find((tab) => tab.id === active) ?? tabs[0];
 
   return (
-    <section id="producto" aria-labelledby="tour-title" className="bg-surface py-20 sm:py-28">
+    <section id="producto" aria-labelledby="tour-title" className="scroll-mt-20 bg-mk-paper py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeading
           eyebrow="Producto"
@@ -200,13 +200,13 @@ export function ProductTour() {
         >
           <Tabs.List
             aria-label="Pantallas del producto"
-            className="border-border bg-surface-2 rounded-ds-md mt-10 flex gap-1 overflow-x-auto border p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="border-mk-line bg-mk-paper-2 rounded-md mt-10 flex gap-1 overflow-x-auto border p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {tabs.map((tab) => (
               <Tabs.Trigger
                 key={tab.id}
                 value={tab.id}
-                className={`text-small text-text-2 hover:text-text data-[state=active]:bg-surface data-[state=active]:text-text data-[state=active]:shadow-card rounded-ds-sm inline-flex min-h-11 shrink-0 items-center justify-center px-3.5 font-medium whitespace-nowrap transition-colors ${focusRing}`}
+                className={`text-small text-mk-ink/75 hover:text-mk-ink data-[state=active]:bg-mk-paper data-[state=active]:text-mk-ink rounded inline-flex min-h-11 shrink-0 items-center justify-center px-3.5 font-medium whitespace-nowrap transition-colors ${focusRing}`}
               >
                 {tab.label}
               </Tabs.Trigger>
@@ -219,20 +219,20 @@ export function ProductTour() {
               initial={reduce ? false : { opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="border-border bg-bg rounded-ds-lg grid gap-8 border p-5 sm:p-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12"
+              className="border-mk-line bg-mk-paper-2 rounded-md grid gap-8 border p-5 sm:p-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12"
             >
               <div className="min-w-0">
-                <h3 className="text-h2 text-text text-balance">{current.title}</h3>
-                <p className="text-body text-text-2 mt-3">{current.text}</p>
+                <h3 className="text-h2 text-mk-ink text-balance">{current.title}</h3>
+                <p className="text-[15px] leading-[1.6] text-mk-ink/75 mt-3">{current.text}</p>
                 <ul className="mt-6 space-y-3">
                   {current.bullets.map((bullet) => (
-                    <li key={bullet} className="text-small text-text flex gap-3">
-                      <Check className="text-primary mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                    <li key={bullet} className="text-small text-mk-ink flex gap-3">
+                      <Check className="text-mk-signal mt-0.5 size-4 shrink-0" aria-hidden="true" />
                       {bullet}
                     </li>
                   ))}
                 </ul>
-                <p className="text-caption text-text-2 mt-6">
+                <p className="text-caption mt-6 text-mk-slate">
                   Capturas reales del tenant demo con datos de ejemplo, no de clientes reales.
                 </p>
               </div>
@@ -251,3 +251,4 @@ export function ProductTour() {
     </section>
   );
 }
+

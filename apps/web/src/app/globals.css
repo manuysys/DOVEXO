@@ -63,7 +63,7 @@
   --color-slate: var(--brand-slate);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-space-grotesk);
+  --font-display: var(--font-archivo);
 
   /* Design system DOVEXO */
   --color-primary: var(--ds-primary);
@@ -212,6 +212,16 @@ body {
   --mk-tint: #efebe3;
   --mk-teal-soft: #5eead4;
   --mk-teal-deep: #0b4f4a;
+
+  /* Identidad 2026-11-20: papel, tinta y una sola señal. */
+  --mk-paper: #f3f0e6;
+  --mk-paper-2: #faf8f0;
+  --mk-ink: #123b31;
+  --mk-ink-hover: #0c2c25;
+  --mk-signal: #d9541e;
+  --mk-signal-strong: #a63c10;
+  --mk-slate: #5a665f;
+  --mk-line: #d8d2c2;
 }
 
 @theme inline {
@@ -220,6 +230,29 @@ body {
   --color-mk-tint: var(--mk-tint);
   --color-mk-teal: var(--mk-teal-soft);
   --color-mk-deep: var(--mk-teal-deep);
+  --color-mk-paper: var(--mk-paper);
+  --color-mk-paper-2: var(--mk-paper-2);
+  --color-mk-ink: var(--mk-ink);
+  --color-mk-ink-hover: var(--mk-ink-hover);
+  --color-mk-signal: var(--mk-signal);
+  --color-mk-signal-strong: var(--mk-signal-strong);
+  --color-mk-slate: var(--mk-slate);
+  --color-mk-line: var(--mk-line);
+}
+
+/* La landing usa una sola familia: Archivo, con el eje de ancho en las etiquetas. */
+.mk-root {
+  font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+}
+
+.mk-label {
+  font-family: var(--font-archivo), ui-sans-serif, sans-serif;
+  font-stretch: 75%;
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .mk-grid-dark {

@@ -5,26 +5,26 @@ import { navLinks } from "@/lib/marketing/content";
 
 import { focusDark } from "./ui";
 
-const linkClass = `text-small rounded text-white/70 transition-colors hover:text-white ${focusDark}`;
-const columnTitle = "text-xs font-semibold tracking-[0.12em] text-white/50 uppercase";
+const linkClass = `text-small rounded text-mk-paper/70 transition-colors hover:text-mk-paper ${focusDark}`;
+const columnTitle = "text-xs font-semibold tracking-[0.12em] text-mk-paper/70 uppercase";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-white/10 bg-deep text-white">
+    <footer className="border-t border-mk-paper/15 bg-mk-ink text-mk-paper">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <p className="flex items-center gap-2">
             <span
               aria-hidden="true"
-              className="grid size-8 place-items-center rounded-lg bg-primary font-display text-sm font-semibold text-white"
+              className="grid size-[26px] place-items-center rounded-[3px] border-[1.5px] border-mk-paper font-display text-[13px] font-extrabold text-mk-paper"
             >
               D
             </span>
-            <span className="font-display text-lg font-semibold tracking-tight">{brand.name}</span>
+            <span className="font-display text-lg font-extrabold tracking-[-0.02em]">{brand.name}</span>
           </p>
-          <p className="text-small mt-3 max-w-xs text-white/70">{brand.tagline}</p>
+          <p className="text-small mt-3 max-w-xs text-mk-paper/70">{brand.tagline}</p>
           <a
             href={`mailto:${brand.email}`}
             className={`text-small mt-4 inline-flex rounded font-medium underline underline-offset-4 ${focusDark}`}
@@ -79,14 +79,15 @@ export function SiteFooter() {
         </nav>
       </div>
 
-      <div className="border-t border-white/10">
+      <div className="border-t border-mk-paper/15">
         <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p className="text-caption text-white/60">
+          <p className="text-caption text-mk-paper/60">
             © {year} {brand.legalName}. Hecho en Argentina · Montos en ARS.
           </p>
-          <p className="text-caption text-white/60">La demo usa datos de ejemplo.</p>
+          <p className="text-caption text-mk-paper/60">La demo usa datos de ejemplo.</p>
         </div>
       </div>
     </footer>
   );
 }
+

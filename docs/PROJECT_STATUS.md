@@ -1,9 +1,10 @@
 # Estado del proyecto
 
-**Última actualización:** 2026-11-19
-**Fase:** preventa / customer discovery activa (GO_TO_MARKET) + landing v2 con
-héroe isométrico propio (Three.js + SVG, sin watermark) y hardening de seguridad
-del backend (desplegados el 2026-11-18/19; `main`, commit `4b27ea0`). Base técnica: Hito 2
+**Última actualización:** 2026-11-20
+**Fase:** preventa / customer discovery activa (GO_TO_MARKET) + landing v3
+“Oficio en orden” implementada y verificada localmente (papel/tinta/Archivo,
+héroe claro con captura real, sin 3D ni Lenis; 281 tests y build de 32 rutas).
+Pendiente de deploy y QA visual en producción. Base técnica: Hito 2
 completo + PWA, app móvil Android DOVEXO, portal del cliente, dashboard
 operativo, automatizaciones, IA con Groq, suscripciones, panel global, WhatsApp,
 importador CSV/XLSX, onboarding y reset de demo (pilot-ready).
@@ -493,6 +494,37 @@ GET  /privacy, /terms, /onboarding,
 auditoría de a11y, comportamiento en dispositivos de gama baja, prueba del
 APK con el cliente de refresh corregido, y flujo WhatsApp end-to-end (sigue sin
 credenciales de Meta).
+
+## Landing v3 — “Oficio en orden” (2026-11-20)
+
+Rediseño de la landing sobre la rama de trabajo, con una dirección de arte
+propia: papel, tinta y una sola señal. Detalle en `CHANGELOG.md` y ADR-021.
+
+- **Tipografía:** Archivo (Omnibus-Type, Buenos Aires) con eje de ancho para
+  etiquetas. Se carga una sola familia en la landing; `.mk-root` acota el cuerpo
+  y el color. La familia display pasa a Archivo en todo el producto y Space
+  Grotesk deja de cargarse.
+- **Paleta:** papel `#F3F0E6`, tinta `#123B31`, señal `#D9541E`, línea `#D8D2C2`.
+  El naranja no se usa como fondo de botón: marca folios, reglas, focos y sellos.
+- **Héroe:** claro, con “El oficio, en orden.”, captura real de
+  `public/product-tour/dashboard.webp` al 175 % y dos llamadas numeradas. Se
+  retiran Three.js, GSAP y Lenis de la landing.
+- **Recorrido:** `OrderRail` reemplaza `Journey` y `FeaturesBento` con cuatro
+  estaciones y la misma `OT-2026-0001`; `ModuleIndex` lista ocho módulos
+  operativos. `TrustStrip` sale de la página.
+- **Cabecera:** papel opaco de 64 px, sin `border-b` ni `backdrop-blur`. Es el
+  fix del borde que se veía al scrollear sobre secciones claras.
+- **Tour, precios, FAQ y CTA final:** retematizados; sin resplandor azul, con
+  sello “Recomendado” y tabla de límites con hairlines. El copy de la prueba de
+  14 días dejó de decir “en implementación”: se activa al registrarse.
+
+**Verificación (local, 2026-11-20):** `pnpm typecheck` OK; `pnpm lint` OK con 2
+warnings preexistentes de React Hook Form; `pnpm test` 281/281; `pnpm build` OK
+con 32 rutas. QA visual con Playwright en curso al cierre de esta entrada.
+
+**Pendiente:** deploy a Vercel y QA visual en producción; las capturas del tour
+siguen mostrando el scrollbar interno de la app (se recortan por CSS, no se
+recapturaron).
 
 ## Demo pública
 

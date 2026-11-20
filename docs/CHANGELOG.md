@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-11-20 — Landing v3: dirección de arte "Oficio en orden"
+
+- Sistema de marketing acotado con `.mk-root`: **Archivo** (Omnibus-Type, eje de
+  ancho) para toda la landing y tokens papel `#F3F0E6`, tinta `#123B31`, señal
+  `#D9541E`, línea `#D8D2C2` y pizarra `#5A665F`. La app conserva sus colores y
+  radios; la familia display pasa a Archivo y deja de cargarse Space Grotesk.
+- Héroe claro: "El oficio, en orden.", captura real del tenant demo al 175 % con
+  dos llamadas numeradas. Sin Three.js, gradientes ni animación de entrada.
+- `page.tsx` deja de montar `SmoothScroll` (Lenis), `Journey` (GSAP),
+  `FeaturesBento` y `TrustStrip`. Se agregan `OrderRail` ("Una sola orden",
+  cuatro estaciones con la misma OT) y `ModuleIndex` (índice de ocho módulos).
+- Cabecera de papel opaca, sin `border-b` ni `backdrop-blur`: elimina el borde y
+  la transparencia que se veían al scrollear.
+- Tour, precios, FAQ, CTA final y footer retematizados. Se quita el resplandor
+  azul; "Recomendado" pasa a sello rotado. La prueba de 14 días ya no figura
+  "en implementación": se activa al registrarse.
+- `AGENTS.md`: regla de subagentes con `opencode-go/deepseek-v4.1-flash` y uso de
+  skills/MCP.
+- Verificado: `pnpm typecheck` OK; `pnpm lint` OK (2 warnings preexistentes);
+  `pnpm test` 281/281; `pnpm build` OK, 32 rutas.
+
 ## 2026-11-19 — Héroe propio sin watermark y contenedor más ancho
 
 - El héroe de la landing deja Spline y vuelve a la escena isométrica propia:

@@ -12,19 +12,19 @@ type SectionHeadingProps = {
 };
 
 const eyebrowTone = {
-  light: "text-primary",
+  light: "text-mk-signal-strong",
   dark: "text-mk-teal",
   teal: "text-white",
 } as const;
 
 const titleTone = {
-  light: "text-text",
+  light: "text-mk-ink",
   dark: "text-white",
   teal: "text-white",
 } as const;
 
 const textTone = {
-  light: "text-text-2",
+  light: "text-mk-ink/70",
   dark: "text-white/70",
   teal: "text-white/80",
 } as const;

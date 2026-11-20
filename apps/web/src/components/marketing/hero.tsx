@@ -1,94 +1,111 @@
-import { ArrowRight, History, Link2, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
-import { demoAccount, heroCopy } from "@/lib/marketing/content";
+import { heroCopy } from "@/lib/marketing/content";
 import { cn } from "@/lib/utils";
 
-import { HeroVisual } from "./hero-visual";
-import { ctaGhostDark, ctaPrimary, delayStyle, focusDark } from "./ui";
+import { ctaOutlineInk, ctaPrimary, focusLight } from "./ui";
 
-const trustItems = [
-  { icon: ShieldCheck, label: "Datos aislados por empresa" },
-  { icon: Link2, label: "Links de presupuesto seguros" },
-  { icon: History, label: "Historial de cada trabajo" },
+const proofItems = [
+  "Datos aislados por empresa",
+  "Link de presupuesto",
+  "Historial de cada trabajo",
 ];
 
-/* Hero full-bleed en deep. El texto entra con CSS (sin esperar JS) para que el LCP sea el titular. */
+/*
+ * Héroe claro: papel, tinta y una sola señal. El producto real es la imagen
+ * principal; no hay 3D, gradientes ni animación de entrada.
+ */
 export function Hero() {
   return (
     <section
       id="contenido"
       aria-labelledby="hero-title"
-      className="relative isolate flex min-h-[100svh] scroll-mt-16 items-center overflow-hidden bg-[#0B1220] pt-24 pb-14 text-white sm:pb-20 lg:pt-28"
+      className="relative overflow-hidden bg-mk-paper pt-24 pb-16 sm:pt-28 sm:pb-20"
     >
-      <div aria-hidden="true" className="mk-grid-dark mk-grid-fade absolute inset-0 -z-10" />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_50%_at_70%_45%,rgb(49_94_251/0.18),transparent_70%)]"
-      />
-
-      <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-8">
-        <div>
-          <p
-            className="mk-rise inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/85"
-            style={delayStyle(0)}
-          >
-            <span aria-hidden="true" className="size-1.5 rounded-full bg-accent-teal" />
+      <div className="mx-auto grid max-w-7xl items-start gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-12">
+        <div className="min-w-0">
+          <p className="mk-label inline-flex items-center rounded border border-mk-line bg-mk-paper-2/60 px-2.5 py-1.5 text-mk-ink/80">
             {heroCopy.eyebrow}
           </p>
 
           <h1
             id="hero-title"
-            className="mk-rise mt-6 font-display text-[clamp(2.5rem,5.4vw,4.6rem)] leading-[0.99] font-semibold tracking-[-0.035em] text-balance"
-            style={delayStyle(80)}
+            className="mt-6 font-display text-[clamp(2.5rem,5.3vw,4.75rem)] leading-[0.98] font-bold tracking-[-0.035em] text-balance text-mk-ink"
           >
-            {heroCopy.title} <span className="text-amber">{heroCopy.titleAccent}</span>
+            {heroCopy.title}
+            <br />
+            <span className="relative inline-block after:absolute after:inset-x-0 after:-bottom-1.5 after:h-[3px] after:rounded-full after:bg-mk-signal">
+              {heroCopy.titleAccent}
+            </span>
           </h1>
 
-          <p
-            className="mk-rise mt-6 max-w-xl text-base leading-7 text-white/80 sm:text-lg"
-            style={delayStyle(160)}
-          >
+          <p className="mt-7 max-w-[44ch] text-[17px] leading-[1.6] text-mk-ink/80 sm:text-[19px]">
             {heroCopy.description}
           </p>
 
-          <div className="mk-rise mt-8 flex flex-col gap-3 sm:flex-row" style={delayStyle(240)}>
-            <Link href="/register" className={cn(ctaPrimary, focusDark)}>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link href="/register" className={cn(ctaPrimary, "px-6 py-3.5", focusLight)}>
               Crear mi empresa
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
-            <Link href="/login" className={cn(ctaGhostDark, focusDark)}>
-              Probar la demo
+            <Link href="/login" className={cn(ctaOutlineInk, "px-6 py-3.5", focusLight)}>
+              Ver la demo
             </Link>
           </div>
-          <p className="mk-rise mt-3 text-xs text-white/60" style={delayStyle(280)}>
-            14 días de prueba. Sin tarjeta. Podés empezar hoy.
+          <p className="mt-3 text-[13px] text-mk-slate">
+            14 días. Sin tarjeta. La demo usa datos de ejemplo.
           </p>
 
-          <ul
-            className="mk-rise mt-8 flex flex-wrap gap-x-5 gap-y-2 text-xs text-white/70"
-            style={delayStyle(320)}
-          >
-            {trustItems.map((item) => (
-              <li key={item.label} className="flex items-center gap-1.5">
-                <item.icon className="size-3.5 text-accent-teal" aria-hidden="true" />
-                {item.label}
+          <ul className="mt-10 flex flex-wrap gap-x-5 gap-y-2 border-t border-mk-line pt-4 text-[12px] text-mk-slate">
+            {proofItems.map((item) => (
+              <li key={item} className="flex items-center gap-2">
+                <span aria-hidden="true" className="size-1 rounded-full bg-mk-signal" />
+                {item}
               </li>
             ))}
           </ul>
-
-          <details className="mk-rise mt-6 max-w-md text-xs text-white/60" style={delayStyle(360)}>
-            <summary className="cursor-pointer rounded-md font-medium text-white/75 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber">
-              Ver credenciales de la demo
-            </summary>
-            <p className="mt-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2">
-              Email: <code className="font-mono text-white">{demoAccount.email}</code> · Contraseña:{" "}
-              <code className="font-mono text-white">{demoAccount.password}</code>
-            </p>
-          </details>
         </div>
 
-        <HeroVisual />
+        <div className="relative min-w-0">
+          <div className="relative aspect-[658/440] overflow-hidden rounded-lg border border-mk-ink/20 bg-white shadow-[0_24px_48px_-40px_rgb(18_59_49/0.35)]">
+            <Image
+              src="/product-tour/dashboard.webp"
+              alt="Panel de DOVEXO con las órdenes, los presupuestos y el saldo del día"
+              width={1440}
+              height={900}
+              priority
+              sizes="(min-width: 1024px) 80vw, 175vw"
+              className="absolute top-[-0.9%] left-[-0.8%] w-[175%] max-w-none"
+            />
+
+            <span
+              aria-hidden="true"
+              className="absolute top-[29%] left-[36%] grid size-5 place-items-center rounded-full border-2 border-mk-paper bg-mk-signal text-[9px] font-bold text-mk-paper"
+            >
+              1
+            </span>
+            <span
+              aria-hidden="true"
+              className="absolute top-[70%] left-[37%] grid size-5 place-items-center rounded-full border-2 border-mk-paper bg-mk-signal text-[9px] font-bold text-mk-paper"
+            >
+              2
+            </span>
+          </div>
+
+          <div className="mt-2 flex flex-wrap justify-end gap-x-4 gap-y-1 text-[11px] text-mk-slate">
+            <span>
+              <b className="font-semibold text-mk-signal-strong">1</b> Operación del día
+            </span>
+            <span>
+              <b className="font-semibold text-mk-signal-strong">2</b> Primeros pasos
+            </span>
+          </div>
+          <p className="mt-1 text-right text-[11px] text-mk-slate">
+            Captura real del tenant demo. Datos de ejemplo.
+          </p>
+        </div>
       </div>
     </section>
   );

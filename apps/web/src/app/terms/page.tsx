@@ -30,7 +30,7 @@ const sections: readonly LegalSection[] = [
     title: "3. Planes, precios y prueba",
     paragraphs: [
       "Los precios se expresan en pesos argentinos (ARS) por mes y son de lanzamiento. Pueden modificarse con aviso previo para los períodos siguientes.",
-      "La prueba gratuita de 14 días está en implementación. Hoy el registro crea una suscripción en prueba y no se realiza ningún cobro. Los medios de pago y la facturación se informarán antes de cualquier cobro.",
+      "La prueba gratuita de 14 días se activa al registrarte. Hoy el registro crea una suscripción en prueba y no se realiza ningún cobro. Los medios de pago y la facturación se informarán antes de cualquier cobro.",
     ],
   },
   {
