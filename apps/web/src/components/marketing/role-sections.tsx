@@ -88,12 +88,6 @@ function OfficePanel() {
       <div className="mt-5 border-t border-white/10 pt-4">
         <div className="flex items-center justify-between gap-3">
           <p className="text-[15px] font-medium text-mk-panel-text">Próximos turnos</p>
-          <Link
-            href="/agenda"
-            className="text-[14px] font-semibold text-mk-foil-gold hover:underline"
-          >
-            Ver agenda
-          </Link>
         </div>
         <div className="mt-3 space-y-2">
           {demoOperation.appointments.map((appointment) => {
@@ -237,10 +231,10 @@ function ClientPanel() {
       </div>
 
       <Link
-        href="/portal/servicios-demo"
+        href="/login"
         className="mt-5 inline-flex items-center gap-2 text-[15px] font-semibold text-mk-ink underline decoration-mk-signal decoration-2 underline-offset-4"
       >
-        Ver el portal del cliente
+        Probar la demo
         <ArrowRight className="size-4" aria-hidden="true" />
       </Link>
     </div>
