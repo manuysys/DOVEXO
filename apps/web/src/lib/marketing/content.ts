@@ -8,9 +8,12 @@ export const demoAccount = {
 
 export const navLinks = [
   { href: "#producto", label: "Producto" },
-  { href: "#funciones", label: "Funciones" },
+  { href: "#oficina", label: "Oficina" },
+  { href: "#tecnico", label: "Técnico" },
+  { href: "#cliente", label: "Cliente" },
+  { href: "#migracion", label: "Migración" },
   { href: "#precios", label: "Precios" },
-  { href: "#demo", label: "Demo" },
+  { href: "#faq", label: "Preguntas" },
 ] as const;
 
 export const heroCopy = {
@@ -18,7 +21,7 @@ export const heroCopy = {
   title: "El oficio,",
   titleAccent: "en orden.",
   description:
-    "Solicitudes, turnos, presupuestos y cobros en un solo lugar. Lo que pasa en la calle se ve en la oficina.",
+    "Solicitudes, turnos, presupuestos y cobros en una sola orden. La oficina, el técnico y el cliente trabajan con la misma información.",
 } as const;
 
 /** Frases de la franja animada. Describen funciones, no clientes ni resultados. */
@@ -206,7 +209,7 @@ export const faqItems = [
   {
     question: "¿Cómo se protegen mis datos?",
     answer:
-      "Cada empresa opera en su propio espacio y el backend valida la pertenencia en cada operación. Las contraseñas se guardan con Argon2id, las sesiones usan cookies HttpOnly con tokens de corta duración y las acciones importantes quedan auditadas. La política de privacidad es un borrador en revisión legal; la región de alojamiento y los plazos de backups todavía no están definidos.",
+      "Cada empresa opera en su propio espacio y el backend valida la pertenencia en cada operación. Las contraseñas se guardan con Argon2id, las sesiones usan cookies HttpOnly con tokens de corta duración y las acciones importantes quedan auditadas. La demo está alojada en Neon (región gru1). La política de privacidad es un borrador en revisión legal; para datos reales, esperá la versión revisada.",
   },
   {
     question: "¿Cómo funciona el asistente de IA y qué datos envía?",
@@ -224,9 +227,9 @@ export const faqItems = [
       "Una cuenta de WhatsApp Business y credenciales de la API oficial de Meta (WhatsApp Cloud API), que se cargan por empresa. Sin credenciales no se envía ningún mensaje y el resto de la plataforma funciona igual. Los mensajes que inicia el negocio pueden requerir plantillas aprobadas por Meta. Todavía no probamos el flujo completo con un número real.",
   },
   {
-    question: "¿Cuánto cuesta y hay prueba gratis?",
+    question: "¿Cuánto cuesta y hay período de evaluación?",
     answer:
-      "Los precios son de lanzamiento, en ARS por mes. Al registrarte se activa una prueba de 14 días. Hoy no se cobra al registrarse, y los medios de pago y la facturación se informarán antes de cualquier cobro.",
+      "Los precios son de lanzamiento, en ARS por mes. Al registrarte se activa un acceso de evaluación. Hoy no se cobra, y los medios de pago y la facturación se informarán antes de cualquier cobro.",
   },
   {
     question: "¿Puedo cambiar de plan?",
@@ -252,10 +255,9 @@ export const faqItems = [
 export const pricingCopy = {
   title: "Precios de lanzamiento",
   description:
-    "Montos en pesos argentinos por mes. Al registrarte se activa la prueba de 14 días. Hoy no se cobra.",
+    "Montos en pesos argentinos por mes. Al registrarte se activa un acceso de evaluación. Hoy no se cobra.",
   limitsNote:
-    "Los límites por plan todavía no se aplican en toda la plataforma. Hoy el límite mensual del asistente de IA es el mismo para todas las empresas.",
-  included: "Incluido en todos los planes",
+    "Los límites de órdenes, usuarios y técnicos se validan al crear o invitar. El asistente de IA tiene un límite mensual por empresa.",
 } as const;
 
 /** Cifras del producto (conteos de contenido), no métricas de clientes. */

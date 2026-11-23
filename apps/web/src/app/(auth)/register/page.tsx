@@ -44,8 +44,7 @@ export default function RegisterPage() {
 
   return (
     <Card className="w-full max-w-md p-8">
-      <p className="text-primary text-xs font-semibold tracking-[0.14em] uppercase">Empezá hoy</p>
-      <h1 className="font-display text-text mt-2 text-2xl font-semibold tracking-tight">
+      <h1 className="font-display text-text text-3xl font-semibold tracking-tight">
         Crear cuenta
       </h1>
       <p className="text-text-2 mt-2 text-sm">

@@ -173,7 +173,26 @@ SHA-256 del asset verificado el 2026-11-18 con la descarga directa:
 
 ## Limitaciones actuales
 
-- Sin Android SDK no se puede generar el APK local.
+- El build local requiere JDK 21, Android SDK y una ruta corta por el límite de
+  260 caracteres de Windows.
 - Sin cuenta de Expo no se puede usar EAS Build.
 - Sin dominio propio, la app usa la URL de Vercel.
 - La PWA sigue disponible como fallback.
+
+## Build local v7 (2026-11-23)
+
+Se compiló el APK release de la v7 con la keystore de debug. El build local
+necesitó una ruta corta (`C:\dm`) y staging de CMake en `C:/cxx` por el límite
+de 260 caracteres de Windows.
+
+```text
+Archivo: .local/apk/dovexo-v7-release.apk
+Tamaño: 95.128.702 bytes
+SHA-256: BD87350B7482ABC9B8DBCDC0B81EE87340130D599783ECB8B860CAB5A036DEC3
+Copiado a: /sdcard/Download/dovexo-v7-release.apk
+```
+
+El APK se instaló después de habilitar la instalación por USB. La app abrió el
+welcome y el deep link `dovexo://tech` mostró el login de técnico. La
+interacción automática por ADB queda bloqueada con `INJECT_EVENTS` hasta
+habilitar “Depuración USB (Ajustes de seguridad)”.

@@ -51,7 +51,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Link href="/dashboard" className="flex items-center gap-3 px-5 py-5">
           <span
             aria-hidden="true"
-            className="bg-primary flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white"
+            className="bg-mk-signal flex h-9 w-9 items-center justify-center rounded-xl text-sm font-bold text-white"
           >
             D
           </span>
@@ -77,14 +77,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
                   active
-                    ? "bg-primary/20 text-white"
+                    ? "bg-white/10 text-white"
                     : "text-white/65 hover:bg-white/8 hover:text-white",
                 )}
                 aria-current={active ? "page" : undefined}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
                 {item.label}
-                {active && <span className="bg-accent-teal ml-auto h-1.5 w-1.5 rounded-full" />}
+                {active && <span className="bg-mk-foil-gold ml-auto h-1.5 w-1.5 rounded-full" />}
               </Link>
             );
           })}
@@ -138,7 +138,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     onClick={() => setMobileOpen(false)}
                     className={cn(
                       "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium",
-                      active ? "bg-primary/20 text-white" : "text-white/65 hover:bg-white/8",
+                      active ? "bg-white/10 text-white" : "text-white/65 hover:bg-white/8",
                     )}
                     aria-current={active ? "page" : undefined}
                   >

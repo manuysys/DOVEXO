@@ -14,6 +14,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { ApprovalStamp } from "@/components/marketing/approval-stamp";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -187,7 +188,7 @@ export function PublicQuoteView({ token }: PublicQuoteViewProps) {
             <p className="text-small flex items-center gap-2 text-white/70 print:text-text-2">
               <span
                 aria-hidden="true"
-                className="flex h-7 w-7 items-center justify-center rounded-ds-sm bg-primary text-xs font-bold text-white print:bg-surface-2 print:text-text"
+                className="flex h-7 w-7 items-center justify-center rounded-ds-sm bg-mk-paper text-xs font-bold text-mk-ink print:bg-surface-2 print:text-text"
               >
                 {quote.tenant_name.charAt(0).toUpperCase()}
               </span>
@@ -240,14 +241,19 @@ export function PublicQuoteView({ token }: PublicQuoteViewProps) {
           role="status"
           className="rounded-ds-lg bg-success-soft p-5 text-success-strong focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
         >
-          <p className="flex items-center gap-2 font-semibold">
-            <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
-            Aprobaste este presupuesto
-          </p>
-          <p className="text-small mt-1">
-            Gracias. {quote.tenant_name} recibió tu aprobación y se va a comunicar con vos para
-            coordinar los próximos pasos.
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="flex items-center gap-2 font-semibold">
+                <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+                Aprobaste este presupuesto
+              </p>
+              <p className="text-small mt-1">
+                Gracias. {quote.tenant_name} recibió tu aprobación y se va a comunicar con vos para
+                coordinar los próximos pasos.
+              </p>
+            </div>
+            <ApprovalStamp label="Aprobado" detail={quote.number} size="sm" className="mk-stamp-in" />
+          </div>
         </div>
       )}
 

@@ -14,15 +14,11 @@ export function FinalCta() {
       aria-labelledby="final-cta-title"
       className="scroll-mt-16 bg-mk-ink text-mk-paper"
     >
-      <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-16">
+      <div className="mx-auto grid max-w-none gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:gap-16">
         <div>
-          <p className="mk-label inline-flex items-center gap-3 text-mk-paper/70">
-            <span aria-hidden="true" className="h-px w-6 bg-current" />
-            Empezar
-          </p>
           <h2
             id="final-cta-title"
-            className="mt-4 max-w-[18ch] text-[clamp(2rem,3.6vw,3rem)] leading-[1.04] font-bold tracking-[-0.03em] text-balance"
+            className="mk-display max-w-[18ch] text-[clamp(2.5rem,4.6vw,3.75rem)] leading-[1] font-medium tracking-[-0.035em] text-balance"
           >
             Probá la demo o creá tu empresa <span className="text-mk-signal">hoy.</span>
           </h2>
@@ -47,22 +43,22 @@ export function FinalCta() {
           </div>
         </div>
 
-        <div className="rounded-md border border-mk-paper/15 bg-mk-paper/5 p-6">
-          <p className="text-small flex items-center gap-2 font-semibold">
-            <ShieldCheck className="size-4 text-mk-signal" aria-hidden="true" />
+        <div className="rounded-2xl border border-mk-paper/15 bg-mk-paper/5 p-6">
+          <p className="flex items-center gap-2 text-[17px] font-semibold">
+            <ShieldCheck className="size-5 text-mk-signal" aria-hidden="true" />
             Cuenta demo
           </p>
-          <dl className="text-small mt-4 space-y-3">
+          <dl className="mt-4 space-y-3 text-[15px]">
             <div>
-              <dt className="text-mk-paper/60">Email</dt>
-              <dd className="font-mono break-all">{demoAccount.email}</dd>
+              <dt className="text-mk-paper/70">Email</dt>
+              <dd className="mt-0.5 font-mono break-all">{demoAccount.email}</dd>
             </div>
             <div>
-              <dt className="text-mk-paper/60">Contraseña</dt>
-              <dd className="font-mono">{demoAccount.password}</dd>
+              <dt className="text-mk-paper/70">Contraseña</dt>
+              <dd className="mt-0.5 font-mono">{demoAccount.password}</dd>
             </div>
           </dl>
-          <p className="text-caption mt-4 text-mk-paper/60">
+          <p className="mt-4 text-[14px] leading-[1.5] text-mk-paper/70">
             Datos de ejemplo. No cargues información real de clientes en la demo.
           </p>
         </div>

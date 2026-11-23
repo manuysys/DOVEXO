@@ -354,3 +354,188 @@ resoluciones.
 | `apps/web/src/components/marketing/ui.ts` | `ctaPrimary`, `ctaGhostDark`, focos |
 | `apps/web/src/app/globals.css` | Tokens, utilidades y animaciones |
 | `apps/web/src/lib/marketing/demo-data.ts` | Datos de ejemplo del hero |
+
+## 10. Landing v4 — “El expediente vivo” (2026-11-22)
+
+La dirección v3 se mantiene en paleta y tono, pero el producto deja de ser una
+captura plana y pasa a ser un expediente armado con piezas reales.
+
+- **Tipografía:** Boska (Fontshare, ITF Free Font License) self-hosted en
+  `apps/web/src/app/fonts/boska-variable.woff2` para titulares; Archivo para
+  cuerpo, UI y etiquetas; Geist Mono para IDs e importes. `--font-mk-display`
+  expone la familia solo a marketing. El texto no espera JS.
+- **Hero:** panel real del tenant demo recortado a la zona visible
+  (`dashboard-main-v4.webp`, 35 KB), tarjeta de presupuesto aprobada, sello de
+  hojalata y teléfono del técnico. Sin chrome falso ni caption debajo de la
+  imagen. El hero ocupa `100svh` y el producto asoma en mobile.
+- **Sello:** `FoilSeal` con `conic-gradient` cobre/ámbar/verde y una sola pasada
+  de brillo; `aria-hidden` y fallback estático con `prefers-reduced-motion`.
+- **Una sola orden:** `OrderRail` sticky/scroll-linked con cuatro estaciones
+  (solicitud, turno, presupuesto, cobro), roles y la misma `OT-2026-0001`.
+  En mobile el visual queda sticky arriba y la lista se lee debajo. El estado
+  activo se calcula con un handler de scroll y `requestAnimationFrame`.
+- **Producto:** `ProductTour` absorbe la lista compacta de módulos en desktop;
+  en mobile se oculta para no alargar la página y queda solo la nota de
+  WhatsApp. Sin Motion: fade CSS `mk-fade` al cambiar de tab.
+- **Migración:** nueva sección “De la planilla a DOVEXO” con importador,
+  onboarding y primera orden; la vista previa está marcada como ejemplo.
+- **Truth pass:** se retira la cuota de tokens de IA por plan (el backend aplica
+  un límite global), se reemplaza “prueba de 14 días” por “acceso de evaluación”,
+  se corrige la respuesta de privacidad y se quita la tabla de precios en mobile
+  (las tarjetas ya muestran los límites).
+- **Motion v4.1 (ADR-023):** la landing usa Motion para el crossfade del rail,
+  la pill de tabs y el conteo de migración; el titular, el halo, el sello, el
+  teléfono y la tira operativa son CSS. El dossier queda fuera de Motion para
+  no demorar el LCP. Sin GSAP, Lenis ni Three.js en el bundle de la landing.
+
+### Motion v4.1 (2026-11-22)
+
+La primera pasada de la v4 priorizó el LCP y quedó demasiado quieta. Se
+reincorporó movimiento con una sola librería (Motion) y CSS para lo que no
+necesita estado:
+
+- **Originkit:** halo iridiscente que respira detrás del expediente (9 s) y
+  sello de hojalata con una pasada de brillo.
+- **Anubi:** titular que entra por líneas, teléfono que flota y expediente que
+  se compone en capas.
+- **MotionSites:** tira operativa en marquesina (28 s, pausa al hover) y
+  progreso del rail atado al scroll.
+- **Motion:** hero con CSS (líneas, halo, sello y teléfono); crossfade + escala
+  del rail, hover/tap de las estaciones, pill de tabs con `layoutId`, entrada de
+  migración y conteo de filas. `useReducedMotion` apaga lo que depende de
+  estado; el CSS lo hace con `prefers-reduced-motion`.
+
+### Verificación
+
+```text
+pnpm lint          -> 0 errores (2 warnings preexistentes de React Hook Form)
+pnpm typecheck     -> OK
+pnpm test          -> 281/281
+pnpm build         -> 28 rutas
+Lighthouse mobile  -> 83 / 100 / 100 / 100; LCP sintético 4.8 s sobre el
+                      panel del hero (LCP observado 318 ms); TBT 40 ms; CLS 0
+Lighthouse desktop -> 99 / 100 / 100 / 100; LCP 0.9 s; TBT 0 ms; CLS 0
+Axe 4.14           -> 0 violaciones WCAG 2.2 AA en 1440 y 390
+Motion             -> hero/rail/tabs/migración con Framer Motion; CSS en
+                      halo/sello/teléfono/ticker; reduced motion verificado
+Playwright         -> sin overflow de 360 a 1920; gutters alineados;
+                      tabs 2x3 en 390; hero con producto visible.
+```
+
+Revisión independiente con `design-reviewer` (DeepSeek V4.1 Flash): P0 ninguno;
+se corrigieron P1 de cuotas de IA por plan y tabs mobile, y P2 de gutters,
+sello/folio, FAQ, duplicación de listas y foco del tablist.
+
+### Pendiente
+
+- Deploy a Vercel y QA visual en producción.
+- Recapturar el tour cuando cambie la UI del panel; las capturas actuales son
+  del tenant demo.
+- Probar en un Android físico la PWA y el APK.
+## 11. Landing v5 — Anubi + Better Stack (2026-11-23)
+
+La v4.1 quedó demasiado cerca de una maqueta. La v5 se rehizo sobre dos
+referencias reales: `anubi.io` (tipo, off-white, objeto único) y
+`betterstack.com` (paneles oscuros, producto por módulos, UI real).
+
+### Dirección
+
+- **Tipografía:** Bricolage Grotesque para cuerpo/UI; Epilogue para titulares;
+  IBM Plex Mono para etiquetas. Boska deja de cargarse.
+- **Paleta:** `#F7F7F5` off-white, `#0F0F0F` negro, `#0B0C14` paneles y
+  `#E4572E` de señal. Sin violeta.
+- **Hero:** titular Epilogue enorme, tags y `QuoteDemo`: un presupuesto en HTML
+  que se aprueba en el lugar y muestra el sello. Sin captura de dashboard, halo,
+  teléfono ni marquesina.
+- **Producto:** `ProductStory` con cuatro paneles live: órdenes, agenda,
+  presupuesto y cobros. Datos de `demoOperation`, declarados como ejemplo.
+- **Migración:** `glass-folder-cards` con carpeta de vidrio, arte generado en
+  canvas y archivos. Lazy mount para no gastar main thread antes del LCP.
+- **Precios/FAQ/CTA:** retematizados; sin cambios de copy de fondo.
+- **Se retiran:** `OperationalTicker`, `OrderRail`, `ProductTour`, halo,
+  teléfono flotante, conteo y `OT/QT` repetidos.
+
+### Verificación
+
+```text
+pnpm lint          -> 0 errores (5 warnings)
+pnpm typecheck     -> OK
+pnpm test          -> 281/281
+pnpm build         -> 28 rutas
+Lighthouse mobile  -> 100 / 100 / 100 / 100; LCP 1.2 s; TBT 60 ms; CLS 0
+Lighthouse desktop -> 100 / 100 / 100 / 100; LCP 0.3 s; TBT 0 ms; CLS 0
+Axe 4.14           -> 0 violaciones WCAG 2.2 AA en 1440 y 390
+Playwright         -> aprobación y carpeta OK; sin overflow de 360 a 1440.
+```
+
+### Pendiente
+
+- Originkit: 12 componentes bloqueados por el límite diario; ver
+  `ORIGINKIT_INTEGRATION.md`.
+- Deploy a Vercel y QA visual en producción.
+## 12. Landing v6 — full-bleed, motion y WebGL (2026-11-23)
+
+La v5 seguía estática y con laterales vacíos. La v6 se apoya en Bizar (WebGL),
+Motive (pinned y escala), Anubi (off-white/tipo) y Better Stack (producto).
+
+- **Layout:** `max-w-[1600px]`, gutters 20–32 px, hero full-bleed; el panel
+  entra completo desde 1024.
+- **Texto:** `TextReveal` con IntersectionObserver propio; hero con `mk-line` y
+  `mk-rise`; nada queda oculto si el observer no dispara.
+- **Hero:** auto-aprobación a los 2.6 s, sello, tilt de 4°; sello oculto en
+  mobile/tablet.
+- **Producto:** secuencia pinned de cuatro pasos con paneles live, sticky de
+  620 px y `operational-scene.tsx` (Three.js, un contexto, lazy, reduced motion).
+- **Migración:** glass folder con auto-drop.
+- **Figma:** https://www.figma.com/design/DcjgOeLHZ980LjHFuPtz55
+
+Verificación local:
+
+```text
+pnpm lint          -> 0 errores (5 warnings)
+pnpm typecheck     -> OK
+pnpm test          -> 281/281
+pnpm build         -> 28 rutas
+Lighthouse mobile  -> 100 / 100 / 100 / 100; LCP 1.2 s; TBT 60 ms; CLS 0
+Lighthouse desktop -> 100 / 100 / 100 / 100; LCP 0.3 s; TBT 0 ms; CLS 0
+Axe 4.14           -> 0 violaciones WCAG 2.2 AA
+Playwright         -> sin overflow de 360 a 1440; auto-aprobación, sticky y
+                      auto-drop verificados.
+```
+
+Pendiente: deploy, QA en producción, variante Figma y Originkit.
+## 13. Landing v7 — secciones por rol y sistema compartido (2026-11-23)
+
+La v7 responde al feedback visual: recorte, panel vago, textos chicos, nota
+sobrante, sello y carpeta sola. No cambia la dirección Anubi + Better Stack +
+Motive.
+
+- **Recorte:** se quita `overflow-hidden` del hero y el panel pinned pasa a
+  680 px con paneles que entran completos; el sello queda dentro del panel.
+- **Textos:** se eliminan eyebrow, tags, microcopy, “Datos de ejemplo” por panel,
+  la nota de motion y los rótulos “01/04”. Lo funcional sube a 12–15 px.
+- **Sello:** `ApprovalStamp` rectangular, doble borde y detalle; integrado en el
+  presupuesto del hero, el panel de producto y el presupuesto público.
+- **Migración:** carpeta + preview de planilla + resumen de errores + archivo
+  flotante.
+- **Secciones nuevas:** La oficina, El técnico, El cliente y Control. La página
+  pasa de 6 a 10 secciones (~9.984 px). Ninguna usa testimonios, logos ni
+  métricas de terceros.
+- **Motion:** scroll-driven nativo para las secciones de rol; el resto conserva
+  hero, pinned, WebGL y auto-drop.
+- **Sistema compartido:** tokens y fuentes nuevos en dashboard, login, portal,
+  PWA y Expo. La base se verificó con el tenant demo en el dashboard.
+
+Verificación local:
+
+```text
+Backend  ruff/format/basedpyright OK; pytest 203
+Frontend lint 0 errores (4 warnings); typecheck OK; 281 tests; build 28 rutas
+Mobile   tsc OK
+Lighthouse mobile  99 / 100 / 100 / 100; LCP 1.2 s; TBT 120 ms; CLS 0
+Lighthouse desktop 100 / 100 / 100 / 100; LCP 0.3 s; TBT 0 ms; CLS 0
+Axe 4.14 -> 0 violaciones
+Playwright -> sin overflow de 320 a 1920; dashboard con demo verificado
+```
+
+Pendiente: deploy, QA en producción, Figma v7, APK nuevo y P0 de demo.

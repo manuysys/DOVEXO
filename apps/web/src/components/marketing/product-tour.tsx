@@ -6,6 +6,8 @@ import { motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import { useState } from "react";
 
+import { featureCards } from "@/lib/marketing/content";
+
 import { SectionHeading } from "./section-heading";
 
 type TourTabId = "dashboard" | "orders" | "quotes" | "agenda" | "tech" | "portal";
@@ -39,7 +41,7 @@ const tabs: readonly TourTab[] = [
       "Saldo pendiente de cobro",
     ],
     visual: {
-      src: "/product-tour/dashboard.webp",
+      src: "/product-tour/dashboard-v4.webp",
       width: 1440,
       height: 900,
       alt: "Dashboard de DOVEXO con métricas, agenda del día y actividad reciente",
@@ -56,7 +58,7 @@ const tabs: readonly TourTab[] = [
       "Materiales y fotos asociados a la orden",
     ],
     visual: {
-      src: "/product-tour/orders.webp",
+      src: "/product-tour/orders-v4.webp",
       width: 1440,
       height: 900,
       alt: "Listado de órdenes de trabajo con filtros, tabla y vista de tablero",
@@ -73,7 +75,7 @@ const tabs: readonly TourTab[] = [
       "Estado sincronizado con la orden de trabajo",
     ],
     visual: {
-      src: "/product-tour/quotes.webp",
+      src: "/product-tour/quotes-v4.webp",
       width: 1440,
       height: 900,
       alt: "Listado de presupuestos con estados, importes y vencimientos",
@@ -90,7 +92,7 @@ const tabs: readonly TourTab[] = [
       "Reprogramación sin perder el historial",
     ],
     visual: {
-      src: "/product-tour/agenda.webp",
+      src: "/product-tour/agenda-v4.webp",
       width: 1440,
       height: 900,
       alt: "Agenda operativa con vista de día, semana y equipo",
@@ -138,20 +140,14 @@ const focusRing =
 
 function BrowserFrame({ visual }: { visual: TourVisual }) {
   return (
-    <div className="w-full overflow-hidden rounded-md border border-mk-ink/20 bg-white">
-      <div className="flex items-center gap-1.5 border-b border-mk-line bg-mk-paper-2 px-3 py-2">
-        <span aria-hidden="true" className="size-2 rounded-full bg-mk-line" />
-        <span aria-hidden="true" className="size-2 rounded-full bg-mk-line" />
-        <span aria-hidden="true" className="size-2 rounded-full bg-mk-line" />
-        <span className="ml-2 truncate text-[11px] text-mk-slate">DOVEXO · panel</span>
-      </div>
+    <div className="w-full overflow-hidden rounded-md border border-mk-ink/20 bg-white shadow-[0_20px_45px_-38px_rgb(18_59_49/0.45)]">
       <Image
         src={visual.src}
         alt={visual.alt}
         width={visual.width}
         height={visual.height}
         sizes="(min-width: 1024px) 55vw, 92vw"
-        className="h-auto w-[101.5%] max-w-none"
+        className="h-auto w-full"
       />
     </div>
   );
@@ -177,8 +173,8 @@ function PhoneFrame({ visual }: { visual: TourVisual }) {
  * estable. Las capturas salen del tenant demo con datos de ejemplo.
  */
 export function ProductTour() {
-  const reduce = useReducedMotion();
   const [active, setActive] = useState<TourTabId>("dashboard");
+  const reduce = useReducedMotion();
   const current = tabs.find((tab) => tab.id === active) ?? tabs[0];
 
   return (
@@ -186,8 +182,8 @@ export function ProductTour() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeading
           eyebrow="Producto"
-          title="Recorré las pantallas principales."
-          text="Dashboard, órdenes, presupuestos, agenda, la vista del técnico y el portal del cliente. Capturas reales del tenant demo."
+          title="El producto, pantalla por pantalla."
+          text="Panel, órdenes, presupuestos, agenda, la vista del técnico y el portal del cliente. Capturas reales del tenant demo, con datos de ejemplo."
           titleId="tour-title"
         />
 
@@ -200,30 +196,41 @@ export function ProductTour() {
         >
           <Tabs.List
             aria-label="Pantallas del producto"
-            className="border-mk-line bg-mk-paper-2 rounded-md mt-10 flex gap-1 overflow-x-auto border p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className={`border-mk-line bg-mk-paper-2 rounded-md mt-10 grid grid-cols-3 gap-1 border p-1 sm:flex sm:overflow-x-auto sm:[scrollbar-width:none] sm:[&::-webkit-scrollbar]:hidden ${focusRing}`}
           >
             {tabs.map((tab) => (
               <Tabs.Trigger
                 key={tab.id}
                 value={tab.id}
-                className={`text-small text-mk-ink/75 hover:text-mk-ink data-[state=active]:bg-mk-paper data-[state=active]:text-mk-ink rounded inline-flex min-h-11 shrink-0 items-center justify-center px-3.5 font-medium whitespace-nowrap transition-colors ${focusRing}`}
+                className={`text-mk-ink/75 hover:text-mk-ink data-[state=active]:text-mk-ink relative inline-flex min-h-11 shrink-0 items-center justify-center overflow-hidden rounded px-2 text-[11px] font-medium whitespace-nowrap transition-colors sm:px-3.5 sm:text-sm ${focusRing}`}
               >
-                {tab.label}
+                {active === tab.id && (
+                  <motion.span
+                    layoutId="tour-tab-pill"
+                    aria-hidden="true"
+                    className="absolute inset-0 rounded bg-mk-paper shadow-[0_1px_2px_rgb(18_59_49/0.08)]"
+                    transition={
+                      reduce
+                        ? { duration: 0 }
+                        : { type: "spring", stiffness: 380, damping: 30 }
+                    }
+                  />
+                )}
+                <span className="relative z-10">{tab.label}</span>
               </Tabs.Trigger>
             ))}
           </Tabs.List>
 
           <Tabs.Content value={active} tabIndex={-1} className="mt-6 outline-none">
-            <motion.div
+            <div
               key={active}
-              initial={reduce ? false : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="border-mk-line bg-mk-paper-2 rounded-md grid gap-8 border p-5 sm:p-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12"
+              className="mk-fade border-mk-line bg-mk-paper-2 rounded-md grid gap-8 border p-5 sm:p-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12"
             >
               <div className="min-w-0">
-                <h3 className="text-h2 text-mk-ink text-balance">{current.title}</h3>
-                <p className="text-[15px] leading-[1.6] text-mk-ink/75 mt-3">{current.text}</p>
+                <h3 className="mk-display text-[clamp(1.75rem,2.6vw,2.25rem)] leading-[1.05] font-medium tracking-[-0.02em] text-balance text-mk-ink">
+                  {current.title}
+                </h3>
+                <p className="mt-3 text-[15px] leading-[1.6] text-mk-ink/75">{current.text}</p>
                 <ul className="mt-6 space-y-3">
                   {current.bullets.map((bullet) => (
                     <li key={bullet} className="text-small text-mk-ink flex gap-3">
@@ -232,21 +239,57 @@ export function ProductTour() {
                     </li>
                   ))}
                 </ul>
-                <p className="text-caption mt-6 text-mk-slate">
-                  Capturas reales del tenant demo con datos de ejemplo, no de clientes reales.
-                </p>
               </div>
 
-              <div className="flex min-h-[18rem] items-center justify-center overflow-hidden lg:h-[30rem]">
+              <motion.div
+                whileHover={reduce ? undefined : { scale: 1.006 }}
+                transition={{ type: "spring", stiffness: 160, damping: 20 }}
+                className="flex min-h-[18rem] items-center justify-center overflow-hidden lg:h-[30rem]"
+              >
                 {current.visual.phone ? (
                   <PhoneFrame visual={current.visual} />
                 ) : (
                   <BrowserFrame visual={current.visual} />
                 )}
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           </Tabs.Content>
         </Tabs.Root>
+
+        <div className="mt-10 hidden border-t border-mk-line pt-6 lg:block">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
+            <h3 className="mk-label text-mk-signal-strong">Todo lo que incluye</h3>
+            <p className="max-w-xl text-[12px] leading-[1.5] text-mk-slate sm:text-right">
+              Sin promesas de roadmap: lo que sigue está operativo en el tenant demo y comparte
+              los mismos datos.
+            </p>
+          </div>
+          <ul className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+            {featureCards
+              .filter((feature) => feature.id !== "whatsapp")
+              .map((feature) => (
+                <li
+                  key={feature.id}
+                  className="flex gap-2.5 border-t border-mk-line pt-2 text-[12px] leading-[1.5] text-mk-ink/80"
+                >
+                  <Check className="mt-0.5 size-3.5 shrink-0 text-mk-signal" aria-hidden="true" />
+                  <span>
+                    <b className="font-semibold text-mk-ink">{feature.title}.</b> {feature.text}
+                  </span>
+                </li>
+              ))}
+          </ul>
+          <p className="mt-4 max-w-3xl text-[12px] leading-[1.5] text-mk-slate">
+            <span className="font-semibold text-mk-ink">WhatsApp Cloud API oficial:</span> se
+            configura con credenciales de Meta por empresa. Sin ellas no se envía ningún mensaje y
+            el resto de la plataforma funciona igual.
+          </p>
+        </div>
+
+        <p className="mt-6 border-t border-mk-line pt-4 text-[12px] leading-[1.5] text-mk-slate lg:hidden">
+          <span className="font-semibold text-mk-ink">WhatsApp Cloud API oficial:</span> se configura
+          con credenciales de Meta por empresa. Sin ellas no se envía ningún mensaje.
+        </p>
       </div>
     </section>
   );

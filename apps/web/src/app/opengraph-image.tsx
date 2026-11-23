@@ -27,7 +27,7 @@ export default function OpenGraphImage() {
             width: 64,
             height: 64,
             borderRadius: 16,
-            background: "#0E2740",
+            background: "#0B0C14",
             border: "2px solid rgba(255,255,255,0.15)",
             color: brand.colors.amber,
             display: "flex",
@@ -37,7 +37,7 @@ export default function OpenGraphImage() {
             fontWeight: 700,
           }}
         >
-          A
+          D
         </div>
         <div style={{ fontSize: 40, fontWeight: 700 }}>{brand.name}</div>
       </div>

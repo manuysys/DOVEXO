@@ -21,8 +21,11 @@ Este script **no respalda producción**.
 - Programado todos los días a las 05:00 UTC y manual con `workflow_dispatch`.
 - Usa el secreto `NEON_DATABASE_URL` (cadena de conexión de Neon). Sin valor en
   el repositorio.
-- `pg_dump --format=custom --no-owner --no-privileges` a `backup.dump`.
-- Sube el archivo como artifact `neon-backup-<run_id>` con retención de **14 días**.
+- `pg_dump --format=custom --no-owner --no-privileges` a `backup.dump`,
+  ejecutado dentro de la imagen `postgres:17` para que el cliente coincida con
+  la versión del servidor.
+- Verifica que el dump no esté vacío, que `pg_restore --list` lo pueda leer y
+  publica `backup.dump` + `backup.dump.sha256` con retención de **14 días**.
 - Si `NEON_DATABASE_URL` no está configurada, imprime el error y termina con
   **código 1**: el run queda en rojo y no simula un backup exitoso (cambiado el
   2026-11-15).

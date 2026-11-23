@@ -126,6 +126,25 @@ corregirlo antes de continuar.
 - Todo subagente debe devolver comandos ejecutados, salidas y rutas de las
   capturas. Sin evidencia, el trabajo no se acepta.
 
+## Diseño frontend y motion
+
+- **Dirección de arte:** usar `design-director`. Para una página nueva sin
+  referencias, `hallmark`; para una página nueva o rediseño con referencias,
+  `taste-skill`; para una interfaz existente, `impeccable`. No combinar
+  `hallmark` y `taste-skill` en la misma página.
+- **Motion web:** usar `motion-engineer` y las skills de Emil: `animate`,
+  `choreograph`, `gestures`, `animation-performance` y `review-animations`.
+- **Motion Expo:** usar `animate-expo` y `gestures`; verificar en dispositivo
+  cuando sea posible.
+- **Revisión visual:** usar `design-reviewer` con `impeccable`, `hallmark` y
+  `web-design-guidelines`, con capturas de Playwright.
+- **QA funcional:** usar `browser-qa`; no reemplaza `qa` ni `test-runner`.
+- **Implementación:** `frontend` o `software-engineer` ejecutan el cambio; el
+  director de diseño no edita y el revisor de diseño no implementa.
+- Las referencias visuales externas (Originkit, Supahero, MotionSites,
+  Fontshare) son inspiración: no copiar código, assets ni prompts propietarios.
+  Registrar qué se tomó de cada una en `docs/DESIGN_REFERENCES.md`.
+
 ## Flujo de trabajo con OpenCode
 
 - Antes de una tarea grande, usar el skill `project-context`.

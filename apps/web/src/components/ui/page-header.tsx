@@ -10,17 +10,12 @@ type PageHeaderProps = {
   className?: string;
 };
 
-export function PageHeader({ title, description, actions, eyebrow, className }: PageHeaderProps) {
+export function PageHeader({ title, description, actions, className }: PageHeaderProps) {
   return (
     <header
       className={cn("flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between", className)}
     >
       <div className="min-w-0">
-        {eyebrow && (
-          <p className="text-primary mb-1 text-xs font-semibold tracking-[0.14em] uppercase">
-            {eyebrow}
-          </p>
-        )}
         <h1 className="text-text font-display text-2xl font-semibold tracking-tight sm:text-3xl">
           {title}
         </h1>

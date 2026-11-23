@@ -553,3 +553,90 @@ elemento padre.
 - Implementación web: `apps/web/src/app/globals.css` y
   `apps/web/src/components/ui/`
 - Implementación móvil actual: `apps/mobile/src/lib/theme.ts`
+
+## 14. Marketing v4 — Boska y sello (2026-11-22)
+
+- **Familias:** `--font-boska` (self-hosted) se expone como `--font-mk-display`
+  y se usa solo en titulares editoriales de la landing. El cuerpo, la UI y las
+  etiquetas siguen en Archivo; IDs e importes en Geist Mono. La app conserva
+  `--font-display: Archivo`.
+- **Tokens nuevos:** `--mk-foil-copper #D9541E`, `--mk-foil-gold #E8B04A`,
+  `--mk-foil-teal #2F7D4F`, `--mk-foil-pale #F0DCC4`.
+- **Sello:** `.mk-foil-surface` (conic-gradient) + `.mk-foil-sheen` (una pasada
+  de brillo). Es decorativo, va con `aria-hidden` y no reemplaza el estado
+  textual. Con `prefers-reduced-motion` no se anima.
+- **Motion de marketing:** Motion (Framer Motion) para el crossfade y progreso
+  del rail, la pill de tabs y el conteo de migración. El hero usa CSS
+  (`.mk-line`, `.mk-rise`, halo, sello y teléfono) para no demorar el LCP. CSS
+  para `.mk-halo` y la marquesina. Sin GSAP/Lenis/Three.js en el bundle de la
+  landing. Todo respeta `prefers-reduced-motion`.
+- **Reglas:** Boska no se usa en párrafos, botones ni tablas; el naranja no es
+  fondo de botón; el sello aparece una vez en el hero; las capturas de producto
+  son reales y del tenant demo, nunca mockups dibujados.
+## 15. Landing v5 — Anubi + Better Stack (2026-11-23)
+
+- **Familias:** Bricolage Grotesque (`--font-bricolage`) para cuerpo/UI;
+  Epilogue (`--font-epilogue`) para titulares; IBM Plex Mono
+  (`--font-plex-mono`) para etiquetas. `mk-root` usa Bricolage; `mk-display`
+  usa Epilogue; `mk-label` y `mk-mono` usan Plex Mono. Boska ya no se carga.
+- **Paleta:** `--mk-paper #F7F7F5`, `--mk-ink #0F0F0F`, `--mk-slate #6B6B6B`,
+  `--mk-line #DEDED8`, `--mk-signal #E4572E`, `--mk-panel #0B0C14`,
+  `--mk-panel-soft #14151D`, `--mk-panel-text #EEF0F5`,
+  `--mk-panel-muted #939DB8`. Sin violeta.
+- **Paneles de producto:** `bg-mk-panel`, borde `white/10`, texto
+  `mk-panel-text`, etiquetas `mk-panel-muted`. Son UI live construida con
+  `demoOperation`, no capturas. Texto de cuerpo 14–16 px; etiquetas 12 px.
+- **Hero:** `QuoteDemo` es el único objeto; un presupuesto en HTML que se
+  aprueba y muestra el sello. No hay dashboard, halo, teléfono ni marquesina.
+- **ProductStory:** cuatro módulos alternados; `OrdersPanel`, `SchedulePanel`,
+  `QuotePanel`, `PaymentsPanel`.
+- **Migración:** `glass-folder-cards` con carpeta de vidrio, canvas y archivos;
+  lazy mount con `LazyGlassFolder`.
+- **Motion:** entrada de hero con `mk-line`/`mk-rise`; aprobación del
+  presupuesto con estado React; hover de paneles; carpeta con su motion propio.
+  Sin scroll-linked, marquee, parallax ni GSAP/Lenis/Three.js.
+- **Reglas:** no hay logos, testimonios ni métricas de terceros; los paneles
+  declaran “Datos de ejemplo”. No usar más de un efecto por pantalla.
+## 16. Landing v6 — motion, WebGL y full-bleed (2026-11-23)
+
+- **Contenedor:** `max-w-[1600px]` y gutters `px-5 sm:px-8` en header, hero,
+  producto, migración, precios, FAQ, CTA y footer. El hero no tiene `max-w-7xl`.
+- **Texto:** `TextReveal` parte el titular en palabras, las enmascara con
+  `overflow-hidden` y las sube con una transición CSS al entrar en viewport.
+  Usa IntersectionObserver propio; si el elemento ya está en viewport, se
+  muestra. Reduced motion deja el texto visible sin transición.
+- **Hero:** `QuoteDemo` se auto-aprueba a los 2.6 s; el sello vive fuera del
+  contenedor 3D para no clipearse y se oculta en mobile/tablet. Tilt de 4°.
+- **Pinned:** cuatro pasos, panel sticky de 620 px, crossfade/scale de paneles
+  con Motion y escena Three.js. Sin marquesina, progress line ni metadata
+  repetida.
+- **WebGL:** `operational-scene.tsx`: terreno de líneas + cuatro nodos, un solo
+  contexto, DPR máx. 1.5, lazy mount, pausa fuera de viewport y reduced motion.
+- **Migración:** glass folder con auto-drop; el botón `+` se dispara una vez al
+  entrar, además de hover/click.
+- **Figma:** variables, text styles, componente Quote Panel y frames; ver
+  `FIGMA_STORYBOARD.md`.
+## 17. Sistema compartido v7 (2026-11-23)
+
+La landing deja de ser un tema aislado: sus tokens pasan a la aplicación.
+El tope de 1600 px de la v6 se retira: hero y secciones usan ancho completo con
+gutters de 20–32 px; el hero pasa a dos columnas desde 1280 px para no dejar el
+panel fuera de vista en 1024/1124.
+
+- **Color:** `--ds-bg` papel `#F7F7F5`, `--ds-surface` blanco, `--ds-deep`
+  panel `#0B0C14`, `--ds-primary` tinta `#0F0F0F`, `--ds-secondary` y
+  `--ds-teal` señal `#C2410C`, borde `#E3E1DB`. Los estados semánticos
+  (success/warning/danger) se mantienen.
+- **Tipografía:** `--font-sans` Bricolage, `--font-display` Epilogue y
+  `--font-mono` IBM Plex Mono. Se retiran Geist y Archivo del `layout`.
+- **Componentes:** `PageHeader` deja de renderizar el eyebrow; el dashboard usa
+  el panel oscuro con señal naranja; el login y el portal heredan los tokens;
+  el presupuesto público usa el mismo `ApprovalStamp`.
+- **Motion:** `mk-stamp-in` para el sello; `mk-scroll-reveal` con
+  `animation-timeline: view()` para secciones informativas; el hero y el
+  producto conservan Motion/Three.js. `prefers-reduced-motion` deja todo
+  visible y sin loop.
+- **Mobile:** `apps/mobile/src/theme/tokens.ts` refleja la misma paleta. Las
+  fuentes siguen siendo del sistema hasta que se carguen con `expo-font`.
+- **Figma:** el archivo existente es v6; la v7 queda pendiente por el límite
+  del MCP Starter.

@@ -454,3 +454,174 @@ argentinas, no equipos de producto.
   reglas y focos; para texto pequeño va `#A63C10`.
 - La prueba de 14 días se comunica como activa al registrarse. Si el flujo de
   trial cambia, hay que corregir héroe, precios y FAQ a la vez.
+
+## ADR-022 — Landing v4 “El expediente vivo”
+
+**Fecha:** 2026-11-22
+**Estado:** parcialmente reemplazada por ADR-024 en la landing (tipografía, paleta y composición). Se conserva como historial. El punto de motion se amplía en ADR-023 (2026-11-22).
+
+**Contexto:** la landing v3 era clara y honesta, pero el producto se mostraba como una captura plana, el recorrido era estático y la tipografía no diferenciaba la marca. Las referencias de Originkit, Supahero/Anubi, MotionSites y Fontshare pedían una pieza con más oficio, no más decoración.
+
+**Decisión:**
+
+- **Boska** (Fontshare, ITF Free Font License) para titulares editoriales; Archivo se mantiene para cuerpo, UI y etiquetas; Geist Mono para IDs e importes. Boska se self-hostea en `apps/web/src/app/fonts/` y se documenta su licencia.
+- **Sello de hojalata:** un sello circular iridiscente (cobre/ámbar/verde, sin violeta) en CSS, con una sola pasada de brillo y fallback estático con `prefers-reduced-motion`. Se usa en el hero, no en cada sección.
+- **Hero como expediente:** panel real del tenant demo, tarjeta de presupuesto aprobada, sello y teléfono del técnico. La captura del hero se recorta a lo visible y se sirve en 35 KB; el texto no espera JS.
+- **Una sola orden:** `OrderRail` pasa a ser una historia sticky/scroll-linked con cuatro estaciones y roles (oficina, técnico, cliente). La base es CSS y un handler de scroll con `requestAnimationFrame`; el detalle de motion se define en ADR-023.
+- **Menos repetición:** se retira `ModuleIndex` de la página; el tour absorbe la lista compacta de módulos y se elimina el chrome falso de browser.
+- **Migración:** nueva sección “De la planilla a DOVEXO” con importador CSV/XLSX, onboarding y primera orden.
+- **Truth pass:** se reemplaza “prueba de 14 días” por “acceso de evaluación” hasta que el trial tenga vencimiento real; los límites que se muestran son los que el backend valida.
+- **Motion:** la primera versión priorizó el LCP y quedó demasiado estática; el detalle de motion real se define en ADR-023. Sin GSAP, Lenis ni Three.js en el bundle de la landing.
+
+**Consecuencias:**
+
+- Lighthouse móvil y desktop en la v4 sin motion: 100/100/100/100; LCP 1.2 s móvil y 0.3 s desktop. Axe: 0 violaciones WCAG 2.2 AA en 1440 y 390. Con motion, ver ADR-023.
+- La página sigue siendo editorial, pero ahora tiene un objeto visual propio y una narrativa de producto.
+- Boska es una fuente closed source con licencia comercial gratuita; no se modifica ni se redistribuye fuera de la app. Si se cambia de fuente, actualizar `layout.tsx`, `globals.css` y este ADR.
+- El dashboard conserva sus tokens `ds-*`; la landing usa `mk-*`. No se unificaron en esta iteración para no ampliar el alcance.
+- Las capturas del tour son del tenant demo y deben recapturarse cuando cambie la UI del panel.
+
+## ADR-023 — Motion real en la landing (v4.1)
+
+**Fecha:** 2026-11-22
+**Estado:** reemplazada por ADR-024 en la landing. Se conserva como historial.
+
+**Contexto:** la v4 quedó correcta en dirección visual, pero demasiado quieta. De las referencias se había tomado sobre todo la paleta y la materialidad, no los momentos de movimiento. El usuario pidió explícitamente animaciones con Framer Motion, GSAP o anime.js y que las referencias se usaran de verdad.
+
+**Decisión:**
+
+- **Hero con Motion mínimo:** entrada por líneas (`mk-line`), `mk-rise`
+  escalonado, halo iridiscente, sello y teléfono flotante. El dossier queda
+  fuera de Motion y usa una imagen directa para no demorar el LCP.
+- **Motion (Framer Motion)** para los momentos que necesitan estado o scroll:
+  - `OrderRail`: crossfade + escala de la imagen activa, hover/tap de las estaciones y línea de progreso con `useScroll`.
+  - `ProductTour`: pill activa con `layoutId` y hover del visual.
+  - `Migration`: entrada de la tarjeta, stagger de pasos y conteo animado de filas.
+- **CSS** para el resto, sin sumar otra librería:
+  - `mk-line`: entrada de las dos líneas del titular, con `overflow-hidden` y `translateY`.
+  - `mk-rise`: entrada escalonada de eyebrow, descripción, CTAs y dossier; la lista de proof queda estática para no bajar el contraste durante la animación.
+  - `mk-seal-in`, `mk-float-phone`: sello y teléfono; el teléfono flota 7 s.
+  - `mk-halo`: halo iridiscente que respira (9 s) inspirado en Originkit.
+  - `mk-marquee-track`: tira operativa de 28 s inspirada en la franja de Anubi/MotionSites; se pausa al hover.
+- **Extracciones explícitas:** Originkit aporta la materialidad iridiscente y el halo; Anubi, la escala tipográfica, la entrada por líneas y el objeto flotante; MotionSites, la tira horizontal y el ritmo del recorrido; Fontshare, Boska.
+- **Una sola librería de motion:** no se agregan GSAP ni anime.js para evitar duplicar sistema y peso. GSAP queda disponible para otras piezas de la app, pero la landing no lo necesita.
+- **Reduced motion:** se respeta en CSS y con `useReducedMotion`; el contenido queda visible sin animación.
+
+**Consecuencias:**
+
+- Lighthouse: desktop 99/100/100/100 (LCP 0.9 s); mobile 83/100/100/100
+  (LCP sintético 4.8 s sobre el panel del hero, LCP observado 318 ms); CLS 0 en
+  ambos. El costo es el panel visible como LCP; el texto sigue en 1.2 s.
+- Axe 4.14: 0 violaciones WCAG 2.2 AA en 1440 y 390.
+- La landing vuelve a tener un momento de entrada, un recorrido con scroll y microinteracciones; el bundle de Motion se compensa con la captura del hero recortada a 35 KB y sin Three.js/Lenis/GSAP.
+- El movimiento del hero no depende de JS para el texto; el resto de los componentes animados son cliente y requieren JS, como las tabs y el rail.
+
+## ADR-024 — Landing v5: Anubi + Better Stack con UI live (2026-11-23)
+
+**Fecha:** 2026-11-23
+**Estado:** parcialmente reemplazada por ADR-025 en la landing (full-bleed, motion, WebGL y Figma). Se conserva como historial.
+
+**Contexto:** la v4.1 seguía sintiéndose como una maqueta: dashboard capturado, marquesina de palabras, rail con línea de progreso y microtextos. El usuario pidió rehacerla usando como referencia **anubi.io** y **betterstack.com**. Se inspeccionaron las dos páginas reales: Anubi usa `#FCFCFC`, negro, Bricolage Grotesque + Epilogue + IBM Plex Mono, tipo enorme y un objeto orbital; Better Stack usa `#0B0C14`, secciones de producto con UI real y copy específico por módulo.
+
+**Decisión:**
+
+- **Tipografía:** Bricolage Grotesque para cuerpo/UI; Epilogue para titulares; IBM Plex Mono para etiquetas. Boska deja de cargarse en la landing.
+- **Paleta:** off-white `#F7F7F5`, negro `#0F0F0F`, paneles `#0B0C14`, un solo naranja de señal `#E4572E`. Sin violeta.
+- **Hero:** tipo Epilogue grande, tags de módulos y un objeto real: `QuoteDemo`, un presupuesto en HTML que se aprueba en el lugar. Sin captura de dashboard, sin halo, sin teléfono flotante. La aprobación es el único momento de motion del hero; el sello aparece una vez.
+- **Producto:** `ProductStory` con cuatro módulos (solicitud, agenda, presupuesto, cobros), cada uno con un panel oscuro de UI live construido con `demoOperation`. Sin capturas ni tabs de screenshots.
+- **Migración:** se integra `glass-folder-cards` (componente local provisto por el usuario) con archivos de ejemplo; se monta con lazy loading para no gastar main thread antes del LCP.
+- **Se retiran:** `OperationalTicker`, `OrderRail`, `ProductTour`, el halo, el teléfono flotante, el conteo y los `OT/QT` repetidos por la página.
+- **Precios/FAQ/CTA:** se conservan, retematizados con la nueva tipografía y tokens.
+- **Sin datos inventados:** no hay logos, testimonios, clientes ni métricas de terceros. Los paneles usan el dataset demo y lo declaran.
+- **Originkit:** se pidieron 12 componentes; el CLI consumió las 3 descargas diarias en un lote sin escribir archivos y el endpoint devuelve 429. Quedan pendientes; el detalle está en `docs/ORIGINKIT_INTEGRATION.md`.
+
+**Consecuencias:**
+
+- Lighthouse móvil y desktop: 100/100/100/100; LCP 1.2 s móvil y 0.3 s desktop; TBT 60 ms / 0 ms; CLS 0.
+- Axe 4.14: 0 violaciones WCAG 2.2 AA en 1440 y 390.
+- `pnpm lint` 0 errores (5 warnings: 3 preexistentes y 2 `<img>` del componente de carpetas), `pnpm typecheck` OK, `pnpm test` 281/281, `pnpm build` 28 rutas.
+- Playwright: sin overflow de 360 a 1440; aprobación del presupuesto y apertura de la carpeta verificadas; sin errores de consola.
+- La carpeta de vidrio se copió y se le corrigieron dos reglas de lint (setState en efecto y acceso a ref en render) sin cambiar su comportamiento visual.
+- Pendiente: componentes Originkit cuando se resetee la cuota, deploy a Vercel y QA en producción.
+
+## ADR-025 — Landing v6: full-bleed, motion y WebGL propio (2026-11-23)
+
+**Fecha:** 2026-11-23
+**Estado:** aceptada. Reemplaza ADR-024 en layout, motion y escena. Se conserva como historial.
+
+**Contexto:** la v5 tenía buen producto y tipografía, pero el usuario marcó tres problemas concretos: demasiado espacio lateral, el panel parecía cortado en su captura y la página seguía siendo estática. Sumó `bizar.ro` y `motiveone.com` como referencias de WebGL, tipografía cinética y secuencia pinned, y pidió usar Figma en serio.
+
+**Decisión:**
+
+- **Layout full-bleed:** contenedor de 1600 px con gutters de 20–32 px en header, hero, producto, migración, precios, FAQ y CTA. El hero ocupa el ancho completo y el panel entra completo desde 1024.
+- **Texto:** `TextReveal` con IntersectionObserver propio y palabras enmascaradas; el hero mantiene `mk-line` y `mk-rise`. No hay títulos que queden ocultos si el observer no dispara.
+- **Hero:** `QuoteDemo` se auto-aprueba una vez a los 2.6 s, muestra el sello y permite click. El panel tiene tilt de puntero de hasta 4°; el sello vive fuera del contenedor 3D para no quedar clipeado. En mobile/tablet el sello se oculta y queda el estado textual.
+- **Producto pinned:** una secuencia de cuatro pasos con panel sticky (620 px), paneles live que cambian por scroll y WebGL de fondo. Sin marquesina, sin progress line y sin metadata repetida. En mobile los paneles se apilan.
+- **WebGL propio:** `operational-scene.tsx` con Three.js: terreno de líneas y cuatro nodos; un solo contexto, lazy mount, pausa fuera de viewport, DPR máximo 1.5, fallback CSS y reduced motion.
+- **Migración:** `glass-folder-cards` con auto-drop de un archivo al entrar en viewport, además de hover/click. Se mantiene lazy.
+- **Figma:** archivo `DOVEXO Landing v6 — Storyboard` con variables, text styles, componente Quote Panel, frames de hero/pinned/mobile y notas de motion. Ver `docs/FIGMA_STORYBOARD.md`.
+- **Originkit:** sigue bloqueado por el límite diario; no hay archivos de Originkit en el repo. Ver `docs/ORIGINKIT_INTEGRATION.md`.
+
+**Consecuencias:**
+
+- Lighthouse móvil y desktop: 100/100/100/100; LCP 1.2 s / 0.3 s; TBT 60 ms / 0 ms; CLS 0.
+- Axe 4.14: 0 violaciones WCAG 2.2 AA en 1440 y 390.
+- `pnpm lint` 0 errores (5 warnings, 2 del `<img>` del componente de carpetas), `pnpm typecheck` OK, `pnpm test` 281/281, `pnpm build` 28 rutas.
+- Playwright: sin overflow de 360 a 1440; auto-aprobación, sello, pinned sticky y auto-drop verificados.
+- Figma MCP Starter cortó al intentar la variante `Aprobado`; el archivo quedó con el componente base y todos los frames.
+- Pendiente: deploy, QA en producción, variante de Figma y componentes Originkit cuando se resetee la cuota.
+
+## ADR-026 — Landing v7: secciones por rol, sello y sistema compartido (2026-11-23)
+
+**Fecha:** 2026-11-23
+**Estado:** aceptada. Extiende ADR-025; no reemplaza la dirección de arte.
+
+**Contexto:** la v6 seguía teniendo un panel de producto demasiado vacío, un
+sello flotante que se recortaba, etiquetas decorativas en 9–11 px y la carpeta
+de migración aislada. El usuario pidió además más secciones y que la misma
+identidad bajara al dashboard, el portal, la PWA y la app móvil.
+
+**Decisión:**
+
+- **Hero:** se eliminan el eyebrow, los tags y el microcopy. El panel no tiene
+  `overflow-hidden`; el sello es un `ApprovalStamp` rectangular, integrado en
+  la cabecera del presupuesto, con texto de 16 px y detalle de 12 px.
+- **Producto:** panel sticky de 680 px, paneles densos (agenda con dos turnos y
+  una orden pendiente), sin nota de motion ni etiquetas “01/04”. El paso se
+  identifica con un número grande.
+- **Secciones nuevas:** “La oficina ve todo”, “El técnico trabaja sin señal”,
+  “El cliente aprueba sin cuenta” y “Cada empresa, separada”. Usan paneles live,
+  un phone frame con la PWA y los roles/auditoría reales. No hay logos,
+  testimonios ni métricas de terceros.
+- **Migración:** la carpeta de vidrio se acompaña con la vista previa de
+  `clientes.xlsx`, el resumen de válidas/errores y un archivo flotante. El
+  auto-drop se mantiene.
+- **Motion:** `mk-scroll-reveal` con `animation-timeline: view()` para las
+  secciones de rol, sin hidratar un componente cliente extra; el hero conserva
+  tilt/estado aprobado, el producto el pinned + WebGL y la carpeta el auto-drop.
+  Reduced motion deja todo visible.
+- **Sistema compartido:** `--ds-*` pasa a la paleta de la landing (paper, ink,
+  panel, señal), `--font-display` a Epilogue, `--font-sans` a Bricolage y
+  `--font-mono` a IBM Plex Mono. Se actualizan `app-shell`, dashboard, login,
+  PageHeader, presupuesto público y tokens de Expo. No se rediseñó cada pantalla
+  del dashboard en esta sesión; la base visual y los componentes compartidos ya
+  apuntan a la identidad nueva.
+- **Demo:** botón “Reiniciar demo” en `/admin` para platform admins; usa el
+  endpoint existente y conserva auditoría.
+
+**Consecuencias:**
+
+- La landing pasa de 6 a 10 secciones y de ~6.000 a ~9.984 px de alto.
+- Se quita el tope de 1600 px: el hero y las secciones usan ancho completo con
+  gutters de 20–32 px. El hero recién pasa a dos columnas desde 1280 px para que
+  el panel no quede fuera de vista en 1024/1124.
+- El panel pinned también pasa a dos columnas desde 1280; en 1024/1124 los
+  paneles se apilan y no hay recorte horizontal.
+- Lighthouse móvil 99/100/100/100 (LCP 1.2 s, TBT 120 ms, CLS 0) y desktop
+  100/100/100/100. Axe 0. El 99 móvil se mantiene con el hero aprobado desde el primer paint y
+  el producto; el resto de las secciones usa CSS scroll-driven.
+- Backend: ruff, format, basedpyright y 203 pytest. Frontend: 281 tests, 28
+  rutas, lint 0 errores (4 warnings). Mobile: `tsc` OK.
+- **Figma:** el archivo queda en v6; el MCP Starter agotó el rate limit y no se
+  pudo crear la v7 ni la variante `Aprobado`. Ver `FIGMA_STORYBOARD.md`.
+- **No desplegado:** falta Vercel, QA en producción y APK nuevo con los tokens.

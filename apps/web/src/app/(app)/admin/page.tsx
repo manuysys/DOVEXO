@@ -26,6 +26,7 @@ export default function AdminPage() {
   const { activeTenantId } = useAuth();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [demoResult, setDemoResult] = useState<string | null>(null);
 
   const metricsQuery = useQuery({
     queryKey: ["admin-metrics", activeTenantId],
@@ -60,6 +61,21 @@ export default function AdminPage() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["admin-metrics"] });
       void queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
+    },
+  });
+
+  const resetDemoMutation = useMutation({
+    mutationFn: () => api.admin.resetDemo(activeTenantId ?? ""),
+    onSuccess: (data) => {
+      void queryClient.invalidateQueries({ queryKey: ["admin-metrics"] });
+      void queryClient.invalidateQueries({ queryKey: ["admin-tenants"] });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
+      void queryClient.invalidateQueries({ queryKey: ["dashboard-operations"] });
+      setDemoResult(
+        Object.entries(data.counts)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(" · "),
+      );
     },
   });
 
@@ -101,7 +117,6 @@ export default function AdminPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Panel global"
         title="Admin SaaS"
         description="Métricas agregadas de la plataforma y estado de las suscripciones. No muestra datos de clientes ni órdenes individuales."
         actions={
@@ -111,6 +126,46 @@ export default function AdminPage() {
           </Badge>
         }
       />
+
+      <Card className="p-5 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-display text-text text-xl font-semibold">Demo pública</h2>
+            <p className="text-text-2 mt-1 max-w-2xl text-sm leading-6">
+              Reinicia el tenant <code className="text-text">servicios-demo</code> con el seed
+              versionado. Conserva la auditoría y no toca otras empresas.
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={resetDemoMutation.isPending}
+            onClick={() => {
+              if (
+                !window.confirm(
+                  "¿Reiniciar la demo? Se borran los datos de negocio del tenant servicios-demo.",
+                )
+              ) {
+                return;
+              }
+              setDemoResult(null);
+              resetDemoMutation.mutate();
+            }}
+          >
+            {resetDemoMutation.isPending ? "Reiniciando..." : "Reiniciar demo"}
+          </Button>
+        </div>
+        {demoResult && (
+          <p role="status" className="bg-success-soft text-success-strong mt-4 rounded-lg px-3 py-2 text-sm">
+            Demo reiniciada. {demoResult}
+          </p>
+        )}
+        {resetDemoMutation.error && (
+          <p role="alert" className="bg-danger-soft text-danger-strong mt-4 rounded-lg px-3 py-2 text-sm">
+            {errorMessage(resetDemoMutation.error, "No se pudo reiniciar la demo.")}
+          </p>
+        )}
+      </Card>
 
       <AdminMetricsSection
         metrics={metricsQuery.data}

@@ -42,8 +42,7 @@ export default function LoginPage() {
 
   return (
     <Card className="w-full max-w-md p-8">
-      <p className="text-primary text-xs font-semibold tracking-[0.14em] uppercase">Bienvenido</p>
-      <h1 className="font-display text-text mt-2 text-2xl font-semibold tracking-tight">Ingresar</h1>
+      <h1 className="font-display text-text text-3xl font-semibold tracking-tight">Ingresar</h1>
       <p className="text-text-2 mt-2 text-sm">Accedé al panel de tu empresa.</p>
 
       <form method="post" onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
@@ -81,9 +80,9 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <div className="bg-surface-2 border-border mt-5 rounded-xl border px-3 py-2.5 text-xs">
+      <div className="bg-surface-2 border-border mt-5 rounded-xl border px-3 py-3 text-[14px]">
         <p className="text-text font-semibold">Cuenta de demo</p>
-        <p className="text-text-2 mt-0.5">
+        <p className="text-text-2 mt-1">
           demo@saasgestion.com · Demo12345! ·{" "}
           <Link href="/register" className="text-primary font-medium hover:underline">
             crear cuenta

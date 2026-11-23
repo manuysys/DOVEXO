@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -209,7 +209,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <section className="bg-deep relative overflow-hidden rounded-ds-xl p-5 text-white sm:p-7">
+      <section className="bg-deep mk-rise relative overflow-hidden rounded-ds-xl p-5 text-white sm:p-7">
         <div
           aria-hidden="true"
           className="absolute inset-0 opacity-[0.12]"
@@ -219,12 +219,12 @@ export default function DashboardPage() {
             backgroundSize: "34px 34px",
           }}
         />
-        <div aria-hidden="true" className="bg-primary/25 absolute -top-24 -right-20 h-64 w-64 rounded-full blur-3xl" />
+        <div aria-hidden="true" className="bg-mk-signal/20 absolute -top-24 -right-20 h-64 w-64 rounded-full blur-3xl" />
         <div aria-hidden="true" className="bg-accent-teal/15 absolute -bottom-32 left-1/3 h-64 w-64 rounded-full blur-3xl" />
 
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0 max-w-xl">
-            <p className="text-accent-teal flex items-center gap-2 text-xs font-semibold tracking-[0.16em] uppercase">
+            <p className="text-mk-foil-gold flex items-center gap-2 text-[14px] font-semibold">
               <span className="relative flex h-2 w-2">
                 <span className="bg-accent-teal absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
                 <span className="bg-accent-teal relative inline-flex h-2 w-2 rounded-full" />
@@ -240,7 +240,7 @@ export default function DashboardPage() {
             <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <Link
                 href="/quotes"
-                className={cn(buttonVariants({ variant: "primary" }), "justify-center")}
+                className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-mk-paper px-4 text-sm font-semibold text-mk-ink transition-colors hover:bg-white"
               >
                 Nuevo presupuesto
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -257,19 +257,19 @@ export default function DashboardPage() {
 
           <dl className="flex flex-wrap gap-x-6 gap-y-3 sm:gap-x-8">
             <div className="min-w-0">
-              <dt className="text-xs text-white/55">Órdenes abiertas</dt>
+              <dt className="text-[13px] text-white/65">Órdenes abiertas</dt>
               <dd className="font-display numeric mt-0.5 text-2xl font-semibold tracking-tight">
                 {display(summary?.work_orders_open)}
               </dd>
             </div>
             <div className="min-w-0">
-              <dt className="text-xs text-white/55">Presupuestos pendientes</dt>
+              <dt className="text-[13px] text-white/65">Presupuestos pendientes</dt>
               <dd className="font-display numeric mt-0.5 text-2xl font-semibold tracking-tight">
                 {display(summary?.quotes_pending)}
               </dd>
             </div>
             <div className="min-w-0">
-              <dt className="text-xs text-white/55">Pendiente de cobro</dt>
+              <dt className="text-[13px] text-white/65">Pendiente de cobro</dt>
               <dd className="font-display numeric mt-0.5 text-xl font-semibold tracking-tight">
                 {balance}
               </dd>
@@ -366,12 +366,12 @@ export default function DashboardPage() {
                       </p>
                       <p className="text-text-2 text-xs">{appointment.customer_name}</p>
                       {appointment.technician_name && (
-                        <p className="text-text-2/70 mt-0.5 text-[11px]">
+                        <p className="text-text-2/70 mt-0.5 text-[12px]">
                           Técnico: {appointment.technician_name}
                         </p>
                       )}
                     </div>
-                    <Badge variant="neutral" className="h-fit shrink-0 text-[10px]">
+                    <Badge variant="neutral" className="h-fit shrink-0 text-[12px]">
                       {statusLabel(appointment.status)}
                     </Badge>
                   </li>
@@ -426,7 +426,7 @@ export default function DashboardPage() {
                           </p>
                           <p className="text-text-2 text-xs">{order.customer_name}</p>
                         </div>
-                        <Badge variant="danger" className="h-fit shrink-0 text-[10px]">
+                        <Badge variant="danger" className="h-fit shrink-0 text-[12px]">
                           {order.days_overdue}d
                         </Badge>
                       </Link>
@@ -468,7 +468,7 @@ export default function DashboardPage() {
                           </p>
                           <p className="text-text-2 text-xs">{order.customer_name}</p>
                         </div>
-                        <Badge variant="warning" className="h-fit shrink-0 text-[10px]">
+                        <Badge variant="warning" className="h-fit shrink-0 text-[12px]">
                           {statusLabel(order.priority)}
                         </Badge>
                       </Link>
@@ -513,7 +513,7 @@ export default function DashboardPage() {
                             {formatCurrency(quote.total)}
                           </p>
                         </div>
-                        <Badge variant="warning" className="h-fit shrink-0 text-[10px]">
+                        <Badge variant="warning" className="h-fit shrink-0 text-[12px]">
                           {quote.days_left}d
                         </Badge>
                       </Link>
@@ -558,7 +558,7 @@ export default function DashboardPage() {
                             {formatCurrency(order.total)}
                           </p>
                         </div>
-                        <Badge variant="danger" className="h-fit shrink-0 text-[10px]">
+                        <Badge variant="danger" className="h-fit shrink-0 text-[12px]">
                           {formatCurrency(order.balance)}
                         </Badge>
                       </Link>
@@ -595,7 +595,7 @@ export default function DashboardPage() {
                     <div className="min-w-0">
                       <p className="text-text text-sm font-semibold">{notification.title}</p>
                       <p className="text-text-2 line-clamp-2 text-xs">{notification.message}</p>
-                      <p className="text-text-2/70 mt-1 text-[11px]">
+                      <p className="text-text-2/70 mt-1 text-[12px]">
                         {formatDate(notification.created_at)}
                       </p>
                     </div>

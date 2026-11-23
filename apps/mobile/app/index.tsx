@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   markText: { color: colors.textInverse, fontSize: 22, fontWeight: "800" },
-  brand: { ...typography.overline, color: colors.cyan, letterSpacing: 2 },
+  brand: { ...typography.overline, color: colors.teal, letterSpacing: 2 },
   heroTitle: { ...typography.display, color: colors.textInverse },
   heroText: { ...typography.body, color: "rgba(255,255,255,0.78)" },
   roleHeader: { flexDirection: "row", alignItems: "flex-start", gap: spacing[3] },

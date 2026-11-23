@@ -17,12 +17,12 @@ export const brand = {
   /** Pendiente de activación cuando ARVOKTA tenga dominio y buzón. */
   email: "hola@arvokta.com",
   colors: {
-    ink: "#0B1F33",
-    teal: "#0F766E",
-    amber: "#F59E0B",
-    paper: "#F7F5F0",
-    mist: "#E7E2D8",
-    slate: "#5B6B7A",
+    ink: "#0F0F0F",
+    teal: "#C2410C",
+    amber: "#E8B04A",
+    paper: "#F7F7F5",
+    mist: "#DEDED8",
+    slate: "#6B6B66",
   },
 } as const;
 
@@ -35,7 +35,6 @@ export type Plan = {
     users: number;
     technicians: number;
     ordersPerMonth: number;
-    aiTokens: number;
   };
 };
 
@@ -45,31 +44,20 @@ export const plans: Plan[] = [
     name: "Starter",
     priceArs: 29_900,
     tagline: "Para el técnico que trabaja solo y quiere dejar las planillas.",
-    limits: { users: 1, technicians: 1, ordersPerMonth: 100, aiTokens: 50_000 },
+    limits: { users: 1, technicians: 1, ordersPerMonth: 100 },
   },
   {
     code: "professional",
     name: "Professional",
     priceArs: 59_900,
     tagline: "Para empresas con equipo en la calle y oficina coordinando.",
-    limits: { users: 5, technicians: 5, ordersPerMonth: 1_000, aiTokens: 200_000 },
+    limits: { users: 5, technicians: 5, ordersPerMonth: 1_000 },
   },
   {
     code: "business",
     name: "Business",
     priceArs: 99_900,
     tagline: "Para operaciones más grandes que necesitan escala y control.",
-    limits: { users: 20, technicians: 20, ordersPerMonth: 10_000, aiTokens: 1_000_000 },
+    limits: { users: 20, technicians: 20, ordersPerMonth: 10_000 },
   },
 ];
-
-export const planFeatures = [
-  "Clientes e historial",
-  "Solicitudes y órdenes",
-  "Presupuestos con link público",
-  "Agenda y asignación de técnicos",
-  "PWA para técnicos, sin instalar app",
-  "Pagos y saldo pendiente",
-  "Automatizaciones y notificaciones",
-  "Asistente de IA con datos reales",
-] as const;

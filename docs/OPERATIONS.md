@@ -32,7 +32,10 @@
 - Workflow `.github/workflows/backup.yml`, diario a las 05:00 UTC.
 - Requiere el secret `NEON_DATABASE_URL` con la URL directa
   (`postgresql://...`) sin prefijo de driver.
-- Guarda un artefacto `backup.dump` con retención de 14 días.
+- Usa la imagen `postgres:17` para que `pg_dump`/`pg_restore` coincidan con la
+  versión del servidor y evitar el error de versión del cliente de Ubuntu.
+- Verifica que el dump no esté vacío, que `pg_restore --list` lo pueda leer y
+  publica `backup.dump` + `backup.dump.sha256` con retención de 14 días.
 - Restauración:
 
 ```powershell
@@ -43,6 +46,21 @@ pg_restore --clean --if-exists --no-owner --no-privileges \
 - Probar la restauración en una base de staging antes de confiar en el backup.
 - Para producción real, usar el plan de Neon con point-in-time recovery y
   backups administrados.
+
+## Rotación de contraseña de un usuario
+
+- Usar `scripts/rotate_password.py`: pide la contraseña por consola, actualiza el
+  hash Argon2id y revoca todos los refresh tokens del usuario.
+- Contra producción, exportar `DATABASE_URL` con la conexión directa y ejecutar:
+
+```powershell
+$env:DATABASE_URL = "postgresql+asyncpg://..."
+uv run --project apps/api python scripts/rotate_password.py --email founder@...
+```
+
+- No reutilizar la contraseña de la demo ni una credencial que haya estado en
+  documentación o historial de Git.
+- Después de rotar, revisar `audit_logs` y las sesiones activas.
 
 ## Incidentes
 

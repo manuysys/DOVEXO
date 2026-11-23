@@ -81,6 +81,11 @@ Los puntos débiles son:
 | **S-19** | **Dos caminos de privilegio de plataforma** (flag en DB y lista de emails en config). | Baja | `api/deps.py::_is_platform_admin` | Usar sólo el flag en DB y administrarlo por script auditado. | `P2-12` |
 | **S-20** | **Cuenta de demo con datos que pueden modificarse** (clientes, pagos, anulaciones). Un visitante puede dejar la demo en un estado que confunda a otros. | Media | [`DEMO_ENVIRONMENT.md`](DEMO_ENVIRONMENT.md) | Reset programado y modo de sólo lectura. | `P0-07` |
 
+> **Actualización 2026-11-22:** se removió la contraseña del founder de
+> [`DEMO.md`](DEMO.md) y se agregó `scripts/rotate_password.py`. La contraseña
+> sigue en el historial público: S-06/S-16 no se cierran hasta rotarla y
+> verificar que la cuenta no sea platform admin en la demo.
+
 ## 3. Auditoría: cobertura por módulo
 
 | Módulo | Eventos auditados (verificados por test o por código) | Observación |

@@ -1,5 +1,151 @@
 # Changelog
 
+## 2026-11-23 — Landing v7: secciones por rol, sello y sistema compartido
+
+- Se eliminan el eyebrow del hero, los tags, el microcopy y las etiquetas
+  decorativas de las secciones; los datos funcionales suben a 12–15 px.
+- Se corrige el recorte del hero (sin `overflow-hidden` en la sección) y del
+  panel de producto (sticky de 680 px con paneles densos).
+- Nuevo `ApprovalStamp` rectangular, integrado en el presupuesto; reemplaza el
+  `FoilSeal` flotante en el hero, el panel de producto y el presupuesto público.
+- El panel de agenda muestra dos turnos, la orden pendiente y una nota de
+  conflicto; se elimina la nota “Misma orden…” y los rótulos “01/04”.
+- Migración: carpeta de vidrio + vista previa de `clientes.xlsx`, resumen de
+  válidas/errores y archivo flotante.
+- Nuevas secciones: La oficina, El técnico, El cliente y Control/seguridad. La
+  landing pasa de 6 a 10 secciones (~9.984 px) con paneles live, phone frame y
+  roles/auditoría reales. Se quita el tope de 1600 px: el layout es full-bleed
+  con gutters de 20–32 px; el hero y el pinned pasan a dos columnas desde
+  1280 px para no recortar el panel en 1024/1124.
+- Motion: `mk-scroll-reveal` con `animation-timeline: view()`; se mantienen el
+  estado aprobado/tilt, el pinned con WebGL y el auto-drop. Reduced motion deja
+  todo visible.
+- Sistema compartido: paleta paper/ink/panel/señal y Bricolage/Epilogue/Plex en
+  `--ds-*`, app-shell, dashboard, login, PageHeader, presupuesto público y
+  tokens de Expo. El dashboard del tenant demo se verificó en navegador.
+- Demo: botón “Reiniciar demo” en `/admin` para platform admins.
+- APK v7 release local (debug-signed) compilado en `.local/apk/dovexo-v7-release.apk`
+  (95.128.702 bytes, SHA-256 `BD87350B7482ABC9B8DBCDC0B81EE87340130D599783ECB8B860CAB5A036DEC3`).
+  Se instaló en el teléfono (`com.dovexo.mobile`, versión 1.0.0); abrió el
+  welcome y el deep link `dovexo://tech` mostró el login de técnico. MIUI
+  bloquea la inyección de taps por ADB (`INJECT_EVENTS`) hasta habilitar
+  “Depuración USB (Ajustes de seguridad)”.
+- Figma no se pudo actualizar: el MCP Starter agotó el rate limit. El archivo
+  existente sigue en v6. Documentado en `FIGMA_STORYBOARD.md`.
+- Verificación: backend ruff/format/basedpyright OK y 203 pytest; frontend lint 0
+  errores (4 warnings), typecheck OK, 281 tests, build 28 rutas; mobile tsc OK.
+  Lighthouse móvil 99/100/100/100 y desktop 100/100/100/100; Axe 0 violaciones.
+  Playwright sin overflow de 320 a 1920; hero, pinned, auto-drop, sello y
+  dashboard con demo verificados. Se corrigieron los min-width de producto,
+  agenda, precios y migración que recortaban el borde derecho en 320–1124.
+  **No desplegado.**
+
+## 2026-11-23 — Landing v6: full-bleed, motion, WebGL y Figma
+
+- Layout full-bleed de 1600 px con gutters de 20–32 px en todas las secciones;
+  se corrige el espacio lateral y el panel del hero entra completo desde 1024.
+- `TextReveal` por palabras con IntersectionObserver propio, hero con líneas y
+  stagger; sin títulos ocultos si el observer no dispara.
+- Hero: `QuoteDemo` se auto-aprueba una vez a los 2.6 s, muestra el sello y
+  sigue clickeable; tilt de puntero de hasta 4°. El sello se oculta en
+  mobile/tablet.
+- Producto pinned: cuatro pasos con paneles live, sticky de 620 px y una escena
+  Three.js propia (terreno de líneas + cuatro nodos), lazy, un solo contexto,
+  pausa fuera de viewport y reduced motion. Se retiran marquesina y progress
+  line.
+- Migración: `glass-folder-cards` con auto-drop de un archivo al entrar en
+  viewport, además de hover/click.
+- Figma: archivo `DOVEXO Landing v6 — Storyboard` con variables, text styles,
+  componente `Quote Panel`, frames de hero/pinned/mobile y notas de motion.
+  https://www.figma.com/design/DcjgOeLHZ980LjHFuPtz55
+- Originkit sigue bloqueado por el límite diario; no hay archivos en el repo.
+- Verificado: `pnpm lint` 0 errores (5 warnings), `pnpm typecheck` OK,
+  `pnpm test` 281/281, `pnpm build` 28 rutas. Lighthouse móvil y desktop
+  100/100/100/100 (LCP 1.2 s / 0.3 s; TBT 60/0 ms; CLS 0). Axe 4.14: 0
+  violaciones WCAG 2.2 AA. Playwright: auto-aprobación, sello, sticky y
+  auto-drop verificados; sin overflow de 360 a 1440.
+
+## 2026-11-23 — Landing v5: Anubi + Better Stack, UI live y glass folder
+
+- Remake visual completo sobre las referencias reales **anubi.io** y
+  **betterstack.com**: Bricolage Grotesque para cuerpo, Epilogue para
+  titulares e IBM Plex Mono para etiquetas; off-white `#F7F7F5`, negro
+  `#0F0F0F`, paneles `#0B0C14` y naranja de señal `#E4572E`. Boska deja de
+  cargarse en la landing.
+- Hero nuevo con titular Epilogue grande, tags de módulos y un objeto real:
+  `QuoteDemo`, un presupuesto en HTML que se aprueba en el lugar y muestra el
+  sello. Sin captura de dashboard, sin halo y sin teléfono flotante.
+- `ProductStory`: cuatro secciones con UI live construida desde `demoOperation`
+  (solicitud, agenda, presupuesto y cobros), paneles oscuros sobre página clara.
+  Se van `OrderRail`, `ProductTour`, `OperationalTicker` y los `OT/QT` repetidos.
+- Migración con `glass-folder-cards`, un componente local con carpeta de vidrio,
+  arte generado en canvas y archivos de ejemplo. Se monta con lazy loading para
+  no gastar main thread antes del LCP.
+- Precios, FAQ y CTA se conservan retematizados; el footer y la cabecera usan la
+  nueva tipografía y el logo negro.
+- Originkit: se pidieron 12 componentes, pero el CLI consumió las 3 descargas
+  diarias en un lote sin escribir archivos y el endpoint devuelve 429. Estado y
+  comandos en `docs/ORIGINKIT_INTEGRATION.md`.
+- Verificado: `pnpm lint` 0 errores (5 warnings, 2 del `<img>` del componente de
+  carpetas), `pnpm typecheck` OK, `pnpm test` 281/281, `pnpm build` 28 rutas.
+  Lighthouse móvil y desktop 100/100/100/100 (LCP 1.2 s / 0.3 s; TBT 60/0 ms;
+  CLS 0). Axe 4.14: 0 violaciones WCAG 2.2 AA en 1440 y 390. Playwright:
+  aprobación del presupuesto y apertura de la carpeta OK, sin overflow de 360 a
+  1440 y sin errores de consola.
+
+## 2026-11-22 — Landing v4.1: motion real
+
+- Se reincorpora **Motion (Framer Motion)** después de que la v4 quedara
+  demasiado estática: crossfade + escala del rail, hover/tap de estaciones, pill
+  de tabs con `layoutId`, entrada de migración y conteo de filas.
+- Hero: titular que entra por líneas (`mk-line`), eyebrow/descripción/CTAs con
+  `mk-rise` escalonado, halo iridiscente que respira (9 s), sello con entrada
+  física y teléfono flotante. El texto sigue sin depender de JS.
+- Nueva tira operativa (`operational-ticker.tsx`) con marquesina de 28 s,
+  pausa al hover y datos de la misma orden; guiño a la franja de Anubi y al
+  ritmo de MotionSites.
+- Rail con progreso atado al scroll y crossfade de imágenes; tabs con pill
+  animada; migración con conteo de filas y stagger de pasos.
+- `prefers-reduced-motion` verificado: CSS apaga halo/sello/teléfono/ticker y
+  Motion apaga crossfade, hover, pill y conteo.
+- Verificado: `pnpm lint` 0 errores (2 warnings preexistentes), `pnpm typecheck`
+  OK, `pnpm test` 281/281, `pnpm build` 28 rutas. Lighthouse desktop
+  99/100/100/100 (LCP 0.9 s) y mobile 83/100/100/100 (LCP sintético 4.8 s sobre
+  el panel del hero; LCP observado 318 ms; CLS 0). Axe 4.14: 0 violaciones WCAG
+  2.2 AA en 1440 y 390. Detalle en ADR-023.
+
+## 2026-11-22 — Landing v4: “El expediente vivo”
+
+- Dirección de arte nueva sobre la base de ADR-021: **Boska** (Fontshare, ITF
+  Free Font License) self-hosted para titulares, Archivo para cuerpo/UI y Geist
+  Mono para IDs. `--font-mk-display` queda acotada a marketing.
+- Hero nuevo (`hero-dossier.tsx`): panel real del tenant demo recortado a la
+  zona visible (35 KB), tarjeta de presupuesto aprobada, sello de hojalata
+  (`foil-seal.tsx`) y teléfono del técnico. `100svh`, sin chrome falso ni
+  caption; el producto asoma en mobile.
+- `OrderRail` se reescribe como historia sticky/scroll-linked de cuatro
+  estaciones con roles; en la primera pasada, sin Motion. El activo se calcula
+  con scroll + `requestAnimationFrame`; en mobile el visual queda sticky. La
+  v4.1 agrega crossfade y progreso con Motion.
+- `ProductTour` absorbe la lista de módulos, elimina el chrome de browser y
+  recaptura las pantallas sin scrollbar (`*-v4.webp`). En mobile las tabs pasan a
+  una grilla de 2 filas y la lista de módulos se oculta.
+- Nueva sección de migración “De la planilla a DOVEXO” con importador,
+  onboarding y primera orden.
+- Truth pass: se quita la cuota de tokens de IA por plan (el backend aplica un
+  límite global), “prueba de 14 días” pasa a “acceso de evaluación”, se corrige
+  la respuesta de privacidad y se oculta la tabla de precios en mobile.
+- La primera pasada retiró Motion/GSAP/Lenis/Three.js del bundle de la landing
+  para priorizar el LCP; la v4.1 reincorpora Motion de forma selectiva (ADR-023).
+- Cabecera: CTA visible desde `sm` y `aria-expanded` en el botón de menú.
+  Tabs con foco visible; el sello ya no tapa el folio del panel.
+- Verificado: `pnpm lint` 0 errores (2 warnings preexistentes), `pnpm typecheck`
+  OK, `pnpm test` 281/281, `pnpm build` 28 rutas. Lighthouse móvil y desktop
+  100/100/100/100 (LCP 1.2 s / 0.3 s). Axe 4.14: 0 violaciones WCAG 2.2 AA en
+  1440 y 390. Playwright: sin overflow de 360 a 1920 y gutters alineados.
+- Pendiente: deploy a Vercel, QA visual en producción y recaptura del tour
+  cuando cambie la UI del panel.
+
 ## 2026-11-20 — Landing v3: dirección de arte "Oficio en orden"
 
 - Sistema de marketing acotado con `.mk-root`: **Archivo** (Omnibus-Type, eje de

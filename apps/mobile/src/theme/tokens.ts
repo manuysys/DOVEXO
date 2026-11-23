@@ -9,17 +9,17 @@
 import { Platform } from "react-native";
 
 export const colors = {
-  // Marca
-  primary: "#315EFB",
-  primaryDark: "#1E3A8A",
-  primarySoft: "#E9EFFF",
-  deep: "#17243D",
-  deepSoft: "#24334F",
-  teal: "#11A69A",
-  tealInk: "#0B7A70",
-  tealSoft: "#E1F5F2",
-  violet: "#7459D9",
-  cyan: "#4CB7D8",
+  // Marca: misma identidad que la landing (ink, paper, señal naranja).
+  primary: "#0F0F0F",
+  primaryDark: "#000000",
+  primarySoft: "#F1F1EE",
+  deep: "#0B0C14",
+  deepSoft: "#14151D",
+  teal: "#C2410C",
+  tealInk: "#9A3412",
+  tealSoft: "#FBEDE7",
+  violet: "#C2410C",
+  cyan: "#2F7D4F",
 
   // Estado
   success: "#16865A",
@@ -33,19 +33,19 @@ export const colors = {
   dangerSoft: "#FCEAEA",
 
   // Superficies
-  bg: "#F5F7FA",
+  bg: "#F7F7F5",
   surface: "#FFFFFF",
-  surface2: "#F0F3F8",
-  border: "#E3E8F0",
-  borderStrong: "#CBD5E1",
+  surface2: "#FCFCFC",
+  border: "#E3E1DB",
+  borderStrong: "#C9C7BF",
 
   // Texto
-  text: "#182235",
-  text2: "#667085",
+  text: "#0F0F0F",
+  text2: "#6B6B66",
   textInverse: "#FFFFFF",
 
   // Utilidades
-  overlay: "rgba(23,36,61,0.45)",
+  overlay: "rgba(11,12,20,0.45)",
   transparent: "transparent",
 } as const;
 

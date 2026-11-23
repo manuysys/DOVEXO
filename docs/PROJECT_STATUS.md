@@ -1,13 +1,16 @@
 # Estado del proyecto
 
-**Última actualización:** 2026-11-20
-**Fase:** preventa / customer discovery activa (GO_TO_MARKET) + landing v3
-“Oficio en orden” implementada y verificada localmente (papel/tinta/Archivo,
-héroe claro con captura real, sin 3D ni Lenis; 281 tests y build de 32 rutas).
-Pendiente de deploy y QA visual en producción. Base técnica: Hito 2
-completo + PWA, app móvil Android DOVEXO, portal del cliente, dashboard
-operativo, automatizaciones, IA con Groq, suscripciones, panel global, WhatsApp,
-importador CSV/XLSX, onboarding y reset de demo (pilot-ready).
+**Última actualización:** 2026-11-23
+**Fase:** preventa / customer discovery activa (GO_TO_MARKET) + landing v7
+“secciones por rol, sello y sistema compartido” verificada localmente (10
+secciones, hero sin recorte ni tope de 1600 px, panel denso, sello integrado, migración con preview,
+secciones de oficina/técnico/cliente/control y tokens nuevos en dashboard,
+portal, PWA y Expo; 203 pytest, 281 tests web, build de 28 rutas, Lighthouse
+móvil 99/100/100/100 y desktop 100/100/100/100, 0 violaciones Axe). Pendiente de
+deploy y QA visual en producción. Base técnica: Hito 2 completo + PWA, app móvil
+Android DOVEXO, portal del cliente, dashboard operativo, automatizaciones, IA con
+Groq, suscripciones, panel global, WhatsApp, importador CSV/XLSX, onboarding y
+reset de demo (pilot-ready).
 
 ## Resumen
 
@@ -30,6 +33,173 @@ El frontend y la API están desplegados en Vercel. La base PostgreSQL está en
 Neon (plan Free, región `gru1`). La demo ya no depende de una máquina local ni
 de un túnel. La empresa es **ARVOKTA** y el producto **DOVEXO**; el dominio
 propio está pendiente.
+
+## Landing v7 — secciones por rol y sistema compartido (2026-11-23)
+
+Implementada y verificada localmente. Documentada en ADR-026, `CHANGELOG.md`,
+`DEMO_READINESS.md` y `DESIGN_SYSTEM.md` §17. **No desplegada.**
+
+- **Hero:** sin eyebrow, tags ni microcopy; sin `overflow-hidden`. El presupuesto
+  se muestra aprobado desde el primer paint y el sello es rectangular, integrado y legible.
+- **Producto:** panel sticky de 680 px, agenda con dos turnos + orden pendiente,
+  sin nota de motion ni rótulos “01/04”.
+- **Secciones nuevas:** La oficina, El técnico (PWA con offline), El cliente
+  (portal + sello) y Control/seguridad. La landing pasa de 6 a 10 secciones
+  (~9.984 px de alto).
+- **Migración:** carpeta + preview de `clientes.xlsx` + resumen de errores +
+  archivo flotante; el auto-drop sigue funcionando.
+- **Motion:** `mk-scroll-reveal` con `animation-timeline: view()`; hero, pinned,
+  WebGL y carpeta conservan sus momentos. Reduced motion deja todo visible.
+- **Sistema compartido:** `--ds-*`, `app-shell`, dashboard, login, PageHeader,
+  presupuesto público y tokens de Expo pasan a paper/ink/panel/señal y
+  Bricolage/Epilogue/Plex. El dashboard del tenant demo se verificó en navegador.
+- **Demo:** botón “Reiniciar demo” en `/admin` para platform admins.
+- **Figma:** el archivo sigue en v6; el MCP Starter agotó el rate limit antes de
+  crear la v7 y la variante `Aprobado` (`FIGMA_STORYBOARD.md`).
+
+Verificación (local, 2026-11-23):
+
+```text
+Backend  ruff / format / basedpyright -> OK; pytest 203 passed
+Frontend lint 0 errores (4 warnings); typecheck OK; test 281/281; build 28 rutas
+Mobile   tsc --noEmit -> OK
+Lighthouse mobile  -> 99 / 100 / 100 / 100; LCP 1.2 s; TBT 120 ms; CLS 0
+Lighthouse desktop -> 100 / 100 / 100 / 100; LCP 0.3 s; TBT 0 ms; CLS 0
+Axe 4.14           -> 0 violaciones WCAG 2.2 AA en 1440 y 390
+Playwright         -> sin overflow de 320 a 1920; hero, pinned, sello,
+                      auto-drop y dashboard con demo verificados. Se corrigieron
+                      min-width de producto, agenda, precios y migración.
+```
+
+**Pendiente:** deploy, QA visual en producción, Figma v7, APK nuevo con los
+tokens y los P0 de `DEMO_READINESS.md` (backups, email, WhatsApp/Mercado Pago,
+APK físico y E2E).
+
+## Landing v6 — full-bleed, motion y WebGL (2026-11-23)
+
+Remake sobre la v5. Documentada en ADR-025, `FIGMA_STORYBOARD.md` y
+`DESIGN_SYSTEM.md` §16. **No desplegada.**
+
+- **Layout full-bleed:** 1600 px con gutters de 20–32 px en header, hero,
+  producto, migración, precios, FAQ y CTA. El panel del hero entra completo
+  desde 1024.
+- **Texto:** `TextReveal` con IntersectionObserver propio; hero con `mk-line` y
+  `mk-rise`; sin títulos ocultos si el observer no dispara.
+- **Hero:** `QuoteDemo` se auto-aprueba a los 2.6 s, sello, tilt de 4° y click;
+  el sello se oculta en mobile/tablet.
+- **Producto:** secuencia pinned de cuatro pasos con paneles live, sticky de
+  620 px y escena Three.js propia (terreno de líneas + cuatro nodos). Sin
+  marquesina ni progress line.
+- **Migración:** glass folder con auto-drop de un archivo, además de hover/click.
+- **Figma:** archivo `DOVEXO Landing v6 — Storyboard` con variables, text styles,
+  componente Quote Panel, frames de hero/pinned/mobile y notas de motion:
+  https://www.figma.com/design/DcjgOeLHZ980LjHFuPtz55
+- **Originkit:** sigue bloqueado por el límite diario; no hay archivos en el repo.
+
+Verificación (local, 2026-11-23):
+
+```text
+pnpm lint          -> 0 errores (5 warnings, 2 <img> del componente de carpetas)
+pnpm typecheck     -> OK
+pnpm test          -> 281/281
+pnpm build         -> 28 rutas
+Lighthouse mobile  -> 100 / 100 / 100 / 100; LCP 1.2 s; TBT 60 ms; CLS 0
+Lighthouse desktop -> 100 / 100 / 100 / 100; LCP 0.3 s; TBT 0 ms; CLS 0
+Axe 4.14           -> 0 violaciones WCAG 2.2 AA en 1440 y 390
+Playwright         -> sin overflow de 360 a 1440; auto-aprobación, sello,
+                      pinned sticky y auto-drop verificados.
+```
+
+**Pendiente:** deploy a Vercel, QA visual en producción, variante `Aprobado` en
+Figma (el MCP Starter cortó por rate limit) y componentes Originkit cuando se
+resetee la cuota.
+
+## Landing v5 — Anubi + Better Stack (2026-11-23)
+
+Remake visual completo y verificado localmente. Documentado en ADR-024,
+`docs/ORIGINKIT_INTEGRATION.md` y `DESIGN_REFERENCES.md`. **No desplegado.**
+
+- **Tipografía:** Bricolage Grotesque para cuerpo/UI, Epilogue para titulares e
+  IBM Plex Mono para etiquetas. Boska deja de cargarse en la landing.
+- **Paleta:** off-white `#F7F7F5`, negro `#0F0F0F`, paneles `#0B0C14`, naranja
+  de señal `#E4572E`; sin violeta.
+- **Hero:** titular Epilogue grande, tags de módulos y `QuoteDemo`, un
+  presupuesto real en HTML que se aprueba en el lugar. Sin captura de dashboard,
+  halo, teléfono flotante ni marquesina.
+- **Producto:** cuatro secciones con paneles oscuros de UI live desde
+  `demoOperation` (solicitud, agenda, presupuesto y cobros). Se retiran
+  `OrderRail`, `ProductTour` y `OperationalTicker`.
+- **Migración:** `glass-folder-cards` local con carpeta de vidrio, arte en canvas
+  y archivos de ejemplo. Se monta con lazy loading.
+- **Precios, FAQ y CTA:** retematizados con la nueva tipografía y tokens.
+- **Originkit:** 12 componentes pedidos; el CLI consumió las 3 descargas diarias
+  en un lote sin escribir archivos y el endpoint devuelve 429. Quedan pendientes.
+
+Verificación (local, 2026-11-23):
+
+```text
+pnpm lint          -> 0 errores (5 warnings; incluye 2 <img> del componente
+                      de carpetas y 3 preexistentes)
+pnpm typecheck     -> OK
+pnpm test          -> 281/281
+pnpm build         -> 28 rutas
+Lighthouse mobile  -> 100 / 100 / 100 / 100; LCP 1.2 s; TBT 60 ms; CLS 0
+Lighthouse desktop -> 100 / 100 / 100 / 100; LCP 0.3 s; TBT 0 ms; CLS 0
+Axe 4.14           -> 0 violaciones WCAG 2.2 AA en 1440 y 390
+Playwright         -> aprobación del presupuesto y apertura de la carpeta OK;
+                      sin overflow de 360 a 1440; sin errores de consola.
+```
+
+**Pendiente:** descargar los Originkit cuando se resetee la cuota, deploy a
+Vercel y QA visual en producción.
+
+## Landing v4 — “El expediente vivo” (2026-11-22)
+
+Implementada y verificada localmente. Documentada en ADR-022, `LANDING_REDESIGN.md`
+§10 y `DESIGN_SYSTEM.md` §14. **No desplegada todavía.**
+
+- **Boska** self-hosted para titulares editoriales; Archivo para cuerpo y UI;
+  Geist Mono para IDs. Tokens `mk-foil-*` y clases `mk-display`, `mk-foil-surface`,
+  `mk-foil-sheen`, `mk-rise` y `mk-fade`.
+- **Hero nuevo** (`hero-dossier.tsx` + `foil-seal.tsx`): panel real del tenant
+  demo recortado a la zona visible (35 KB), tarjeta de presupuesto aprobada,
+  sello iridiscente y teléfono del técnico. `100svh`; el producto asoma en 360
+  y 390. Sin chrome falso ni caption bajo la imagen.
+- **`OrderRail`** sticky/scroll-linked con cuatro estaciones y roles; estado
+  activo por scroll + `requestAnimationFrame`; en mobile el visual queda sticky.
+- **`ProductTour`** absorbe la lista de módulos, elimina el chrome de browser y
+  usa capturas `*-v4.webp` recapturadas sin scrollbar. Tabs en grilla de dos
+  filas en mobile; lista de módulos oculta en mobile para no alargar la página.
+- **Migración**: nueva sección “De la planilla a DOVEXO”, marcada como ejemplo.
+- **Truth pass:** se quita la cuota de tokens de IA por plan (el backend aplica
+  un límite global), “prueba de 14 días” pasa a “acceso de evaluación”, se
+  corrige la respuesta de privacidad y la tabla de precios se oculta en mobile.
+- **Motion v4.1:** Framer Motion para el crossfade y progreso del rail, la pill
+  de tabs y el conteo de migración. CSS para la entrada por líneas, halo
+  iridiscente, sello, teléfono flotante y tira operativa; el dossier queda fuera
+  de Motion para no demorar el LCP. Sin GSAP/Lenis/Three.js en la landing.
+  `prefers-reduced-motion` verificado. Detalle en ADR-023 y
+  `LANDING_REDESIGN.md` §10.
+
+Verificación (local, 2026-11-22):
+
+```text
+pnpm lint          -> 0 errores (2 warnings preexistentes de React Hook Form)
+pnpm typecheck     -> OK
+pnpm test          -> 281/281
+pnpm build         -> 28 rutas
+Lighthouse mobile  -> 83 / 100 / 100 / 100; LCP sintético 4.8 s sobre el
+                      panel del hero (LCP observado 318 ms); TBT 40 ms; CLS 0
+Lighthouse desktop -> 99 / 100 / 100 / 100; LCP 0.9 s; TBT 0 ms; CLS 0
+Axe 4.14           -> 0 violaciones WCAG 2.2 AA en 1440 y 390
+Motion             -> hero/rail/tabs/migración con Framer Motion; CSS en
+                      halo/sello/teléfono/ticker; reduced motion verificado
+Playwright         -> sin overflow de 360 a 1920; gutters alineados;
+                      tabs 2x3 en 390; hero con producto visible.
+```
+
+**Pendiente:** deploy a Vercel, QA visual en producción y recaptura del tour
+cuando cambie la UI del panel.
 
 ## Hecho y verificado
 
@@ -158,6 +328,9 @@ propio está pendiente.
   - Seed versionado en `apps/api/app/seed/demo.py`, idempotente, con un turno
     futuro: mañana a las 10:00 hora argentina (13:00 UTC), según `_tomorrow_at`.
   - Rate limit: 10 resets por ventana. Lock de la fila del tenant demo.
+- [x] Botón “Reiniciar demo” en `/admin` para platform admins (2026-11-23):
+  llama al endpoint existente, muestra los conteos del seed e invalida las
+  queries de admin y dashboard.
 - [x] 179 pruebas pytest al cierre del bloque 2026-11-11. La cifra vigente es
   203 (2026-11-18; ver "Landing v2, hardening y deploy").
 
@@ -542,6 +715,17 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
 
 ## Pendiente
 
+- [ ] Desplegar la landing v7 a Vercel y hacer QA visual en producción
+  (1440/1024/1124/390/360, sello, oficina/técnico/cliente, pinned, WebGL, carpeta).
+- [ ] Crear la v7 en Figma y la variante `Aprobado` del `Quote Panel` cuando se
+  resetee el rate limit del MCP Starter; ver `FIGMA_STORYBOARD.md`.
+- [ ] Resolver los P0 de `DEMO_READINESS.md` antes de una demo pública:
+  backups, email/Resend, WhatsApp/Mercado Pago, APK físico y E2E.
+- [ ] Recorrer el flujo completo del APK v7 ya instalado (técnico, cliente,
+  fotos, offline y push) en el Android físico. La app abrió y el deep link
+  `/tech` mostró el login; falta la interacción completa.
+- [ ] Descargar los 12 componentes Originkit cuando se resetee la cuota diaria
+  y montar `/labs/originkit`; ver `docs/ORIGINKIT_INTEGRATION.md`.
 - [ ] Autorizar y enviar los primeros mensajes a prospectos (borradores en
   `docs/GO_TO_MARKET/OUTREACH_DRAFTS_2026-11-14.md`; requiere aprobación del
   fundador).
@@ -617,8 +801,8 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
 - La ventana de gracia de refresh (10 s) acepta un token ya rotado dentro de ese
   plazo sin revocar la familia (ADR-019).
 - El reset de demo solo lo ejecuta un platform admin. `demo@saasgestion.com` no es
-  platform admin, así que no puede resetear la demo. No hay botón en la UI; el reset
-  es solo por API.
+  platform admin, así que no puede resetear la demo. El botón “Reiniciar demo”
+  existe en `/admin`, pero solo lo ve un platform admin.
 - El importador solo crea clientes. No importa órdenes asociadas (pendiente del
   Hito 9).
 - Los `import_jobs` guardan datos personales en `rows_json` y no tienen política de

@@ -36,7 +36,7 @@
 |---|---|---|---|---|---|
 | Administrador | `demo@saasgestion.com` | Servicios Demo | No | `DEMO.md`, `hero.tsx`, `login/page.tsx`, `content.ts` | Alto: pública en la landing. |
 | Técnico | `tecnico@saasgestion.com` | Servicios Demo | No | `DEMO.md`, `MOBILE_API.md` | Medio: expone la PWA y las órdenes asignadas. |
-| Fundador / plataforma | `founder@saasgestion.com` | SaaS Gestion HQ | **Sí** (`is_platform_admin=true`) | `DEMO.md` | **Crítico** si la contraseña funciona en la base pública: da acceso a `/admin` y a métricas de todas las empresas. |
+| Fundador / plataforma | `founder@saasgestion.com` | SaaS Gestion HQ | **Sí** (`is_platform_admin=true`) | No publicada (removida de `DEMO.md`) | **Crítico hasta rotar**: la contraseña estuvo en el historial público; da acceso a `/admin` y a métricas de todas las empresas. |
 
 Nota sobre el dominio del email: `saasgestion.com` no es el dominio de la marca provisional (Arreglo). Conviene migrar la demo a un dominio propio cuando exista ([`BRAND.md`](BRAND.md)).
 

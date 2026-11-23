@@ -1,41 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f5f0;
-  --foreground: #0b1f33;
-  --brand-ink: #0b1f33;
-  --brand-teal: #0f766e;
-  --brand-amber: #f59e0b;
-  --brand-paper: #f7f5f0;
-  --brand-mist: #e7e2d8;
-  --brand-slate: #5b6b7a;
+  --background: #f7f7f5;
+  --foreground: #0f0f0f;
+  --brand-ink: #0f0f0f;
+  --brand-teal: #c2410c;
+  --brand-amber: #e4572e;
+  --brand-paper: #f7f7f5;
+  --brand-mist: #deded8;
+  --brand-slate: #6b6b66;
 
-  /* Design system DOVEXO — Fase 1 (2026-11-18) */
-  --ds-primary: #315efb;
-  --ds-primary-dark: #1e3a8a;
-  --ds-deep: #17243d;
-  --ds-secondary: #4778ff;
-  --ds-teal: #11a69a;
-  --ds-violet: #7459d9;
-  --ds-cyan: #4cb7d8;
+  /* Design system DOVEXO — misma identidad que la landing (v7) */
+  --ds-primary: #0f0f0f;
+  --ds-primary-dark: #000000;
+  --ds-deep: #0b0c14;
+  --ds-secondary: #e4572e;
+  --ds-teal: #c2410c;
+  --ds-violet: #c2410c;
+  --ds-cyan: #2f7d4f;
   --ds-success: #16865a;
   --ds-success-soft: #e7f5ee;
   --ds-success-strong: #0f5c3d;
-  --ds-warning: #d69b28;
+  --ds-warning: #b7791f;
   --ds-warning-soft: #fbf3e2;
   --ds-warning-strong: #7a5312;
-  --ds-danger: #d94848;
+  --ds-danger: #c0392b;
   --ds-danger-soft: #fdecec;
   --ds-danger-strong: #8f2b2b;
-  --ds-info: #315efb;
-  --ds-info-soft: #eaefff;
-  --ds-info-strong: #1e3a8a;
-  --ds-bg: #f5f7fa;
+  --ds-info: #0f0f0f;
+  --ds-info-soft: #f1f1ee;
+  --ds-info-strong: #0f0f0f;
+  --ds-bg: #f7f7f5;
   --ds-surface: #ffffff;
-  --ds-surface-2: #f0f3f8;
-  --ds-border: #e3e8f0;
-  --ds-text: #182235;
-  --ds-text-2: #667085;
+  --ds-surface-2: #fcfcfc;
+  --ds-border: #e3e1db;
+  --ds-text: #0f0f0f;
+  --ds-text-2: #6b6b66;
 
   --ds-radius-sm: 8px;
   --ds-radius-md: 12px;
@@ -61,9 +61,12 @@
   --color-paper: var(--brand-paper);
   --color-mist: var(--brand-mist);
   --color-slate: var(--brand-slate);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-archivo);
+  --font-sans: var(--font-bricolage);
+  --font-mono: var(--font-plex-mono);
+  --font-display: var(--font-epilogue);
+  --font-mk-display: var(--font-epilogue);
+  --font-mk-sans: var(--font-bricolage);
+  --font-mk-mono: var(--font-plex-mono);
 
   /* Design system DOVEXO */
   --color-primary: var(--ds-primary);
@@ -184,7 +187,7 @@ body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
 }
 
 ::selection {
@@ -207,21 +210,33 @@ body {
  * Utilidades propias de la landing. Los tokens de marca de arriba no cambian.
  */
 :root {
-  --mk-ink-2: #0e2740;
-  --mk-ink-3: #16344f;
-  --mk-tint: #efebe3;
-  --mk-teal-soft: #5eead4;
-  --mk-teal-deep: #0b4f4a;
+  --mk-ink-2: #16171d;
+  --mk-ink-3: #1e2028;
+  --mk-tint: #f1f1ee;
+  --mk-teal-soft: #9fe3d0;
+  --mk-teal-deep: #0b0c14;
 
-  /* Identidad 2026-11-20: papel, tinta y una sola señal. */
-  --mk-paper: #f3f0e6;
-  --mk-paper-2: #faf8f0;
-  --mk-ink: #123b31;
-  --mk-ink-hover: #0c2c25;
-  --mk-signal: #d9541e;
-  --mk-signal-strong: #a63c10;
-  --mk-slate: #5a665f;
-  --mk-line: #d8d2c2;
+  /* Identidad 2026-11-22: Anubi + Better Stack. Off-white, negro, un solo
+     naranja de señal; los paneles de producto usan el azul de la app. */
+  --mk-paper: #f7f7f5;
+  --mk-paper-2: #fcfcfc;
+  --mk-ink: #0f0f0f;
+  --mk-ink-hover: #000000;
+  --mk-signal: #e4572e;
+  --mk-signal-strong: #c2410c;
+  --mk-slate: #6b6b6b;
+  --mk-line: #deded8;
+  --mk-panel: #0b0c14;
+  --mk-panel-soft: #14151d;
+  --mk-panel-text: #eef0f5;
+  --mk-panel-muted: #939db8;
+
+  /* Sello de hojalata: una sola superficie iridiscente, sin violeta. */
+  --mk-foil-copper: #d9541e;
+  --mk-foil-gold: #e8b04a;
+  --mk-foil-teal: #2f7d4f;
+  --mk-foil-pale: #f0dcc4;
+  --mk-foil-shadow: rgb(18 59 49 / 0.18);
 }
 
 @theme inline {
@@ -238,20 +253,154 @@ body {
   --color-mk-signal-strong: var(--mk-signal-strong);
   --color-mk-slate: var(--mk-slate);
   --color-mk-line: var(--mk-line);
+  --color-mk-panel: var(--mk-panel);
+  --color-mk-panel-soft: var(--mk-panel-soft);
+  --color-mk-panel-text: var(--mk-panel-text);
+  --color-mk-panel-muted: var(--mk-panel-muted);
+  --color-mk-foil-copper: var(--mk-foil-copper);
+  --color-mk-foil-gold: var(--mk-foil-gold);
+  --color-mk-foil-teal: var(--mk-foil-teal);
+  --color-mk-foil-pale: var(--mk-foil-pale);
 }
 
-/* La landing usa una sola familia: Archivo, con el eje de ancho en las etiquetas. */
+/* La landing: Bricolage para la operación, Epilogue para titulares y
+ * IBM Plex Mono para etiquetas. */
 .mk-root {
-  font-family: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+}
+
+.mk-display {
+  font-family: var(--font-epilogue), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: lining-nums;
+  letter-spacing: -0.04em;
+}
+
+.mk-mono {
+  font-family: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.mk-wordmark {
+  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+/* Sello de hojalata: una sola pasada de brillo, nunca en loop. */
+.mk-foil-surface {
+  background: conic-gradient(
+    from 220deg,
+    var(--mk-foil-copper),
+    var(--mk-foil-gold),
+    var(--mk-foil-pale),
+    var(--mk-foil-teal),
+    var(--mk-foil-copper)
+  );
+}
+
+.mk-foil-sheen {
+  overflow: hidden;
+}
+
+.mk-foil-sheen::after {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: linear-gradient(
+    110deg,
+    transparent 35%,
+    rgb(255 255 255 / 0.55) 50%,
+    transparent 65%
+  );
+  transform: translateX(-120%);
+  animation: mk-foil-sheen 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.35s both;
+}
+
+@keyframes mk-foil-sheen {
+  to {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-foil-sheen::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* Sello de aprobación integrado: una entrada corta, sin loop. */
+@keyframes mk-stamp-in {
+  from {
+    opacity: 0;
+    transform: scale(1.12) rotate(-6deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(-2deg);
+  }
+}
+
+.mk-stamp-in {
+  animation: mk-stamp-in 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-stamp-in {
+    animation: none;
+  }
+}
+
+@keyframes mk-float-soft {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-3deg);
+  }
+  50% {
+    transform: translate3d(0, -7px, 0) rotate(-1.5deg);
+  }
+}
+
+.mk-float-soft {
+  animation: mk-float-soft 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-float-soft {
+    animation: none;
+  }
+}
+
+/* Reveal con scroll nativo: sin JS, sin hidratar una sección entera. Si el
+ * navegador no soporta animation-timeline, el contenido queda visible. */
+@keyframes mk-scroll-reveal {
+  from {
+    transform: translate3d(0, 24px, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .mk-scroll-reveal {
+    animation: mk-scroll-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 8% cover 30%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-scroll-reveal {
+    animation: none;
+  }
 }
 
 .mk-label {
-  font-family: var(--font-archivo), ui-sans-serif, sans-serif;
-  font-stretch: 75%;
-  font-size: 0.6875rem;
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
   line-height: 1.2;
-  font-weight: 700;
-  letter-spacing: 0.14em;
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -264,8 +413,8 @@ body {
 
 .mk-grid-light {
   background-image:
-    linear-gradient(to right, rgb(11 31 51 / 0.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(11 31 51 / 0.07) 1px, transparent 1px);
+    linear-gradient(to right, rgb(15 15 15 / 0.065) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(15 15 15 / 0.065) 1px, transparent 1px);
   background-size: 56px 56px;
 }
 
@@ -321,6 +470,115 @@ body {
 .mk-rise {
   animation: mk-rise 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   animation-delay: var(--mk-delay, 0ms);
+}
+
+@keyframes mk-fade {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.mk-fade {
+  animation: mk-fade 0.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Entrada de titulares por línea. El texto queda en el HTML aunque no haya JS. */
+@keyframes mk-line-up {
+  from {
+    transform: translate3d(0, 110%, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.mk-line {
+  display: block;
+  animation: mk-line-up 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.mk-line-2 {
+  animation-delay: 90ms;
+}
+
+/* Sello: entra como un objeto físico y queda girado. */
+@keyframes mk-seal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.72) rotate(-18deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(6deg);
+  }
+}
+
+.mk-seal-in {
+  animation: mk-seal-in 1s cubic-bezier(0.16, 1, 0.3, 1) 380ms both;
+}
+
+/* El teléfono flota muy poco; el movimiento viene de la referencia de Anubi. */
+@keyframes mk-float-phone {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(3deg);
+  }
+  50% {
+    transform: translate3d(0, -7px, 0) rotate(2deg);
+  }
+}
+
+.mk-float-phone {
+  animation: mk-float-phone 7s ease-in-out infinite;
+}
+
+/* Halo iridiscente: materialidad de Originkit, adaptada al papel. */
+.mk-halo {
+  background: conic-gradient(
+    from 210deg,
+    var(--mk-foil-copper),
+    var(--mk-foil-gold),
+    var(--mk-foil-pale),
+    var(--mk-foil-teal),
+    var(--mk-foil-copper)
+  );
+  filter: blur(28px);
+  opacity: 0.28;
+  animation: mk-halo-breathe 9s ease-in-out infinite;
+  transform: translateZ(0);
+  will-change: opacity;
+}
+
+@keyframes mk-halo-breathe {
+  0%,
+  100% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.34;
+  }
+}
+
+.mk-ticker:hover .mk-marquee-track {
+  animation-play-state: paused;
+}
+
+.mk-ticker .mk-marquee-track {
+  animation-duration: 28s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-line,
+  .mk-seal-in,
+  .mk-float-phone,
+  .mk-halo {
+    animation: none;
+  }
 }
 
 @keyframes mk-marquee {
@@ -423,6 +681,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .mk-rise,
+  .mk-fade,
   .mk-marquee-track,
   .mk-grid-move,
   .mk-dash,

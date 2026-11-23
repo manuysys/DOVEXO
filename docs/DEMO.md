@@ -32,14 +32,11 @@ Empresa: Servicios Demo
 
 ### Fundador / panel global
 
-```text
-Email: founder@saasgestion.com
-Password: Founder12345!
-Empresa: SaaS Gestion HQ
-```
+La cuenta de plataforma **no se publica**. Para operar `/admin`, usar una cuenta
+propia con `is_platform_admin=true` o un email en `PLATFORM_ADMIN_EMAILS`.
 
-El usuario fundador tiene `is_platform_admin=true` y puede entrar a `/admin`.
-No publicar estas credenciales fuera del equipo.
+La contraseña anterior del fundador quedó expuesta en el historial del
+repositorio público: **rotarla en producción** y no reutilizarla en la demo.
 
 ## Datos cargados
 

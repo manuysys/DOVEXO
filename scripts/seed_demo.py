@@ -20,20 +20,29 @@ sys.path.insert(0, str(API_ROOT))
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from app.core.config import settings
 from app.core.security import hash_password
 from app.models import Membership, Tenant, User
 from app.services.demo_service import reset_demo
 
-DEFAULT_DATABASE_URL = "postgresql+asyncpg://saas:saas_dev_password@127.0.0.1:55432/saas_gestion"
+DEFAULT_DATABASE_URL = (
+    "postgresql+asyncpg://saas:saas_dev_password@127.0.0.1:55432/saas_gestion_dev"
+)
 
 
 async def main() -> None:
-    database_url = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
+    # settings ya carga el .env del repositorio; os.getenv solo gana si se
+    # pasó una URL explícita en la shell.
+    database_url = os.getenv("DATABASE_URL") or settings.database_url
     engine = create_async_engine(database_url, echo=False, future=True)
-    session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    session_factory = async_sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
 
     async with session_factory() as session:
-        tenant = await session.scalar(select(Tenant).where(Tenant.slug == "servicios-demo"))
+        tenant = await session.scalar(
+            select(Tenant).where(Tenant.slug == "servicios-demo")
+        )
 
         if tenant is None:
             tenant = Tenant(name="Servicios Demo", slug="servicios-demo")

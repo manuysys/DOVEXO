@@ -13,23 +13,34 @@ jobs:
       DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install PostgreSQL client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-      - name: Dump database
+      - name: Dump database with PostgreSQL 17
         run: |
           if [ -z "$DATABASE_URL" ]; then
             echo "::error::NEON_DATABASE_URL no configurada; el backup no se ejecuto. Configurar el secreto en Settings > Secrets and variables > Actions. Ver docs/BACKUP_RESTORE.md."
             exit 1
           fi
-          pg_dump "$DATABASE_URL" \
-            --format=custom \
-            --no-owner \
-            --no-privileges \
-            --file=backup.dump
+          docker run --rm --network host \
+            --user "$(id -u):$(id -g)" \
+            -v "$PWD:/backup" \
+            -e DATABASE_URL \
+            postgres:17 \
+            sh -c 'pg_dump "$DATABASE_URL" --format=custom --no-owner --no-privileges --file=/backup/backup.dump'
+      - name: Verify dump integrity
+        run: |
+          test -s backup.dump
+          docker run --rm \
+            --user "$(id -u):$(id -g)" \
+            -v "$PWD:/backup" \
+            postgres:17 \
+            sh -c 'pg_restore --list /backup/backup.dump > /dev/null'
+          sha256sum backup.dump > backup.dump.sha256
+          echo "Dump verificado: $(wc -c < backup.dump) bytes"
       - name: Upload backup artifact
         if: ${{ env.DATABASE_URL != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: neon-backup-${{ github.run_id }}
-          path: backup.dump
+          path: |
+            backup.dump
+            backup.dump.sha256
           retention-days: 14

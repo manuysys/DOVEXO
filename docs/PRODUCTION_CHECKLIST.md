@@ -1,6 +1,6 @@
 # Checklist de producción
 
-Estado al 2026-11-09. Marcar solo cuando esté verificado.
+Estado al 2026-11-22. Marcar solo cuando esté verificado.
 
 ## P0 — antes de clientes reales
 
@@ -9,6 +9,7 @@ Estado al 2026-11-09. Marcar solo cuando esté verificado.
 - [x] Migraciones aplicadas contra la base administrada.
 - [x] Cookies `HttpOnly`, `Secure`, `SameSite=None` para cross-site.
 - [x] Cabeceras de seguridad en API.
+- [x] Cabeceras de seguridad en frontend (CSP, X-Frame-Options, Referrer-Policy, Permissions-Policy).
 - [x] Rate limiting compartido en PostgreSQL (con fallback en memoria).
 - [x] Lockout de login y revocación de familia de refresh tokens.
 - [x] Audit log de acciones críticas.
@@ -16,7 +17,7 @@ Estado al 2026-11-09. Marcar solo cuando esté verificado.
 - [x] Validación de `Origin` en endpoints con cookie.
 - [ ] Password reset con token de un solo uso.
 - [ ] Email transaccional con dominio verificado (Resend).
-- [ ] Backup diario y restauración probada (workflow listo; falta secret).
+- [ ] Backup diario y restauración probada (workflow con PostgreSQL 17, verificación y checksum; falta `NEON_DATABASE_URL` y restore real).
 - [ ] Monitoreo de errores y uptime.
 - [ ] Dominio propio.
 - [ ] Política de privacidad y términos revisados.

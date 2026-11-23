@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 
-import { Reveal } from "./reveal";
+import { TextReveal } from "./text-reveal";
 
 type SectionHeadingProps = {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   text?: string;
   tone?: "light" | "dark" | "teal";
@@ -45,15 +45,20 @@ export function SectionHeading({
   className,
 }: SectionHeadingProps) {
   return (
-    <Reveal className={cn("max-w-2xl", className)}>
-      <p className={`text-label inline-flex items-center gap-3 ${eyebrowTone[tone]}`}>
-        <span aria-hidden="true" className="h-px w-6 bg-current" />
-        {eyebrow}
-      </p>
-      <h2 id={titleId} className={`text-h1 mt-4 text-balance ${titleTone[tone]}`}>
-        {title}
-      </h2>
-      {text && <p className={`text-body mt-4 max-w-xl text-pretty ${textTone[tone]}`}>{text}</p>}
-    </Reveal>
+    <div className={cn("max-w-2xl", className)}>
+      {eyebrow ? (
+        <p className={`text-label inline-flex items-center gap-3 ${eyebrowTone[tone]}`}>
+          <span aria-hidden="true" className="h-px w-6 bg-current" />
+          {eyebrow}
+        </p>
+      ) : null}
+      <TextReveal
+        as="h2"
+        id={titleId}
+        text={title}
+        className={`mk-display text-[clamp(2.5rem,4.6vw,3.75rem)] leading-[1.02] font-medium tracking-[-0.035em] text-balance ${titleTone[tone]}`}
+      />
+      {text && <p className={`text-body mt-5 max-w-xl text-pretty ${textTone[tone]}`}>{text}</p>}
+    </div>
   );
 }

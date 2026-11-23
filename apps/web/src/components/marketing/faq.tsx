@@ -12,27 +12,26 @@ const focusRing =
 export function Faq() {
   return (
     <section id="faq" aria-labelledby="faq-title" className="scroll-mt-16 bg-mk-paper py-16 sm:py-24">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+      <div className="mx-auto grid max-w-none gap-10 px-5 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
         <div className="lg:sticky lg:top-24 lg:self-start">
           <SectionHeading
-            eyebrow="Preguntas frecuentes"
             title="Lo que suele preguntarse antes de empezar."
             text="Respuestas sobre el estado real del producto, sin promesas de funciones que todavía no están operativas."
             titleId="faq-title"
           />
 
-          <div className="mt-8 rounded-md border border-mk-line bg-mk-paper-2 p-5">
-            <p className="text-small flex items-center gap-2 font-semibold text-mk-ink">
+          <div className="mt-8 rounded-2xl border border-mk-line bg-mk-paper-2 p-5">
+            <p className="text-[16px] flex items-center gap-2 font-semibold text-mk-ink">
               <Mail className="size-4 text-mk-signal" aria-hidden="true" />
               ¿Quedó otra duda?
             </p>
-            <p className="text-small mt-2 text-mk-slate">
+            <p className="text-[15px] leading-[1.55] mt-2 text-mk-slate">
               Escribinos y te respondemos. Todavía no hay un canal formal de soporte ni tiempos de
               respuesta comprometidos.
             </p>
             <a
               href={`mailto:${brand.email}`}
-              className={`text-small mt-3 inline-flex rounded font-semibold text-mk-signal-strong underline underline-offset-4 ${focusRing}`}
+              className={`text-[15px] mt-3 inline-flex rounded font-semibold text-mk-signal-strong underline underline-offset-4 ${focusRing}`}
             >
               {brand.email}
             </a>
@@ -53,7 +52,7 @@ export function Faq() {
                   <Plus className="size-4 transition-transform duration-200 group-open:rotate-45" />
                 </span>
               </summary>
-              <p className="text-small max-w-2xl pr-10 pb-5 text-mk-slate">{item.answer}</p>
+              <p className="text-[15px] leading-[1.6] max-w-2xl pr-10 pb-5 text-mk-slate">{item.answer}</p>
             </details>
           ))}
         </div>

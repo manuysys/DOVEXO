@@ -1,5 +1,25 @@
 # Problemas conocidos
 
+## Landing v7 y Originkit (2026-11-23)
+
+- **Originkit bloqueado por límite diario.** El CLI hizo 3 fetches en un lote y
+  cortó antes de escribir archivos; el endpoint directo devuelve 429. No hay
+  componentes de Originkit en el repo. Ver `docs/ORIGINKIT_INTEGRATION.md`.
+- **La API key de Originkit quedó expuesta en el chat.** Rotarla después de
+  usarla. No está escrita en el repo.
+- **La landing v7 no está desplegada.** Verificada localmente; falta Vercel y
+  QA visual en producción.
+- **Figma MCP Starter agotó el rate limit.** El archivo existente quedó en v6 con variables,
+  text styles, componente Quote Panel y frames; falta la variante `Aprobado`.
+  Ver `FIGMA_STORYBOARD.md`.
+- **El WebGL depende de WebGL.** La sección pinned usa Three.js lazy con
+  fallback CSS y reduced motion; si el navegador no soporta WebGL, no dibuja el
+  terreno, pero el panel y el contenido siguen.
+- **`glass-folder-cards` usa `<img>` y canvas.** Se monta con lazy loading para
+  no afectar el LCP; los warnings de `<img>` son del componente local copiado.
+- **Boska sigue en `public`/`src/app/fonts` sin uso en la landing.** No se borró
+  para conservar el historial; si se confirma la v5, se puede quitar.
+
 ## Entorno y despliegue
 
 - **GitHub CLI parcialmente autenticado.** `gh` está instalado y el push a
@@ -122,9 +142,10 @@
   cerrado.
 - **Reset de demo solo para platform admin.** `POST /api/v1/admin/demo/reset` exige
   `is_platform_admin` o un email listado en `PLATFORM_ADMIN_EMAILS`.
-  `demo@saasgestion.com` no es platform admin, así que no puede ejecutarlo. No hay
-  botón en la UI. Para resetear la demo hace falta un usuario platform admin o agregar
-  el email a `PLATFORM_ADMIN_EMAILS`, decisión que tiene que tomar el responsable.
+  `demo@saasgestion.com` no es platform admin, así que no puede ejecutarlo. El
+  botón “Reiniciar demo” existe en `/admin`, pero solo lo ve un platform admin.
+  Para resetear la demo hace falta un usuario platform admin o agregar el email
+  a `PLATFORM_ADMIN_EMAILS`, decisión que tiene que tomar el responsable.
 - **Verificación en producción: resuelta.** Migraciones `d4e5f6a7b8c9` y
   `e5f6a7b8c9d0`, los endpoints de importación, onboarding y reset, y la UI fueron
   verificadas contra Vercel + Neon (commit `3e3ff21`, todos los endpoints 200).
@@ -215,3 +236,17 @@ Estado al cierre del día. Detalle en `CHANGELOG.md` y `PROJECT_STATUS.md`.
 - **Corrección de nota vieja.** Las notas que decían que `openpyxl` y `defusedxml`
   no estaban en `requirements.txt` quedaron desactualizadas. Ambas están en
   `apps/api/requirements.txt` desde el 2026-11-11 (ver ADR-017 y `PROJECT_STATUS.md`).
+
+## P0 seguridad (2026-11-22)
+
+- **Credencial del fundador:** se eliminó la contraseña de `DEMO.md` y la
+  referencia a que estaba publicada en `DEMO_ENVIRONMENT.md`. La contraseña
+  sigue en el historial público de Git: hay que rotarla con
+  `scripts/rotate_password.py` y confirmar que la cuenta no sea platform admin
+  en la demo. El hallazgo no está cerrado hasta hacer esa rotación.
+- **CI:** se agregó `pnpm exec playwright install --with-deps chromium` al job
+  de frontend. Falta validar el próximo run en GitHub; localmente `pnpm test`
+  pasa con Chromium instalado.
+- **Backups:** el workflow ahora valida que el dump no esté vacío, que
+  `pg_restore --list` lo pueda leer y publica un SHA-256. Sigue bloqueado por la
+  falta de `NEON_DATABASE_URL` en GitHub.

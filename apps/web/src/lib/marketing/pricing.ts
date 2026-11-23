@@ -23,11 +23,10 @@ export function formatCount(value: number) {
 
 /** Límites del plan en texto listo para mostrar en la landing. */
 export function planLimitItems(plan: Plan) {
-  const { users, technicians, ordersPerMonth, aiTokens } = plan.limits;
+  const { users, technicians, ordersPerMonth } = plan.limits;
   return [
     `${formatCount(users)} ${users === 1 ? "usuario" : "usuarios"}`,
     `${formatCount(technicians)} ${technicians === 1 ? "técnico" : "técnicos"}`,
     `${formatCount(ordersPerMonth)} órdenes por mes`,
-    `${formatCount(aiTokens)} tokens del asistente por mes`,
   ];
 }

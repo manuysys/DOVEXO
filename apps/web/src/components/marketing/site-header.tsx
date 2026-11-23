@@ -29,19 +29,18 @@ export function SiteHeader() {
       >
         Saltar al contenido
       </a>
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-none items-center justify-between gap-4 px-5 sm:px-8">
         <Link
           href="/"
-          aria-label={`${brand.name}, inicio`}
           className={cn("flex items-center gap-2.5 rounded-lg", focusLight)}
         >
           <span
             aria-hidden="true"
-            className="grid size-[26px] place-items-center rounded-[3px] border-[1.5px] border-mk-ink font-display text-[13px] font-extrabold text-mk-ink"
+            className="mk-wordmark grid size-[26px] place-items-center rounded-[3px] bg-mk-ink text-[13px] font-bold text-mk-paper"
           >
             D
           </span>
-          <span className="font-display text-lg font-extrabold tracking-[-0.02em]">
+          <span className="mk-wordmark text-lg font-bold tracking-[-0.03em]">
             {brand.name}
           </span>
         </Link>
@@ -74,7 +73,7 @@ export function SiteHeader() {
           <Link
             href="/register"
             className={cn(
-              "hidden rounded-lg bg-mk-ink px-4 py-2.5 text-sm font-semibold text-mk-paper transition-colors hover:bg-mk-ink-hover lg:inline-flex",
+              "hidden rounded-lg bg-mk-ink px-4 py-2.5 text-sm font-semibold text-mk-paper transition-colors hover:bg-mk-ink-hover sm:inline-flex",
               focusLight,
             )}
           >
@@ -86,6 +85,7 @@ export function SiteHeader() {
               <button
                 type="button"
                 aria-label="Abrir menú"
+                aria-expanded={menuOpen}
                 className={cn(
                   "grid size-10 place-items-center rounded-lg border border-mk-line bg-mk-paper text-mk-ink lg:hidden",
                   focusLight,

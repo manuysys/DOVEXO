@@ -1,24 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Epilogue, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { PwaRegister } from "@/components/pwa-register";
 import { brand } from "@/lib/brand";
 import { Providers } from "./providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const epilogue = Epilogue({
+  variable: "--font-epilogue",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const archivo = Archivo({
-  variable: "--font-archivo",
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
   subsets: ["latin"],
-  axes: ["wdth"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -60,7 +62,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es-AR"
-      className={`${geistSans.variable} ${geistMono.variable} ${archivo.variable} h-full antialiased`}
+      className={`${bricolage.variable} ${epilogue.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-paper text-ink">
         <Providers>{children}</Providers>

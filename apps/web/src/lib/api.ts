@@ -1216,6 +1216,15 @@ export const api = {
         headers: tenantHeaders(tenantId),
         body: JSON.stringify({ plan_code: planCode, status }),
       }),
+    /** Solo platform admin. Reinicia el tenant `servicios-demo` y devuelve los conteos del seed. */
+    resetDemo: (tenantId: string) =>
+      request<{ tenant_id: string; counts: Record<string, number> }>(
+        "/api/v1/admin/demo/reset",
+        {
+          method: "POST",
+          headers: tenantHeaders(tenantId),
+        },
+      ),
   },
   ai: {
     status: (tenantId: string) =>

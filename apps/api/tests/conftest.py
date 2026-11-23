@@ -14,8 +14,15 @@ TEST_DATABASE_URL = os.getenv(
 
 os.environ["DATABASE_URL"] = TEST_DATABASE_URL
 os.environ["DATABASE_URL_SYNC"] = TEST_DATABASE_URL.replace("+asyncpg", "+psycopg")
+os.environ.setdefault("APP_ENV", "test")
+# Los tests usan el host "test" en ASGITransport; no deben heredar el
+# ALLOWED_HOSTS restrictivo del .env local.
+os.environ.setdefault("ALLOWED_HOSTS", '["*"]')
 os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 os.environ.setdefault("AI_PROVIDER", "deterministic")
+# El modo demo del portal se activa explícitamente en los tests que lo prueban;
+# no debe heredarse del .env local.
+os.environ.setdefault("PORTAL_DEV_MODE", "false")
 
 from app.core.db import get_db  # noqa: E402
 from app.main import app  # noqa: E402

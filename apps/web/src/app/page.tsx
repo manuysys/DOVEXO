@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import { Faq } from "@/components/marketing/faq";
 import { FinalCta } from "@/components/marketing/final-cta";
 import { Hero } from "@/components/marketing/hero";
-import { ModuleIndex } from "@/components/marketing/module-index";
-import { OrderRail } from "@/components/marketing/order-rail";
+import { Migration } from "@/components/marketing/migration";
 import { Pricing } from "@/components/marketing/pricing";
-import { ProductTour } from "@/components/marketing/product-tour";
+import { ProductStory } from "@/components/marketing/product-story";
+import { RoleSections } from "@/components/marketing/role-sections";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { brand } from "@/lib/brand";
@@ -30,7 +30,9 @@ export const metadata: Metadata = {
   },
 };
 
-/* Landing: papel, tinta y una sola señal. Sin smooth scroll ni 3D. */
+/* Landing: Anubi para el tipo y el objeto; Better Stack para la estructura de
+ * producto. Off-white, negro, un naranja de señal y paneles oscuros con UI
+ * live. */
 export default function HomePage() {
   return (
     <div className="mk-root bg-mk-paper text-mk-ink">
@@ -41,9 +43,9 @@ export default function HomePage() {
       <SiteHeader />
       <main className="overflow-x-clip">
         <Hero />
-        <OrderRail />
-        <ModuleIndex />
-        <ProductTour />
+        <ProductStory />
+        <RoleSections />
+        <Migration />
         <Pricing />
         <Faq />
         <FinalCta />

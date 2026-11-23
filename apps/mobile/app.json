@@ -16,7 +16,7 @@
       "versionCode": 1,
       "permissions": ["CAMERA", "READ_MEDIA_IMAGES", "POST_NOTIFICATIONS"],
       "adaptiveIcon": {
-        "backgroundColor": "#0B1F33",
+        "backgroundColor": "#0B0C14",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
@@ -34,7 +34,7 @@
         {
           "image": "./assets/images/splash-icon.png",
           "resizeMode": "contain",
-          "backgroundColor": "#0B1F33"
+          "backgroundColor": "#0B0C14"
         }
       ],
       "expo-secure-store",
@@ -48,7 +48,7 @@
       [
         "expo-notifications",
         {
-          "color": "#0F766E"
+          "color": "#C2410C"
         }
       ]
     ],

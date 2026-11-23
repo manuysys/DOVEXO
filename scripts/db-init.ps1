@@ -58,7 +58,8 @@ $$;
 
 foreach ($db in @('saas_gestion_dev', 'saas_gestion_test')) {
     $exists = & $psql -h 127.0.0.1 -p 55432 -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='$db'"
-    if ($exists.Trim() -ne '1') {
+    $existsText = ($exists | Out-String).Trim()
+    if ($existsText -ne '1') {
         & $createdb -h 127.0.0.1 -p 55432 -U postgres -O saas $db
         Write-Host "Base creada: $db"
     } else {
