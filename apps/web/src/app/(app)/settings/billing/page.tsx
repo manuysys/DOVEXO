@@ -17,6 +17,7 @@ import {
 } from "@/lib/billing";
 import { api, errorMessage, type Plan, type SubscriptionDetail } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { plans as marketingPlans } from "@/lib/brand";
 import { readLimit, usagePercent } from "@/lib/usage";
 import { cn, formatCurrency, formatDateOnly, formatNumber } from "@/lib/utils";
 
@@ -28,6 +29,29 @@ const STATUS_VARIANTS = {
   past_due: "warning",
   cancelled: "neutral",
 } as const;
+
+/*
+ * Puente de display hasta aplicar ad1d19f0512b en Neon; el backend mantiene su
+ * snapshot. Solo cambia precio y cupos visibles: el `code` que se envía al
+ * cambiar de plan sigue siendo el de la API.
+ */
+function localPlanFor(code: string) {
+  return marketingPlans.find((plan) => plan.code === code) ?? null;
+}
+
+function withLocalPlan(apiPlan: Plan): Plan {
+  const local = localPlanFor(apiPlan.code);
+  if (!local) return apiPlan;
+  return {
+    ...apiPlan,
+    price_ars: String(local.priceArs),
+    limits: {
+      max_users: local.limits.users,
+      max_technicians: local.limits.technicians,
+      max_orders_per_month: local.limits.ordersPerMonth,
+    },
+  };
+}
 
 export default function BillingPage() {
   const { activeTenantId, tenants } = useAuth();
@@ -85,9 +109,9 @@ export default function BillingPage() {
   }
 
   const detail = subscriptionQuery.data;
-  const plans = plansQuery.data ?? [];
+  const displayPlans = (plansQuery.data ?? []).map(withLocalPlan);
   const currentPlanCode = detail?.subscription.plan.code;
-  const availablePlans = plans.filter(
+  const availablePlans = displayPlans.filter(
     (plan) => plan.active || plan.code === currentPlanCode,
   );
   const isOwner = activeTenant?.role === "owner";
@@ -276,6 +300,10 @@ function StatusBadge({ status }: { status: string }) {
 
 function CurrentPlanCard({ detail }: { detail: SubscriptionDetail }) {
   const { subscription } = detail;
+  const localPlan = localPlanFor(subscription.plan.code);
+  const priceArs = localPlan
+    ? formatCurrency(localPlan.priceArs)
+    : formatCurrency(subscription.plan.price_ars);
   return (
     <section
       aria-labelledby="current-plan-title"
@@ -294,9 +322,7 @@ function CurrentPlanCard({ detail }: { detail: SubscriptionDetail }) {
             {subscription.plan.name}
           </p>
           <p className="text-text-2 mt-1 text-sm">
-            <span className="numeric text-text font-semibold">
-              {formatCurrency(subscription.plan.price_ars)}
-            </span>{" "}
+            <span className="numeric text-text font-semibold">{priceArs}</span>{" "}
             por {periodLabel(subscription.plan.billing_period)} · precio de lista
           </p>
         </div>
@@ -332,6 +358,15 @@ function CurrentPlanCard({ detail }: { detail: SubscriptionDetail }) {
 
 function UsageSection({ detail }: { detail: SubscriptionDetail }) {
   const { usage, subscription } = detail;
+  const localPlan = localPlanFor(subscription.plan.code);
+  /* El uso se compara contra el cupo del catálogo local mientras la DB no se actualiza. */
+  const limits: Record<string, unknown> | null = localPlan
+    ? {
+        max_users: localPlan.limits.users,
+        max_technicians: localPlan.limits.technicians,
+        max_orders_per_month: localPlan.limits.ordersPerMonth,
+      }
+    : subscription.plan.limits;
   return (
     <section
       aria-labelledby="usage-title"
@@ -350,7 +385,7 @@ function UsageSection({ detail }: { detail: SubscriptionDetail }) {
       <div className="mt-5 grid gap-5 sm:grid-cols-2">
         {PLAN_LIMIT_ITEMS.map((item) => {
           const used = usage[item.usageKey];
-          const limit = readLimit(subscription.plan.limits, item.key);
+          const limit = readLimit(limits, item.key);
           return <UsageBar key={item.key} label={item.label} used={used} limit={limit} />;
         })}
       </div>
