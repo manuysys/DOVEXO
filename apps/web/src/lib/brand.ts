@@ -32,32 +32,40 @@ export type Plan = {
   priceArs: number;
   tagline: string;
   limits: {
+    /** Usuarios de oficina (owner/admin/dispatcher/viewer). Incluye al dueño. */
     users: number;
+    /** Técnicos: cuentan aparte y no ocupan cupo de oficina. */
     technicians: number;
     ordersPerMonth: number;
   };
 };
 
+/**
+ * `limits.users` son usuarios de oficina (incluye al dueño); no incluye técnicos.
+ * Los técnicos tienen su propia cuenta y se cuentan en `technicians`.
+ */
 export const plans: Plan[] = [
   {
     code: "starter",
     name: "Starter",
-    priceArs: 29_900,
-    tagline: "Para el técnico que trabaja solo y quiere dejar las planillas.",
+    priceArs: 19_900,
+    tagline:
+      "Para el técnico independiente que quiere ordenar sus trabajos y dejar las planillas.",
     limits: { users: 1, technicians: 1, ordersPerMonth: 100 },
   },
   {
     code: "professional",
     name: "Professional",
-    priceArs: 59_900,
-    tagline: "Para empresas con equipo en la calle y oficina coordinando.",
-    limits: { users: 5, technicians: 5, ordersPerMonth: 1_000 },
+    priceArs: 39_900,
+    tagline:
+      "Para la empresa con oficina y equipo en la calle que coordina varias visitas.",
+    limits: { users: 3, technicians: 5, ordersPerMonth: 1_000 },
   },
   {
     code: "business",
     name: "Business",
-    priceArs: 99_900,
-    tagline: "Para operaciones más grandes que necesitan escala y control.",
-    limits: { users: 20, technicians: 20, ordersPerMonth: 10_000 },
+    priceArs: 64_900,
+    tagline: "Para operaciones grandes con más técnicos y más volumen.",
+    limits: { users: 5, technicians: 20, ordersPerMonth: 10_000 },
   },
 ];

@@ -16,6 +16,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.roles import TECHNICIAN_ROLE
 from app.core.security import (
     create_access_token,
     generate_refresh_token,
@@ -145,9 +146,12 @@ async def create_invitation(
         existing_pending.revoked_at = datetime.now(UTC)
         await db.flush()
 
-    await plan_limits_service.assert_can_invite_user(db, tenant_id=tenant_id)
-    if role == "technician":
+    if role == TECHNICIAN_ROLE:
+        # El técnico tiene su propio cupo (`max_technicians`): no consume
+        # usuarios de oficina.
         await plan_limits_service.assert_can_invite_technician(db, tenant_id=tenant_id)
+    else:
+        await plan_limits_service.assert_can_invite_user(db, tenant_id=tenant_id)
 
     raw, token_hash = _generate_token()
     expires_at = datetime.now(UTC) + timedelta(days=INVITATION_TTL_DAYS)

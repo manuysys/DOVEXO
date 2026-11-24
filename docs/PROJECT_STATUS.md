@@ -1,16 +1,15 @@
 # Estado del proyecto
 
-**Última actualización:** 2026-11-23
-**Fase:** preventa / customer discovery activa (GO_TO_MARKET) + landing v7
-“secciones por rol, sello y sistema compartido” verificada localmente (10
-secciones, hero sin recorte ni tope de 1600 px, panel denso, sello integrado, migración con preview,
-secciones de oficina/técnico/cliente/control y tokens nuevos en dashboard,
-portal, PWA y Expo; 203 pytest, 281 tests web, build de 28 rutas, Lighthouse
-móvil 99/100/100/100 y desktop 100/100/100/100, 0 violaciones Axe). Pendiente de
-deploy y QA visual en producción. Base técnica: Hito 2 completo + PWA, app móvil
-Android DOVEXO, portal del cliente, dashboard operativo, automatizaciones, IA con
-Groq, suscripciones, panel global, WhatsApp, importador CSV/XLSX, onboarding y
-reset de demo (pilot-ready).
+**Última actualización:** 2026-11-24
+**Fase:** preventa / customer discovery activa (GO_TO_MARKET) + precios de
+lanzamiento v2 con cupos separados de oficina y técnicos (ADR-027). La landing
+v7 “secciones por rol, sello y sistema compartido” está verificada localmente
+(10 secciones, hero sin recorte ni tope de 1600 px, panel denso, sello integrado,
+migración con preview, secciones de oficina/técnico/cliente/control y tokens
+nuevos en dashboard, portal, PWA y Expo) y **sigue sin deploy**. Base técnica:
+Hito 2 completo + PWA, app móvil Android DOVEXO, portal del cliente, dashboard
+operativo, automatizaciones, IA con Groq, suscripciones, panel global, WhatsApp,
+importador CSV/XLSX, onboarding y reset de demo (pilot-ready).
 
 ## Resumen
 
@@ -33,6 +32,55 @@ El frontend y la API están desplegados en Vercel. La base PostgreSQL está en
 Neon (plan Free, región `gru1`). La demo ya no depende de una máquina local ni
 de un túnel. La empresa es **ARVOKTA** y el producto **DOVEXO**; el dominio
 propio está pendiente.
+
+## Precios de lanzamiento v2 y cupos separados (2026-11-24)
+
+Implementado en código y verificado localmente. Documentado en ADR-027,
+`CHANGELOG.md`, `GO_TO_MARKET/PLANES_EXPLICADOS.md` y
+`GO_TO_MARKET/PRICING_VALIDATION.md` §1.
+
+- **Precios:** Starter $19.900/mes (1 usuario de oficina, 1 técnico, 100 órdenes
+  nuevas/mes); Professional $39.900 (3, 5 y 1.000); Business $64.900 (5, 20 y
+  10.000). Antes eran $29.900 / $59.900 / $99.900 con usuarios y técnicos
+  igualados en 1/5/20.
+- **Cupos separados:** `max_users` cuenta solo usuarios de oficina
+  (`owner`/`admin`/`dispatcher`/`viewer`) e incluye al dueño;
+  `max_technicians` cuenta solo técnicos. Un técnico no consume cupo de oficina.
+  Las invitaciones pendientes reservan cupo. `billing/detail` devuelve
+  `users_count` y `technicians_count` por separado.
+- **IA sin tokens públicos:** el asistente está incluido en los tres planes, sin
+  costo aparte. Se mantiene el límite mensual por empresa igual para todos
+  (`ai_monthly_token_limit`, 200.000 por defecto), medido internamente; al
+  alcanzarlo responde 429 hasta el mes siguiente y el resto del sistema sigue
+  funcionando. `/settings/billing` muestra el uso de usuarios, técnicos y
+  órdenes, no el de IA.
+- **Landing:** `apps/web/src/lib/brand.ts` pasa a los precios y cupos nuevos; la
+  sección de precios y las respuestas de FAQ aclaran usuarios de oficina,
+  técnicos aparte e IA incluida con límite mensual.
+- **Dashboard:** el shell de la app pasa a ancho completo (sin `max-w-7xl`) y la
+  tarjeta de plan actual usa el precio de lista del plan, para que no queden
+  franjas laterales ni el precio viejo en `/settings/billing`.
+- **Migración de planes:** `ad1d19f0512b` (`update_plan_pricing_and_demo_snapshot`)
+  carga estos valores en `plans`, quita `ai_monthly_tokens` de los límites y
+  actualiza el snapshot de precio del tenant demo a Professional, con
+  `downgrade` completo. **No consta aplicada en Neon**; hasta aplicarla,
+  producción sigue mostrando los precios viejos en `/api/v1/plans` y
+  `/settings/billing`.
+- **Cobro automático:** pendiente. Cambiar de plan sigue siendo un cambio de
+  `plan_id` y `price_snapshot`, sin pasarela ni facturación.
+
+Verificación (local, 2026-11-24, según los agentes de implementación):
+
+```text
+Backend  ruff / format / basedpyright -> OK; pytest 207 passed
+         (incluye test_billing.py: uso de oficina y técnicos por separado, y
+          test_invitations.py: el técnico no consume cupo de oficina)
+Frontend lint 0 errores (4 warnings preexistentes); typecheck OK;
+         test 284/284; build 32 rutas
+```
+
+**No verificado en esta entrada:** si la migración `ad1d19f0512b` está aplicada
+en Neon, deploy de la landing, QA visual en producción y cobro real.
 
 ## Landing v7 — secciones por rol y sistema compartido (2026-11-23)
 
@@ -332,7 +380,8 @@ cuando cambie la UI del panel.
   llama al endpoint existente, muestra los conteos del seed e invalida las
   queries de admin y dashboard.
 - [x] 179 pruebas pytest al cierre del bloque 2026-11-11. La cifra vigente es
-  203 (2026-11-18; ver "Landing v2, hardening y deploy").
+  207 (2026-11-24, con los cupos separados de oficina/técnicos; ver "Precios de
+  lanzamiento v2").
 
 ### Frontend
 
@@ -380,7 +429,8 @@ cuando cambie la UI del panel.
 - [x] Onboarding en `/onboarding`: asistente de cuatro pasos (empresa, servicios
   y horarios, equipo, primeros datos) con progreso guardado y reanudable.
 - [x] Checklist de inicio en el dashboard (`OnboardingChecklist`).
-- [x] Vitest con 281 pruebas al 2026-11-18 (210 al cierre del bloque 2026-11-11).
+- [x] Vitest con 284 pruebas al 2026-11-24 (281 al 2026-11-18; 210 al cierre del
+  bloque 2026-11-11).
 
 ### App móvil
 
@@ -715,8 +765,12 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
 
 ## Pendiente
 
+- [ ] Aplicar la migración de planes v2 en Neon y verificar
+  `/api/v1/plans` y `/settings/billing` con los precios y cupos nuevos
+  (hoy producción sigue con 29.900/59.900/99.900; ver ADR-027).
 - [ ] Desplegar la landing v7 a Vercel y hacer QA visual en producción
-  (1440/1024/1124/390/360, sello, oficina/técnico/cliente, pinned, WebGL, carpeta).
+  (1440/1024/1124/390/360, sello, oficina/técnico/cliente, pinned, WebGL, carpeta,
+  y la sección de precios con los valores nuevos).
 - [ ] Crear la v7 en Figma y la variante `Aprobado` del `Quote Panel` cuando se
   resetee el rate limit del MCP Starter; ver `FIGMA_STORYBOARD.md`.
 - [ ] Resolver los P0 de `DEMO_READINESS.md` antes de una demo pública:
@@ -780,6 +834,12 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
   la cuota; el modo determinista no es un LLM.
 - `send_whatsapp` en automatizaciones queda `skipped` hasta configurar WhatsApp.
 - La suscripción se crea en modo `trialing` de 14 días, pero todavía no se cobra.
+  El cobro automático, el prorrateo y la facturación de los planes siguen
+  pendientes (ADR-027).
+- Los precios y cupos v2 están en `apps/web/src/lib/brand.ts` y en la migración
+  `ad1d19f0512b`, pero **no consta que la migración esté aplicada en Neon**:
+  hasta aplicarla, la base y la landing no coinciden. Dos fuentes de verdad hasta
+  ese momento.
 - Los cold starts de Vercel pueden agregar latencia a la primera request.
 - Falta RLS, 2FA y recuperación de contraseña con email.
 - El APK `mobile-apk-6` usa firma de debug; el AAB firmado con release existe

@@ -1,7 +1,8 @@
 """Validaciones de límites del plan contratado.
 
 El objetivo es no prometer en la landing más de lo que el backend permite.
-Se aplican límites de órdenes por mes, usuarios totales y técnicos.
+Se aplican límites de órdenes por mes, usuarios de oficina y técnicos. Los dos
+últimos son cupos independientes: un técnico no consume cupo de oficina.
 """
 
 from datetime import UTC, datetime
@@ -12,10 +13,17 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import raiseload
 
+from app.core.roles import OFFICE_ROLES, TECHNICIAN_ROLE
 from app.models import Invitation, Membership, Plan, Subscription
 from app.repositories import billing as billing_repo
 
 _MINIMUM_PLAN_CODE = "starter"
+
+
+def _office_users_label(limit: int) -> str:
+    """Etiqueta legible del cupo de oficina (1 usuario / N usuarios)."""
+    noun = "usuario de oficina" if limit == 1 else "usuarios de oficina"
+    return f"{limit} {noun}"
 
 
 def _limit_value(limits: dict[str, object] | None, key: str) -> int | None:
@@ -64,11 +72,16 @@ async def _resolve_plan_for_update(db: AsyncSession, tenant_id: UUID) -> Plan | 
     return await db.get(Plan, subscription.plan_id)
 
 
-async def _count_active_memberships(db: AsyncSession, tenant_id: UUID) -> int:
+async def _count_active_office_users(db: AsyncSession, tenant_id: UUID) -> int:
+    """Membresías activas que consumen cupo de oficina (incluye al dueño)."""
     result = await db.scalar(
         select(func.count())
         .select_from(Membership)
-        .where(Membership.tenant_id == tenant_id, Membership.status == "active")
+        .where(
+            Membership.tenant_id == tenant_id,
+            Membership.status == "active",
+            Membership.role.in_(OFFICE_ROLES),
+        )
     )
     return int(result or 0)
 
@@ -80,19 +93,20 @@ async def _count_active_technicians(db: AsyncSession, tenant_id: UUID) -> int:
         .where(
             Membership.tenant_id == tenant_id,
             Membership.status == "active",
-            Membership.role == "technician",
+            Membership.role == TECHNICIAN_ROLE,
         )
     )
     return int(result or 0)
 
 
-async def _count_pending_invitations(db: AsyncSession, tenant_id: UUID) -> int:
+async def _count_pending_office_invitations(db: AsyncSession, tenant_id: UUID) -> int:
     now = datetime.now(UTC)
     result = await db.scalar(
         select(func.count())
         .select_from(Invitation)
         .where(
             Invitation.tenant_id == tenant_id,
+            Invitation.role.in_(OFFICE_ROLES),
             Invitation.accepted_at.is_(None),
             Invitation.revoked_at.is_(None),
             Invitation.expires_at > now,
@@ -108,7 +122,7 @@ async def _count_pending_technician_invitations(db: AsyncSession, tenant_id: UUI
         .select_from(Invitation)
         .where(
             Invitation.tenant_id == tenant_id,
-            Invitation.role == "technician",
+            Invitation.role == TECHNICIAN_ROLE,
             Invitation.accepted_at.is_(None),
             Invitation.revoked_at.is_(None),
             Invitation.expires_at > now,
@@ -140,9 +154,11 @@ async def assert_can_create_work_order(db: AsyncSession, *, tenant_id: UUID) -> 
 
 
 async def assert_can_invite_user(db: AsyncSession, *, tenant_id: UUID) -> None:
-    """Valida que el tenant no haya alcanzado el límite total de usuarios.
+    """Valida que el tenant no haya alcanzado el límite de usuarios de oficina.
 
-    El cálculo incluye membresías activas más invitaciones pendientes.
+    El cálculo incluye membresías activas de oficina (owner, admin, dispatcher,
+    viewer) más invitaciones pendientes a esos roles. Los técnicos no consumen
+    este cupo.
     """
     plan = await _resolve_plan_for_update(db, tenant_id)
     if plan is None:
@@ -152,13 +168,13 @@ async def assert_can_invite_user(db: AsyncSession, *, tenant_id: UUID) -> None:
     if limit is None or limit <= 0:
         return
 
-    active = await _count_active_memberships(db, tenant_id)
-    pending = await _count_pending_invitations(db, tenant_id)
+    active = await _count_active_office_users(db, tenant_id)
+    pending = await _count_pending_office_invitations(db, tenant_id)
     if active + pending >= limit:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=(
-                f"El plan {plan.name} permite hasta {limit} usuarios. "
+                f"El plan {plan.name} permite hasta {_office_users_label(limit)}. "
                 "Cambiá de plan o revocá invitaciones pendientes."
             ),
         )

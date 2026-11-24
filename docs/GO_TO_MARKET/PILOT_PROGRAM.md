@@ -1,6 +1,7 @@
 # Programa de pilotos de DOVEXO
 
-**Última actualización:** 2026-11-14
+**Última actualización:** 2026-11-14 (referencia de precios actualizada el
+2026-11-24, ADR-027)
 **Fuente:** `PREVENTA_ENTREVISTA_LISTA.txt` (sección 12).
 **Restricción:** no prometer disponibilidad, soporte ni integraciones que no
 estén garantizadas. Ver `DEMO_SCRIPT.md` §5 para el estado real de cada
@@ -75,8 +76,11 @@ funcionalidad.
 - Al finalizar los 30 días: reunión de evaluación → si hay encaje, proponer
   plan; si no hay encaje, cerrar bien la relación (ver
   `SALES_MESSAGES.md`, "Cierre por falta de encaje").
-- Referencia de precios vigentes: Starter ARS 29.900 · Professional ARS 59.900
-  · Business ARS 99.900 (fuente en `PRICING_VALIDATION.md` §1).
+- Referencia de precios vigentes (actualizado 2026-11-24): Starter ARS 19.900 ·
+  Professional ARS 39.900 · Business ARS 64.900 (fuente en
+  `PRICING_VALIDATION.md` §1; explicación para clientes en
+  `PLANES_EXPLICADOS.md`). El piloto no se cobra; el precio se conversa al
+  cierre y no se activa ningún cobro automático.
 
 ## 6. Checklist de inicio de piloto
 

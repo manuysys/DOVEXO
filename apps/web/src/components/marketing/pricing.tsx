@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Check } from "lucide-react";
 
 import { plans, type Plan } from "@/lib/brand";
 import { pricingCopy } from "@/lib/marketing/content";
@@ -22,21 +23,36 @@ type LimitRow = {
 
 const limitRows: LimitRow[] = [
   {
-    label: "Usuarios",
-    detail: "Personas con acceso al panel",
+    label: "Usuarios de oficina",
+    detail: "Incluye al dueño; no cuenta técnicos.",
     value: (plan) => formatCount(plan.limits.users),
   },
   {
     label: "Técnicos",
-    detail: "Cuentas para trabajo en la calle",
+    detail: "Cuentas para la calle; no consumen cupo de oficina.",
     value: (plan) => formatCount(plan.limits.technicians),
   },
   {
-    label: "Órdenes por mes",
-    detail: "Trabajos creados en el período",
+    label: "Órdenes nuevas por mes",
+    detail: "Trabajos nuevos creados en el período.",
     value: (plan) => formatCount(plan.limits.ordersPerMonth),
   },
 ];
+
+/** Funciones incluidas en los tres planes: cambia el cupo, no el producto. */
+const featureRows = [
+  { label: "Clientes e historial", detail: "Ficha con datos, direcciones y visitas." },
+  { label: "Solicitudes y órdenes", detail: "Estados, historial y auditoría de cada cambio." },
+  { label: "Presupuestos online", detail: "Link público para ver y aprobar sin cuenta." },
+  { label: "Agenda y asignación", detail: "Turnos, técnicos y detección de solapamientos." },
+  { label: "PWA para técnicos", detail: "Se usa desde el navegador del celular." },
+  { label: "Pagos y saldos", detail: "Cobros totales o parciales con saldo visible." },
+  { label: "Automatizaciones", detail: "Reglas por evento y notificaciones internas." },
+  { label: "Asistente de IA", detail: "Responde con los datos de la empresa." },
+] as const;
+
+const aiNote =
+  "El asistente de IA está incluido en los tres planes; no se cobra aparte. Hoy tiene un límite mensual de uso por empresa, igual para todos los planes.";
 
 /*
  * Precios con jerarquía por borde, sello y columna destacada, no por sombra.
@@ -174,7 +190,71 @@ export function Pricing() {
             </table>
           </div>
         </div>
-        <p className="text-caption mt-4 max-w-3xl text-mk-slate">{pricingCopy.limitsNote}</p>
+        <div className="mt-5 overflow-hidden rounded-2xl border border-mk-line bg-mk-paper-2">
+          <div
+            role="region"
+            aria-label="Funciones incluidas por plan"
+            tabIndex={0}
+            className={cn("overflow-x-auto", focusRing)}
+          >
+            <table className="w-full min-w-[32rem] border-collapse text-left">
+              <caption className="sr-only">Funciones incluidas en cada plan comparadas</caption>
+              <thead>
+                <tr className="border-b border-mk-line bg-mk-paper">
+                  <th scope="col" className="px-4 py-3 text-[13px] font-semibold text-mk-slate">
+                    Función
+                  </th>
+                  {plans.map((plan) => (
+                    <th
+                      key={plan.code}
+                      scope="col"
+                      className={cn(
+                        "px-4 py-3 text-[13px] font-semibold",
+                        plan.code === "professional"
+                          ? "bg-mk-signal/5 text-mk-ink"
+                          : "text-mk-ink",
+                      )}
+                    >
+                      {plan.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {featureRows.map((row) => (
+                  <tr key={row.label} className="border-b border-mk-line last:border-0">
+                    <th scope="row" className="px-4 py-3 font-medium">
+                      <span className="block text-[13px] text-mk-ink">{row.label}</span>
+                      <span className="text-caption block text-mk-slate">{row.detail}</span>
+                    </th>
+                    {plans.map((plan) => (
+                      <td
+                        key={plan.code}
+                        className={cn(
+                          "text-small px-4 py-3 text-mk-ink",
+                          plan.code === "professional" && "bg-mk-signal/5",
+                        )}
+                      >
+                        <span className="inline-flex items-center gap-1.5 font-medium">
+                          <Check
+                            className="h-4 w-4 shrink-0 text-mk-signal-strong"
+                            aria-hidden="true"
+                          />
+                          Incluido
+                        </span>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="mt-4 max-w-3xl space-y-2">
+          <p className="text-caption text-mk-slate">{pricingCopy.limitsNote}</p>
+          <p className="text-caption text-mk-slate">{aiNote}</p>
+        </div>
       </div>
     </section>
   );

@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.roles import OFFICE_ROLES, TECHNICIAN_ROLE
 from app.models import (
     AIUsageLog,
     Membership,
@@ -48,11 +49,16 @@ async def get_subscription_with_plan(
     return row[0], row[1]
 
 
-async def count_tenant_memberships(db: AsyncSession, tenant_id: UUID) -> int:
+async def count_tenant_office_users(db: AsyncSession, tenant_id: UUID) -> int:
+    """Membresías activas que consumen cupo de oficina (`max_users`)."""
     result = await db.scalar(
         select(func.count())
         .select_from(Membership)
-        .where(Membership.tenant_id == tenant_id, Membership.status == "active")
+        .where(
+            Membership.tenant_id == tenant_id,
+            Membership.status == "active",
+            Membership.role.in_(OFFICE_ROLES),
+        )
     )
     return int(result or 0)
 
@@ -64,7 +70,7 @@ async def count_tenant_technicians(db: AsyncSession, tenant_id: UUID) -> int:
         .where(
             Membership.tenant_id == tenant_id,
             Membership.status == "active",
-            Membership.role == "technician",
+            Membership.role == TECHNICIAN_ROLE,
         )
     )
     return int(result or 0)

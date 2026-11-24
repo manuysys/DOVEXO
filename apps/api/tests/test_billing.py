@@ -1,11 +1,13 @@
 from decimal import Decimal
+from uuid import UUID
 
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Plan, Subscription, User
+from app.core.security import hash_password
+from app.models import Membership, Plan, Subscription, User
 
 
 @pytest.fixture
@@ -155,8 +157,6 @@ async def test_technician_cannot_change_plan(
     tech_user = result.scalar_one()
     tech_user_id = tech_user.id
 
-    from app.models import Membership
-
     result = await db_session.execute(
         select(Membership).where(
             Membership.tenant_id == tenant_id, Membership.user_id == tech_user_id
@@ -258,6 +258,38 @@ async def test_admin_list_tenants_isolated(
     tenant_ids = {item["id"] for item in body["items"]}
     assert tenant_id_a in tenant_ids
     assert _tenant_id_b in tenant_ids
+
+
+async def test_subscription_usage_separates_office_users_from_technicians(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    plans_fixture: list[Plan],
+) -> None:
+    """El uso del plan informa oficina y técnicos por separado."""
+    token, tenant_id = await _register(client, "owner-usage@example.com", "Empresa Usage")
+
+    technician_user = User(
+        email="usage-tech@example.com",
+        password_hash=hash_password("super-secret-123"),
+        full_name="Usage Tech",
+    )
+    db_session.add(technician_user)
+    await db_session.flush()
+    db_session.add(
+        Membership(
+            tenant_id=UUID(tenant_id),
+            user_id=technician_user.id,
+            role="technician",
+        )
+    )
+    await db_session.commit()
+
+    response = await client.get("/api/v1/subscription", headers=_headers(token, tenant_id))
+    assert response.status_code == 200, response.text
+    usage = response.json()["usage"]
+    assert usage["users_count"] == 1  # solo el dueño ocupa cupo de oficina
+    assert usage["technicians_count"] == 1
+    assert usage["orders_this_month"] == 0
 
 
 async def test_order_limit_is_enforced(

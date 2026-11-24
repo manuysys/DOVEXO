@@ -508,7 +508,8 @@ async def test_tenant_without_subscription_uses_minimum_plan_limits(
         headers=_headers(token, tenant_id),
     )
     assert blocked.status_code == 403, blocked.text
-    assert "usuarios" in blocked.json()["detail"]
+    # El mensaje distingue el cupo de oficina ("usuario(s) de oficina").
+    assert "usuario" in blocked.json()["detail"]
 
 
 async def test_work_order_limit_applies_without_subscription(

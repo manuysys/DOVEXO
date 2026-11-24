@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-11-24 — Precios de lanzamiento v2 y cupos separados de oficina/técnicos
+
+- **Planes:** Starter $19.900 (1 usuario de oficina, 1 técnico, 100 órdenes
+  nuevas/mes), Professional $39.900 (3, 5, 1.000) y Business $64.900 (5, 20,
+  10.000). Reemplazan 29.900/59.900/99.900 con usuarios y técnicos igualados.
+- **Cupos separados en el backend:** `max_users` cuenta solo usuarios de oficina
+  (`owner`/`admin`/`dispatcher`/`viewer`) e incluye al dueño; `max_technicians`
+  cuenta solo técnicos. Un técnico no consume cupo de oficina. Las invitaciones
+  pendientes reservan cupo. `billing/detail` expone `users_count` y
+  `technicians_count` por separado.
+- **IA sin tokens públicos:** el asistente queda incluido en los tres planes, sin
+  costo aparte. Se elimina la columna de tokens por plan de la landing y de la
+  documentación comercial. Se mantiene el límite mensual global por empresa
+  (`ai_monthly_token_limit`, 200.000 por defecto), igual para todos, medido
+  internamente; al alcanzarlo responde 429 y se reanuda el mes siguiente.
+  `/settings/billing` muestra el uso de usuarios de oficina, técnicos y órdenes,
+  no el de IA.
+- **Landing:** `apps/web/src/lib/brand.ts` con precios y cupos nuevos; la sección
+  de precios y las FAQ explican “usuario de oficina” (incluye al dueño) y que los
+  técnicos no ocupan ese cupo.
+- **Dashboard:** el shell pasa a ancho completo (sin `max-w-7xl`) y la tarjeta de
+  plan actual usa el precio de lista del plan; se eliminan las franjas laterales
+  en pantallas anchas y el precio viejo en `/settings/billing`.
+- **Nuevo documento comercial:** `docs/GO_TO_MARKET/PLANES_EXPLICADOS.md` con la
+  tabla, el detalle de cada plan, la explicación de la IA, lo que no incluye,
+  evaluación vs piloto, FAQ y mensajes cortos listos para enviar.
+- **Documentación actualizada:** ADR-027 en `DECISIONS.md`;
+  `PRICING_VALIDATION.md` §1-§2; referencia de precios en `PILOT_PROGRAM.md`;
+  nota de precios vigentes en `DEMO_SCRIPT.md` (la tabla de evidencia del
+  2026-11-14 se conserva); fila nueva en el mapa de `GO_TO_MARKET/README.md`;
+  dimensiones de DOVEXO en `GO_TO_MARKET/COMPETITOR_BENCHMARK.md` §2 y respuesta
+  de precio en `INTERVIEW_PREP_TOTALAIR_2026-11-24.md`.
+- **Migración de planes:** `ad1d19f0512b`
+  (`update_plan_pricing_and_demo_snapshot`) carga los valores nuevos en `plans`,
+  quita `ai_monthly_tokens` de los límites, actualiza el snapshot de precio del
+  tenant demo a Professional y tiene `downgrade` completo. **No consta aplicada
+  en Neon**: producción sigue mostrando los precios anteriores en
+  `/api/v1/plans` y `/settings/billing` hasta que se aplique.
+- **Verificación (local):** backend ruff/format/basedpyright OK y **207 pytest**;
+  frontend lint 0 errores (4 warnings preexistentes), typecheck OK, **284 tests**
+  y build de **32 rutas**. Sin deploy y sin QA visual en producción.
+
 ## 2026-11-23 — Landing v7: secciones por rol, sello y sistema compartido
 
 - Se eliminan el eyebrow del hero, los tags, el microcopy y las etiquetas

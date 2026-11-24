@@ -36,7 +36,7 @@ async def get_subscription_detail(db: AsyncSession, tenant_id: UUID) -> Subscrip
 
     usage = SubscriptionUsage(
         orders_this_month=await billing_repo.count_work_orders_this_month(db, tenant_id),
-        users_count=await billing_repo.count_tenant_memberships(db, tenant_id),
+        users_count=await billing_repo.count_tenant_office_users(db, tenant_id),
         technicians_count=await billing_repo.count_tenant_technicians(db, tenant_id),
         ai_tokens_used=await billing_repo.count_ai_tokens_this_month(db, tenant_id),
     )

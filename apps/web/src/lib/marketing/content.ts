@@ -217,9 +217,9 @@ export const faqItems = [
       "Consulta los datos de tu empresa para responder, pero no ejecuta acciones ni escribe SQL. Con el modo local, los datos no salen de la plataforma. Con un proveedor externo (hoy Groq) se envía un resumen: nombres de clientes, números y montos de presupuestos, títulos y estados de órdenes, técnicos del día y saldo pendiente. No se envían contraseñas ni direcciones.",
   },
   {
-    question: "¿Qué pasa cuando consumo mi cuota de IA?",
+    question: "¿El asistente de IA tiene un límite?",
     answer:
-      "Cada empresa tiene un límite mensual de tokens del asistente, que hoy es igual en todos los planes. Al alcanzarlo, el asistente deja de responder hasta el mes siguiente. Si se agota solo la cuota del proveedor externo, responde en modo local y lo indica. El resto de la plataforma no se ve afectado.",
+      "Está incluido en los tres planes y no se cobra aparte. Hoy tiene un límite mensual de uso por empresa, igual para todos los planes, porque estamos midiendo el consumo real antes de definir cuotas por plan. Si se alcanza, el asistente se pausa hasta el mes siguiente; el resto de la plataforma sigue funcionando.",
   },
   {
     question: "¿Qué necesito para conectar WhatsApp?",
@@ -229,7 +229,7 @@ export const faqItems = [
   {
     question: "¿Cuánto cuesta y hay período de evaluación?",
     answer:
-      "Los precios son de lanzamiento, en ARS por mes. Al registrarte se activa un acceso de evaluación. Hoy no se cobra, y los medios de pago y la facturación se informarán antes de cualquier cobro.",
+      "Starter desde $19.900 por mes; Professional $39.900 y Business $64.900, en pesos argentinos. Cambia la cantidad de usuarios de oficina, técnicos y órdenes, no las funciones. Al registrarte se activa un acceso de evaluación. Hoy no se cobra, y los medios de pago y la facturación se informarán antes de cualquier cobro.",
   },
   {
     question: "¿Puedo cambiar de plan?",
@@ -255,9 +255,9 @@ export const faqItems = [
 export const pricingCopy = {
   title: "Precios de lanzamiento",
   description:
-    "Montos en pesos argentinos por mes. Al registrarte se activa un acceso de evaluación. Hoy no se cobra.",
+    "Montos en pesos argentinos por mes. Los tres planes incluyen las mismas funciones; cambia la cantidad de usuarios de oficina, técnicos y órdenes. Al registrarte se activa un acceso de evaluación. Hoy no se cobra.",
   limitsNote:
-    "Los límites de órdenes, usuarios y técnicos se validan al crear o invitar. El asistente de IA tiene un límite mensual por empresa.",
+    "Los usuarios de oficina incluyen al dueño; los técnicos tienen su propia cuenta y no ocupan cupo de oficina.",
 } as const;
 
 /** Cifras del producto (conteos de contenido), no métricas de clientes. */

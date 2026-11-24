@@ -625,3 +625,93 @@ identidad bajara al dashboard, el portal, la PWA y la app móvil.
 - **Figma:** el archivo queda en v6; el MCP Starter agotó el rate limit y no se
   pudo crear la v7 ni la variante `Aprobado`. Ver `FIGMA_STORYBOARD.md`.
 - **No desplegado:** falta Vercel, QA en producción y APK nuevo con los tokens.
+
+## ADR-027 — Precios de lanzamiento v2 y cupos separados de oficina/técnicos (2026-11-24)
+
+**Fecha:** 2026-11-24
+**Estado:** aceptada. Reemplaza los valores de planes de la migración
+`5ffb8399d836` y la tabla de `PRICING_VALIDATION.md` §1 vigente hasta el
+2026-11-14. **No reemplaza ADR-011**, que sigue vigente para el mecanismo de
+suscripciones, `price_snapshot` y el panel global; tampoco cambia el modo
+`trialing`.
+
+**Contexto:** la tabla anterior (Starter $29.900 / Professional $59.900 /
+Business $99.900, con “usuarios” y “técnicos” siempre iguales y tokens de IA por
+plan) tenía tres problemas comerciales y uno técnico:
+
+1. El precio de entrada dejaba afuera al técnico independiente, que es el
+   segmento más fácil de conseguir en la etapa de preventa.
+2. Un mismo número para usuarios y técnicos no reflejaba la operación real: una
+   empresa con 1 persona en oficina y 4 técnicos quedaba forzada a un plan
+   pensado para 5 personas de oficina.
+3. Vender “tokens de IA” por plan obliga a explicar una unidad que el cliente no
+   quiere administrar y que el backend no aplica por plan: hay un límite global
+   por empresa (`ai_monthly_token_limit`).
+4. El backend contaba usuarios y técnicos con el mismo cupo, así que la landing y
+   el producto no podían prometer cupos separados sin cambiar la validación.
+
+**Decisión:**
+
+Precios de lanzamiento v2 (ARS/mes):
+
+| Plan | Precio | Usuarios de oficina | Técnicos | Órdenes nuevas/mes |
+|---|---|---|---|---|
+| Starter | 19.900 | 1 | 1 | 100 |
+| Professional | 39.900 | 3 | 5 | 1.000 |
+| Business | 64.900 | 5 | 20 | 10.000 |
+
+- **`max_users` cuenta solo usuarios de oficina** (`owner`, `admin`,
+  `dispatcher`, `viewer`) y **incluye al dueño**. Las invitaciones pendientes a
+  esos roles reservan cupo.
+- **`max_technicians` cuenta solo técnicos.** Un técnico no consume cupo de
+  oficina. `billing/detail` devuelve `users_count` y `technicians_count` por
+  separado.
+- **La IA no se vende por tokens.** Está incluida en los tres planes, sin costo
+  aparte y sin cuota comercial publicada. Se mantiene el límite mensual global
+  por empresa, igual para todos los planes, medido internamente. `/settings/billing`
+  muestra el uso de usuarios de oficina, técnicos y órdenes; el consumo de IA no
+  se muestra. Al alcanzar el tope, el asistente responde 429 y se reanuda el mes
+  siguiente; el resto del sistema no se afecta.
+- **Orden nueva por mes** = órdenes de trabajo creadas desde el día 1 a las
+  00:00 de `America/Argentina/Buenos_Aires`. No limita el historial.
+- **Migración nueva de planes:** `ad1d19f0512b`
+  (`update_plan_pricing_and_demo_snapshot`) carga precios y cupos en `plans`,
+  quita `ai_monthly_tokens` de los límites y actualiza el `price_snapshot` de la
+  suscripción del tenant `servicios-demo` a Professional. Tiene `downgrade`
+  completo. **No consta aplicada en Neon** al cierre de este ADR; no se afirma lo
+  contrario.
+- **Landing actualizada** con los precios, los cupos separados y la aclaración
+  de que el asistente está incluido con límite mensual. Verificada en local; sin
+  deploy.
+- **Documentación comercial:** `PLANES_EXPLICADOS.md` explica los planes para
+  clientes; `PRICING_VALIDATION.md` §1, `PILOT_PROGRAM.md` y `DEMO_SCRIPT.md`
+  referencian los valores nuevos sin reescribir la evidencia histórica.
+
+**Consecuencias:**
+
+- **Cobro automático pendiente.** Cambiar de plan sigue siendo un cambio de
+  `plan_id` y `price_snapshot` sin pasarela: no hay débito, ni factura, ni
+  prorrateo, ni bloqueo por falta de pago. Cualquier cobro se acuerda y se
+  registra a mano. No prometer cobro automático.
+- **Downgrade sin purga:** bajar de plan no elimina membresías ni datos. Si la
+  empresa queda por encima del cupo, el backend solo bloquea nuevas invitaciones
+  y nuevas órdenes hasta volver al rango.
+- **Dos fuentes de verdad hasta aplicar la migración:** `brand.ts` (landing) y
+  `plans` en la base. Mientras la migración no esté aplicada, producción sigue
+  mostrando los precios viejos en `/settings/billing` y `/api/v1/plans`. No
+  cotizar contra producción sin verificar.
+- **Precio de entrada más bajo:** Starter queda por debajo del piso de la
+  hipótesis H6 (ARS 25.000–65.000) y Business dentro del techo. No valida la
+  hipótesis: sigue sin haber entrevistas.
+- **Riesgo comercial:** 100 órdenes/mes en Starter puede quedar corto para un
+  técnico muy activo (unas 4-5 órdenes por día hábil). Es intencional: el
+  objetivo es que el salto a Professional sea por volumen, no por funciones.
+- **Verificación:** backend con 207 pytest y ruff/format/basedpyright OK;
+  incluye `test_billing.py::test_subscription_usage_separates_office_users_from_technicians`,
+  `test_invitations.py::test_technician_does_not_consume_office_user_seat` y
+  `test_office_seat_is_free_after_inviting_a_technician`. Landing con 284 tests
+  web, lint 0 errores (4 warnings preexistentes), typecheck OK y build de 32
+  rutas. Evidencia de las sesiones de implementación del 2026-11-24; este ADR no
+  re-ejecutó las suites.
+- **Pendiente:** aplicar la migración en Neon, desplegar la landing, QA visual en
+  producción y, más adelante, enforcement completo de límites y cobro real.

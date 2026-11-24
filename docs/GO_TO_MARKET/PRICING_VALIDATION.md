@@ -1,6 +1,6 @@
 # Pricing y protocolo de validación
 
-**Última actualización:** 2026-11-14
+**Última actualización:** 2026-11-24 (precios de lanzamiento v2; ADR-027)
 **Regla:** **no cambiar precios sin autorización del fundador.** Este documento
 registra los precios actuales con fuente y define cómo validar disposición a
 pagar en entrevistas, sin inducir.
@@ -9,30 +9,49 @@ pagar en entrevistas, sin inducir.
 
 ## 1. Precios actuales (verificados en el código)
 
-Fuente: `apps/web/src/lib/brand.ts` (líneas 42-64), contrastado con el test
-`apps/web/src/lib/marketing/pricing.test.ts` y con la fila de referencia de
-DOVEXO/Arreglo en `docs/COMPETITOR_BENCHMARK.md` (§2).
+Fuente: `apps/web/src/lib/brand.ts` (precios y cupos que muestra la landing) y
+la migración de planes `ad1d19f0512b` (`update_plan_pricing_and_demo_snapshot`),
+que carga los mismos valores en la base y quita `ai_monthly_tokens` de los
+límites. **No consta aplicada en Neon** al 2026-11-24. Contraste:
+`apps/api/app/services/plan_limits_service.py` (validación de cupos) y
+`apps/web/src/lib/marketing/pricing.ts` + `pricing.test.ts` (formato).
 
-| Plan | Precio (ARS/mes) | Usuarios | Técnicos | Órdenes por mes | Tokens del asistente IA por mes |
+| Plan | Precio (ARS/mes) | Usuarios de oficina | Técnicos | Órdenes nuevas por mes | Asistente de IA |
 |---|---|---|---|---|---|
-| **Starter** | **29.900** | 1 | 1 | 100 | 50.000 |
-| **Professional** | **59.900** | 5 | 5 | 1.000 | 200.000 |
-| **Business** | **99.900** | 20 | 20 | 10.000 | 1.000.000 |
+| **Starter** | **19.900** | 1 | 1 | 100 | Incluido, sin tokens aparte |
+| **Professional** | **39.900** | 3 | 5 | 1.000 | Incluido, sin tokens aparte |
+| **Business** | **64.900** | 5 | 20 | 10.000 | Incluido, sin tokens aparte |
 
+Notas que cambian desde la versión anterior de esta tabla:
+
+- **Cupos separados:** `max_users` cuenta solo usuarios de oficina
+  (`owner`/`admin`/`dispatcher`/`viewer`) e **incluye al dueño**;
+  `max_technicians` cuenta solo técnicos. Un técnico **no** consume cupo de
+  oficina. Antes ambos cupos eran el mismo número y se leían como “usuarios”.
+- **Sin tokens públicos de IA:** desaparece la columna de tokens por plan. El
+  asistente está incluido en los tres planes, sin costo aparte y sin cuota
+  comercial publicada. Hoy hay un límite mensual de uso por empresa, **igual
+  para todos los planes**, configurable en el backend (`ai_monthly_token_limit`,
+  valor por defecto 200.000 tokens). Se mide internamente; `/settings/billing`
+  muestra el uso de usuarios de oficina, técnicos y órdenes, no el de IA. Al
+  alcanzar el tope se pausa el asistente y el resto del sistema sigue
+  funcionando.
 - Trial de suscripción: **14 días** (se crea `trialing` al registrar la
   empresa; hoy no se cobra automáticamente — ver `docs/PROJECT_STATUS.md`,
-  "Limitaciones conocidas").
+  "Limitaciones conocidas"). Es distinto del **piloto de 30 días** para 3
+  empresas (`PILOT_PROGRAM.md`).
 - Formato de presentación: ARS sin decimales, formato es-AR
   (`apps/web/src/lib/marketing/pricing.ts`).
 - Antes de cotizar a un prospecto, re-verificar la landing y el código (el
-  mandato pide "verificar la landing antes de cotizar").
+  mandato pide "verificar la landing antes de cotizar"). La explicación para
+  clientes está en `PLANES_EXPLICADOS.md`.
 
 ## 2. Qué incluye cada plan según lo implementado
 
-Las **funciones son las mismas en los tres planes** (`planFeatures` en
-`apps/web/src/lib/brand.ts`); lo que cambia son los **límites** (usuarios,
-técnicos, órdenes por mes, tokens de IA). Funciones implementadas y verificadas
-(`docs/PROJECT_STATUS.md`, "Hecho y verificado"):
+Las **funciones son las mismas en los tres planes** (lista `featureRows` en
+`apps/web/src/components/marketing/pricing.tsx`); lo que cambia son los
+**límites**: usuarios de oficina, técnicos y órdenes nuevas por mes. Funciones
+implementadas y verificadas (`docs/PROJECT_STATUS.md`, "Hecho y verificado"):
 
 - Clientes e historial.
 - Solicitudes y órdenes de trabajo con transiciones y auditoría.
@@ -51,9 +70,16 @@ técnicos, órdenes por mes, tokens de IA). Funciones implementadas y verificada
   credenciales de Meta / dominio verificado).
 - Cobros online (Mercado Pago): no implementado.
 - Facturación fiscal completa: fuera del MVP.
-- Enforcement de límites: aplicado en órdenes por mes, usuarios y técnicos;
-  el enforcement completo en todos los endpoints está pendiente
-  (ADR-011, `docs/PROJECT_STATUS.md` "Pendiente").
+- Enforcement de límites: aplicado en órdenes nuevas por mes, usuarios de
+  oficina (incluye al dueño e invitaciones pendientes) y técnicos; el
+  enforcement completo en todos los endpoints está pendiente
+  (ADR-011, ADR-027, `docs/PROJECT_STATUS.md` "Pendiente").
+- IA: incluida en los tres planes, sin tokens comerciales. No ejecuta acciones y
+  tiene un límite mensual de uso por empresa igual para todos; si se alcanza, se
+  pausa el asistente hasta el mes siguiente.
+- Precios y cupos de la base: la migración `ad1d19f0512b` **no consta aplicada
+  en Neon** al 2026-11-24. No cotizar contra producción sin verificar la fila de
+  `plans` primero.
 
 ## 3. Protocolo de validación en entrevistas
 
@@ -94,6 +120,12 @@ por entrevistas (regla de `docs/COMPETITOR_BENCHMARK.md` §6).
 realizadas). La afirmación previa de un rango "validado en entrevistas" en
 `docs/COMPETITIVE_ANALYSIS.md` fue identificada como sin sustento
 (inconsistencia B-01 del benchmark) y debe tratarse como hipótesis.
+
+Con los precios v2 (2026-11-24), Starter ($19.900) queda **por debajo del piso**
+de esa hipótesis y Business ($64.900) **dentro del techo**. Eso no valida nada:
+sigue sin haber entrevistas. Si al cotizar aparece rechazo por precio, registrar
+la reacción literal en `INTERVIEW_RESULTS.md` y no ajustar el precio en la
+conversación.
 
 ## 5. Registro de decisiones de precio
 

@@ -96,7 +96,8 @@ Estas cantidades son objetivos de trabajo, no resultados garantizados.
 | `DEMO_SCRIPT.md` | Guion de demo de 10-15 min con datos de `servicios-demo` y tabla de qué se puede mostrar (evidencia HTTP del 2026-11-14). | Completo |
 | `PILOT_PROGRAM.md` | Programa de pilotos: 30 días, 3 cupos, condiciones y conversión. | Completo |
 | `SALES_MESSAGES.md` | Mensajes para cada etapa del proceso comercial, listos para personalizar. | Completo |
-| `PRICING_VALIDATION.md` | Precios actuales con fuente, qué incluye cada plan y protocolo de validación en entrevistas. | Completo |
+| `PRICING_VALIDATION.md` | Precios actuales con fuente, qué incluye cada plan y protocolo de validación en entrevistas. | Completo (precios v2, 2026-11-24) |
+| `PLANES_EXPLICADOS.md` | Explicación de los tres planes para clientes: cupos, qué es un usuario de oficina y una orden nueva, IA incluida, qué no incluye, evaluación vs piloto, FAQ y mensajes cortos. | Completo (2026-11-24) |
 | `COMPETITOR_BENCHMARK.md` | Resumen del benchmark competitivo existente y estructura para ampliarlo. | Completo (datos al 2026-11-08, reverificar) |
 | `PRODUCT_FEEDBACK.md` | Clasificación y priorización de feedback de entrevistas y pilotos. | Estructura vacía |
 | `METRICS.md` | Métricas comerciales con definiciones y tabla semanal. | Estructura vacía |

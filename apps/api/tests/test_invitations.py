@@ -531,3 +531,117 @@ async def test_invitation_tenant_isolation(
         headers=_headers(token_b, tenant_b),
     )
     assert revoke_b.status_code == 404
+
+
+async def test_technician_does_not_consume_office_user_seat(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    plans_fixture: list[Plan],
+) -> None:
+    """Con `max_users=1` el técnico no ocupa el único cupo de oficina.
+
+    El dueño ya consume el cupo de oficina, así que invitar un técnico debe
+    funcionar (cupo de técnicos = 1) y el segundo técnico debe fallar. Una
+    invitación de oficina (viewer) sí debe fallar: solo cuenta el dueño.
+    """
+    starter = plans_fixture[0]
+    starter.limits = {"max_users": 1, "max_technicians": 1, "max_orders_per_month": 100}
+    await db_session.commit()
+
+    token, tenant_id = await _register(client, "owner-seat@example.com", "Empresa Seat")
+
+    technician = await client.post(
+        "/api/v1/team/invitations",
+        json={"email": "seat-tech@example.com", "role": "technician"},
+        headers=_headers(token, tenant_id),
+    )
+    assert technician.status_code == 201, technician.text
+
+    second_technician = await client.post(
+        "/api/v1/team/invitations",
+        json={"email": "seat-tech2@example.com", "role": "technician"},
+        headers=_headers(token, tenant_id),
+    )
+    assert second_technician.status_code == 403, second_technician.text
+    assert "técnicos" in second_technician.json()["detail"]
+
+    viewer = await client.post(
+        "/api/v1/team/invitations",
+        json={"email": "seat-viewer@example.com", "role": "viewer"},
+        headers=_headers(token, tenant_id),
+    )
+    assert viewer.status_code == 403, viewer.text
+    viewer_detail = viewer.json()["detail"]
+    assert "1 usuario de oficina" in viewer_detail
+
+
+async def test_office_seat_is_free_after_inviting_a_technician(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    plans_fixture: list[Plan],
+) -> None:
+    """Con `max_users=2` el técnico pendiente no bloquea una invitación de oficina.
+
+    Si el técnico consumiera cupo de oficina, el viewer sería rechazado. Al
+    invitarlo con éxito queda demostrado que los cupos son independientes.
+    """
+    starter = plans_fixture[0]
+    starter.limits = {"max_users": 2, "max_technicians": 2, "max_orders_per_month": 100}
+    await db_session.commit()
+
+    token, tenant_id = await _register(client, "owner-office-seat@example.com", "Empresa Office")
+
+    technician = await client.post(
+        "/api/v1/team/invitations",
+        json={"email": "office-seat-tech@example.com", "role": "technician"},
+        headers=_headers(token, tenant_id),
+    )
+    assert technician.status_code == 201, technician.text
+
+    viewer = await client.post(
+        "/api/v1/team/invitations",
+        json={"email": "office-seat-viewer@example.com", "role": "viewer"},
+        headers=_headers(token, tenant_id),
+    )
+    assert viewer.status_code == 201, viewer.text
+
+    # Dueño + viewer pendiente alcanzan max_users=2; el técnico sigue sin contar.
+    another_viewer = await client.post(
+        "/api/v1/team/invitations",
+        json={"email": "office-seat-viewer2@example.com", "role": "viewer"},
+        headers=_headers(token, tenant_id),
+    )
+    assert another_viewer.status_code == 403, another_viewer.text
+    assert "2 usuarios de oficina" in another_viewer.json()["detail"]
+
+
+async def test_pending_technician_invitation_is_not_counted_as_office_user(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    plans_fixture: list[Plan],
+) -> None:
+    """Una invitación pendiente de técnico no cuenta como usuario de oficina.
+
+    Con `max_users=1` el único cupo de oficina lo ocupa el dueño, por lo que la
+    invitación de técnico pasa y cualquier invitación de oficina falla.
+    """
+    starter = plans_fixture[0]
+    starter.limits = {"max_users": 1, "max_technicians": 2, "max_orders_per_month": 100}
+    await db_session.commit()
+
+    token, tenant_id = await _register(client, "owner-pending-tech@example.com", "Empresa Pend")
+
+    technician = await client.post(
+        "/api/v1/team/invitations",
+        json={"email": "pending-tech@example.com", "role": "technician"},
+        headers=_headers(token, tenant_id),
+    )
+    assert technician.status_code == 201, technician.text
+
+    viewer = await client.post(
+        "/api/v1/team/invitations",
+        json={"email": "pending-viewer@example.com", "role": "viewer"},
+        headers=_headers(token, tenant_id),
+    )
+    assert viewer.status_code == 403, viewer.text
+    assert "1 usuario de oficina" in viewer.json()["detail"]

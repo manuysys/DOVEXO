@@ -23,10 +23,9 @@ export const SUBSCRIPTION_STATUSES = [
 
 /** Límites del plan y el campo de uso que se compara contra cada uno. */
 export const PLAN_LIMIT_ITEMS = [
-  { key: "max_users", label: "Usuarios", usageKey: "users_count" },
+  { key: "max_users", label: "Usuarios de oficina", usageKey: "users_count" },
   { key: "max_technicians", label: "Técnicos", usageKey: "technicians_count" },
   { key: "max_orders_per_month", label: "Órdenes por mes", usageKey: "orders_this_month" },
-  { key: "ai_monthly_tokens", label: "Tokens de IA por mes", usageKey: "ai_tokens_used" },
 ] as const satisfies readonly {
   key: string;
   label: string;

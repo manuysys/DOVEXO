@@ -295,9 +295,9 @@ function CurrentPlanCard({ detail }: { detail: SubscriptionDetail }) {
           </p>
           <p className="text-text-2 mt-1 text-sm">
             <span className="numeric text-text font-semibold">
-              {formatCurrency(subscription.price_snapshot)}
+              {formatCurrency(subscription.plan.price_ars)}
             </span>{" "}
-            por {periodLabel(subscription.plan.billing_period)} · precio contratado
+            por {periodLabel(subscription.plan.billing_period)} · precio de lista
           </p>
         </div>
 
@@ -354,6 +354,10 @@ function UsageSection({ detail }: { detail: SubscriptionDetail }) {
           return <UsageBar key={item.key} label={item.label} used={used} limit={limit} />;
         })}
       </div>
+      <p className="border-border text-text-2 mt-5 border-t pt-4 text-sm">
+        El asistente de IA está incluido en todos los planes; el consumo se mide internamente.
+        Los usuarios de oficina incluyen al dueño y no cuentan a los técnicos.
+      </p>
     </section>
   );
 }

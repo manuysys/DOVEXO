@@ -23,9 +23,10 @@ decisión comercial, repetir la verificación con el skill `competitive-research
   (talleres de reparación de celulares, electrodomésticos, mecánica). Solo
   **Ordion** y **AppTec** atacan el servicio a domicilio de forma nativa: ese
   es el espacio donde compite DOVEXO.
-- Precio de entrada: DOVEXO Starter (29.900) queda entre Ordion Emprendedor
-  (25.000, incluye 3 técnicos + 1 admin) y AppTec Starter (49.000). La
-  comparación de capacidad no es directa (1 técnico en DOVEXO Starter).
+- Precio de entrada: DOVEXO Starter (19.900 desde el 2026-11-24) queda por
+  debajo de Ordion Emprendedor (25.000, incluye 3 técnicos + 1 admin) y de
+  AppTec Starter (49.000). La comparación de capacidad no es directa (1 usuario
+  de oficina y 1 técnico en DOVEXO Starter).
 - Diferenciales posibles con base en lo implementado: presupuesto público con
   precio histórico (ADR-008), transparencia de límites, PWA sin tienda de
   aplicaciones. **No declarar un diferencial si la función no está
@@ -50,20 +51,22 @@ Detalle completo (WhatsApp, IA, app, offline, plan free) en
 
 ## 2. Estructura de comparación (dimensiones del mandato §13)
 
-Al actualizar el benchmark, comparar cada competidor en estas dimensiones:
+Al actualizar el benchmark, comparar cada competidor en estas dimensiones
+(fila DOVEXO actualizada el 2026-11-24 con los precios v2 de ADR-027; el
+relevamiento de competidores sigue al 2026-11-08):
 
 | Dimensión | DOVEXO (estado real) | Qué verificar del competidor |
 |---|---|---|
-| Usuarios | 1 / 5 / 20 según plan | Cantidad incluida por plan |
-| Técnicos | 1 / 5 / 20 según plan | Cantidad incluida por plan |
-| Órdenes | 100 / 1.000 / 10.000 por mes | Límite de órdenes u operaciones |
+| Usuarios de oficina | 1 / 3 / 5 según plan (incluye al dueño) | Cantidad incluida por plan |
+| Técnicos | 1 / 5 / 20 según plan (no ocupan cupo de oficina) | Cantidad incluida por plan |
+| Órdenes | 100 / 1.000 / 10.000 nuevas por mes (no limita el historial) | Límite de órdenes u operaciones |
 | Almacenamiento | Fotos en PostgreSQL (BYTEA; migrar a S3 pendiente) | Límite de fotos/archivos y dónde almacenan |
-| IA | Asistente con datos reales (Groq/fallback determinista, solo lectura) | IA propia, chatbot o ninguna |
+| IA | Asistente con datos reales (Groq/fallback determinista, solo lectura), incluido sin tokens; límite mensual por empresa igual para todos | IA propia, chatbot o ninguna |
 | WhatsApp | No operativo (sin credenciales de Meta) | Integración real o "manual" |
 | Automatizaciones | Reglas por evento con notificaciones in-app | Notificaciones automáticas, recordatorios |
 | Soporte | Contacto directo con el fundador (sin SLA) | Canal, horario, SLA |
 | Integraciones | Mercado Pago no implementado; email sin dominio verificado | Pagos online, facturación, WhatsApp |
-| Precio | 29.900 / 59.900 / 99.900 (trial 14 días) | Entrada y techo, con fecha de verificación |
+| Precio | 19.900 / 39.900 / 64.900 (evaluación de 14 días; sin cobro automático) | Entrada y techo, con fecha de verificación |
 
 ## 3. Filas por categoría de competidor
 

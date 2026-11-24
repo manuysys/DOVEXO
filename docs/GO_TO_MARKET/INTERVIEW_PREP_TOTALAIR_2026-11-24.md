@@ -97,9 +97,11 @@ manuales funciona. Está en etapa piloto; no tenemos cobros online ni facturaci�
 fiscal integrada.
 
 **“¿Cuánto sale?”**
-Hay planes desde ARS 29.900/mes. Para el piloto inicial puedo ofrecer 30 días sin
-costo, con acompañamiento y 3 cupos. No quiero cerrar precio antes de entender
-el volumen y el uso real.
+Hay planes desde ARS 19.900/mes (Starter), con Professional a ARS 39.900 y
+Business a ARS 64.900; cambian los cupos, no las funciones. Para el piloto
+inicial puedo ofrecer 30 días sin costo, con acompañamiento y 3 cupos. No quiero
+cerrar precio antes de entender el volumen y el uso real. Detalle en
+`PLANES_EXPLICADOS.md`.
 
 **“¿Se integra con WhatsApp?”**
 La API oficial de WhatsApp está contemplada, pero requiere credenciales y

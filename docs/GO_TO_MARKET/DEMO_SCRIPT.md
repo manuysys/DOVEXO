@@ -1,10 +1,15 @@
 # Guion de demostración comercial (10-15 minutos)
 
-**Última actualización:** 2026-11-14
+**Última actualización:** 2026-11-14 (nota de precios vigentes agregada el
+2026-11-24)
 **Fuente:** `PREVENTA_ENTREVISTA_LISTA.txt` (sección 11) + estado verificado en
 `docs/PROJECT_STATUS.md` y `docs/PILOT_READINESS.md`.
 **Evidencia de demo:** auditoría con HTTP real contra producción del
 **2026-11-14** (~35 requests, sin 5xx). Detalle en la sección 5.
+**Precios vigentes (2026-11-24):** Starter $19.900 · Professional $39.900 ·
+Business $64.900 por mes, con cupos separados de oficina y técnicos. Las filas
+de planes de la sección 5 son evidencia del 2026-11-14 y se conservan como
+historial; para cotizar, usar `PRICING_VALIDATION.md` §1 y `PLANES_EXPLICADOS.md`.
 **Regla central:** mostrar únicamente funciones comprobadas y usar registros
 claramente identificados como datos de ejemplo. No mostrar operaciones ficticias
 como si fueran datos reales de una empresa.
