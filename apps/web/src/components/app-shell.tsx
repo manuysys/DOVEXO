@@ -166,7 +166,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="md:pl-64">
         <header className="border-border bg-bg/85 sticky top-0 z-30 border-b backdrop-blur">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 md:px-8">
+          <div className="flex w-full items-center justify-between gap-3 px-4 py-3 md:px-8">
             <div className="flex min-w-0 items-center gap-2">
               <button
                 type="button"
@@ -223,7 +223,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         )}
 
-        <main className="mx-auto max-w-7xl p-4 md:p-8">{children}</main>
+        <main className="w-full p-4 md:p-8">{children}</main>
       </div>
     </div>
   );
