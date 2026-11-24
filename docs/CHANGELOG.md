@@ -40,7 +40,13 @@
   `/api/v1/plans` y `/settings/billing` hasta que se aplique.
 - **Verificación (local):** backend ruff/format/basedpyright OK y **207 pytest**;
   frontend lint 0 errores (4 warnings preexistentes), typecheck OK, **284 tests**
-  y build de **32 rutas**. Sin deploy y sin QA visual en producción.
+  y build de **32 rutas**.
+- **Deploy 2026-11-24:** web y API en producción. Landing con
+  19.900/39.900/64.900; `/settings/billing` con 1/3/5 usuarios de oficina,
+  1/5/20 técnicos y 100/1.000/10.000 órdenes; dashboard sin overflow a 1536 y
+  1920 px. La base de Neon sigue con los precios viejos porque la migración
+  `ad1d19f0512b` no se pudo aplicar (Vercel oculta el secreto de la base); el
+  panel usa un override de display hasta aplicarla.
 
 ## 2026-11-23 — Landing v7: secciones por rol, sello y sistema compartido
 

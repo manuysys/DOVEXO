@@ -3,10 +3,11 @@
 **Última actualización:** 2026-11-24
 **Fase:** preventa / customer discovery activa (GO_TO_MARKET) + precios de
 lanzamiento v2 con cupos separados de oficina y técnicos (ADR-027). La landing
-v7 “secciones por rol, sello y sistema compartido” está verificada localmente
-(10 secciones, hero sin recorte ni tope de 1600 px, panel denso, sello integrado,
-migración con preview, secciones de oficina/técnico/cliente/control y tokens
-nuevos en dashboard, portal, PWA y Expo) y **sigue sin deploy**. Base técnica:
+v7 “secciones por rol, sello y sistema compartido” está verificada y
+**desplegada en producción desde el 2026-11-24** (10 secciones, hero sin recorte
+ni tope de 1600 px, panel denso, sello integrado, migración con preview,
+secciones de oficina/técnico/cliente/control y tokens nuevos en dashboard,
+portal, PWA y Expo). Base técnica:
 Hito 2 completo + PWA, app móvil Android DOVEXO, portal del cliente, dashboard
 operativo, automatizaciones, IA con Groq, suscripciones, panel global, WhatsApp,
 importador CSV/XLSX, onboarding y reset de demo (pilot-ready).
@@ -59,7 +60,13 @@ Implementado en código y verificado localmente. Documentado en ADR-027,
   técnicos aparte e IA incluida con límite mensual.
 - **Dashboard:** el shell de la app pasa a ancho completo (sin `max-w-7xl`) y la
   tarjeta de plan actual usa el precio de lista del plan, para que no queden
-  franjas laterales ni el precio viejo en `/settings/billing`.
+  franjas laterales ni el precio viejo en `/settings/billing`. La grilla de KPIs
+  y las tarjetas usan 3 columnas desde 1280 px y `min-w-0`, para que el panel no
+  se corte en notebooks con zoom o escalado.
+- **Deploy 2026-11-24:** web `saas-gestion-web` y API `saas-gestion-api` en
+  producción. La landing muestra 19.900/39.900/64.900; el dashboard usa ancho
+  completo; `/settings/billing` muestra el catálogo nuevo con un override de
+  display porque la base de Neon sigue con los valores viejos.
 - **Migración de planes:** `ad1d19f0512b` (`update_plan_pricing_and_demo_snapshot`)
   carga estos valores en `plans`, quita `ai_monthly_tokens` de los límites y
   actualiza el snapshot de precio del tenant demo a Professional, con
@@ -79,8 +86,12 @@ Frontend lint 0 errores (4 warnings preexistentes); typecheck OK;
          test 284/284; build 32 rutas
 ```
 
-**No verificado en esta entrada:** si la migración `ad1d19f0512b` está aplicada
-en Neon, deploy de la landing, QA visual en producción y cobro real.
+**Verificado en producción (2026-11-24):** landing con 19.900/39.900/64.900 y
+sin los precios viejos; `/settings/billing` con 1/3/5 usuarios de oficina,
+1/5/20 técnicos y 100/1.000/10.000 órdenes; dashboard sin overflow a 1536 y 1920
+px; API desplegada. **Pendiente:** aplicar `ad1d19f0512b` en Neon (la API
+`/api/v1/plans` y `/api/v1/subscription` siguen con 29.900/59.900/99.900),
+quitar el override de facturación cuando esté aplicada y cobro real.
 
 ## Landing v7 — secciones por rol y sistema compartido (2026-11-23)
 
@@ -765,12 +776,14 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
 
 ## Pendiente
 
-- [ ] Aplicar la migración de planes v2 en Neon y verificar
-  `/api/v1/plans` y `/settings/billing` con los precios y cupos nuevos
-  (hoy producción sigue con 29.900/59.900/99.900; ver ADR-027).
-- [ ] Desplegar la landing v7 a Vercel y hacer QA visual en producción
-  (1440/1024/1124/390/360, sello, oficina/técnico/cliente, pinned, WebGL, carpeta,
-  y la sección de precios con los valores nuevos).
+- [ ] Aplicar la migración de planes v2 en Neon, verificar `/api/v1/plans` y
+  `/api/v1/subscription`, y quitar el override de display de `/settings/billing`
+  (hoy la API sigue con 29.900/59.900/99.900; la landing y el panel muestran los
+  valores nuevos; ver ADR-027).
+- [x] Desplegar la landing v7 y el dashboard a Vercel (hecho el 2026-11-24).
+  QA visual de precios y ancho del dashboard en 1536/1920; falta el recorrido
+  completo de 1440/1024/1124/390/360, sello, oficina/técnico/cliente, pinned,
+  WebGL y carpeta.
 - [ ] Crear la v7 en Figma y la variante `Aprobado` del `Quote Panel` cuando se
   resetee el rate limit del MCP Starter; ver `FIGMA_STORYBOARD.md`.
 - [ ] Resolver los P0 de `DEMO_READINESS.md` antes de una demo pública:

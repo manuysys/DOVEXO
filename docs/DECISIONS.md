@@ -680,9 +680,11 @@ Precios de lanzamiento v2 (ARS/mes):
   suscripción del tenant `servicios-demo` a Professional. Tiene `downgrade`
   completo. **No consta aplicada en Neon** al cierre de este ADR; no se afirma lo
   contrario.
-- **Landing actualizada** con los precios, los cupos separados y la aclaración
-  de que el asistente está incluido con límite mensual. Verificada en local; sin
-  deploy.
+- **Landing desplegada** el 2026-11-24 con los precios, los cupos separados y la
+  aclaración de que el asistente está incluido con límite mensual. El dashboard
+  usa ancho completo y la grilla de KPIs pasa a 3 columnas desde 1280 px para no
+  cortarse en notebooks con zoom. `/settings/billing` muestra el catálogo nuevo
+  con un override de display hasta aplicar la migración en Neon.
 - **Documentación comercial:** `PLANES_EXPLICADOS.md` explica los planes para
   clientes; `PRICING_VALIDATION.md` §1, `PILOT_PROGRAM.md` y `DEMO_SCRIPT.md`
   referencian los valores nuevos sin reescribir la evidencia histórica.
@@ -696,10 +698,11 @@ Precios de lanzamiento v2 (ARS/mes):
 - **Downgrade sin purga:** bajar de plan no elimina membresías ni datos. Si la
   empresa queda por encima del cupo, el backend solo bloquea nuevas invitaciones
   y nuevas órdenes hasta volver al rango.
-- **Dos fuentes de verdad hasta aplicar la migración:** `brand.ts` (landing) y
-  `plans` en la base. Mientras la migración no esté aplicada, producción sigue
-  mostrando los precios viejos en `/settings/billing` y `/api/v1/plans`. No
-  cotizar contra producción sin verificar.
+- **Dos fuentes de verdad hasta aplicar la migración:** `brand.ts` (landing y
+  display de facturación) y `plans` en la base. La landing y `/settings/billing`
+  ya muestran los valores nuevos; `/api/v1/plans` y `/api/v1/subscription` siguen
+  con los viejos. No cotizar contra la API sin verificar y quitar el override de
+  facturación cuando la migración esté aplicada.
 - **Precio de entrada más bajo:** Starter queda por debajo del piso de la
   hipótesis H6 (ARS 25.000–65.000) y Business dentro del techo. No valida la
   hipótesis: sigue sin haber entrevistas.

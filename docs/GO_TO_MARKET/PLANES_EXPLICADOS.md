@@ -319,8 +319,11 @@ Tono argentino, claro, sin jerga. No prometen nada que no esté operativo.
 
 **Pendientes que afectan lo que se puede prometer:**
 
-- La migración de planes `ad1d19f0512b` todavía no consta aplicada en Neon.
-- La landing con estos precios está verificada en local, pero **no desplegada**.
+- La migración de planes `ad1d19f0512b` todavía no consta aplicada en Neon; la
+  API `/api/v1/plans` y `/api/v1/subscription` siguen con los valores viejos.
+- La landing con estos precios está **desplegada en producción desde el
+  2026-11-24**; el dashboard muestra el catálogo nuevo con un override de
+  display en `/settings/billing`.
 - El cobro automático no está implementado: cambiar de plan desde
   `/settings/billing` solo registra el plan y el precio contratado. No hay pago,
   prorrateo ni factura.

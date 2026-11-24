@@ -12,7 +12,9 @@ pagar en entrevistas, sin inducir.
 Fuente: `apps/web/src/lib/brand.ts` (precios y cupos que muestra la landing) y
 la migración de planes `ad1d19f0512b` (`update_plan_pricing_and_demo_snapshot`),
 que carga los mismos valores en la base y quita `ai_monthly_tokens` de los
-límites. **No consta aplicada en Neon** al 2026-11-24. Contraste:
+límites. **No consta aplicada en Neon** al 2026-11-24; la landing y
+`/settings/billing` muestran los valores nuevos, pero `/api/v1/plans` y
+`/api/v1/subscription` siguen con los viejos hasta aplicarla. Contraste:
 `apps/api/app/services/plan_limits_service.py` (validación de cupos) y
 `apps/web/src/lib/marketing/pricing.ts` + `pricing.test.ts` (formato).
 
