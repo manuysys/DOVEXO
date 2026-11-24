@@ -21,7 +21,7 @@ const toneClasses: Record<NonNullable<StatCardProps["tone"]>, string> = {
 
 export function StatCard({ label, value, hint, icon: Icon, tone = "default", className }: StatCardProps) {
   return (
-    <div className={cn("border-border bg-surface rounded-ds-lg border p-5 shadow-card", className)}>
+    <div className={cn("border-border bg-surface min-w-0 rounded-ds-lg border p-5 shadow-card", className)}>
       <div className="flex items-start justify-between gap-3">
         <p className="text-text-2 text-label">{label}</p>
         {Icon && (

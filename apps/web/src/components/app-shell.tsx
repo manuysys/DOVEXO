@@ -197,7 +197,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <CommandPalette items={items} />
               <NotificationsBell />
               <select

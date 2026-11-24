@@ -288,7 +288,7 @@ export default function DashboardPage() {
         <OnboardingChecklist tenantId={activeTenantId} />
       )}
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3 min-[1800px]:grid-cols-5">
         <StatCard
           label="Clientes"
           value={display(summary?.customers_total)}
@@ -326,8 +326,8 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card>
+      <div className="grid gap-4 xl:grid-cols-3">
+        <Card className="min-w-0">
           <CardHeader className="flex-row items-start justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
@@ -381,7 +381,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="min-w-0">
           <CardHeader className="flex-row items-start justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2">
@@ -570,7 +570,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="min-w-0">
           <CardHeader className="flex-row items-start justify-between gap-3">
             <div>
               <CardTitle>Actividad reciente</CardTitle>
@@ -624,7 +624,7 @@ export default function DashboardPage() {
         <CardHeader>
           <CardTitle>Accesos rápidos</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        <CardContent className="grid grid-cols-2 gap-2 sm:grid-cols-3 min-[1700px]:grid-cols-6">
           {quickLinks.map((link) => {
             const Icon = link.icon;
             return (
