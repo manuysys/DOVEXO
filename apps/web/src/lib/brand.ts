@@ -9,7 +9,7 @@ export const brand = {
   company: "ARVOKTA",
   tagline: "Gestión para empresas de servicios técnicos.",
   description:
-    "Recibí solicitudes, asigná técnicos, enviá presupuestos y cobrá. Todo en un solo lugar, desde la oficina o el celular.",
+    "Recibí solicitudes, asigná técnicos, enviá presupuestos y registrá pagos. Controlá saldos pendientes y mantené cada cobro asociado a su orden.",
   /** URL pública vigente. Cambiar cuando el dominio propio esté confirmado. */
   appUrl: "https://saas-gestion-web.vercel.app",
   /** Dominio propio: pendiente de confirmar. No usar para enlaces ni emails. */
