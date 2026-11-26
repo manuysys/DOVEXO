@@ -776,6 +776,12 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
 
 ## Pendiente
 
+- [ ] Cerrar los hallazgos de la auditoría externa del 2026-11-26: legal con
+  abogado (región, backups, retención, exportación y eliminación), exportación
+  CSV de clientes/órdenes/presupuestos/pagos, soporte con tiempos y backup real
+  con restauración probada; ver
+  `docs/GO_TO_MARKET/AUDIT_RESPONSE_2026-11-26.md`. La contradicción del trial y
+  la copy de cobros ya están corregidas.
 - [ ] Aplicar la migración de planes v2 en Neon, verificar `/api/v1/plans` y
   `/api/v1/subscription`, y quitar el override de display de `/settings/billing`
   (hoy la API sigue con 29.900/59.900/99.900; la landing y el panel muestran los

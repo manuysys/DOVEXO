@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-26 — Correcciones de la auditoría externa
+
+- Se unificó el trial: `/terms` ya no promete “14 días”; ahora dice “acceso de
+  evaluación”, igual que la landing. La fecha legal se actualizó al 2026-11-26.
+- `brand.description` ya no dice “cobrá”; ahora “registrá pagos, controlá saldos
+  pendientes y mantené cada cobro asociado a su orden”.
+- Se agregó `docs/GO_TO_MARKET/AUDIT_RESPONSE_2026-11-26.md` con la verificación
+  de los hallazgos (precios viejos y “Arreglo” no están en producción; legal,
+  exportación CSV, soporte y backups quedan pendientes) y el guion de grabación
+  para el auditor.
+- Deploy web de las dos correcciones de copy.
+
 ## 2026-11-24 — Precios de lanzamiento v2 y cupos separados de oficina/técnicos
 
 - **Planes:** Starter $19.900 (1 usuario de oficina, 1 técnico, 100 órdenes
