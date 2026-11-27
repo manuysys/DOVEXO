@@ -45,10 +45,10 @@ cargan datos ficticios.
 
 ## Pendiente de empresa
 
-- [x] Actualizar los root directories de Vercel (2026-11-27):
-  `saas-gestion-web` → `products/dovexo/apps/web`;
-  `saas-gestion-api` → `products/dovexo/apps/api`. Falta verificar el deploy
-  desde la rama y mergear.
+- [x] Root directories de Vercel actualizados y deploy de DOVEXO verificado
+  (2026-11-27): web production `kie45n9mj` Ready; API production `7r0gb50fp`
+  Ready; API conectada a GitHub; landing con 19.900/39.900/64.900 y login demo
+  `200` contra Vercel + Neon. Rama `feat/arvokta-monorepo` mergeada a `main`.
 - [x] Completar la Fase 1 del Sales Agent: login, dashboard, productos,
   campañas, worker, seed de DOVEXO y tests (33 backend + 29 frontend).
 - [ ] Implementar la Fase 2 del Sales Agent: descubrimiento OSM/Overpass, CSV,
