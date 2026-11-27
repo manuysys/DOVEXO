@@ -199,10 +199,26 @@ class ImportBatch(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     filename: Mapped[str] = mapped_column(String(300), nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="preview", server_default="preview", index=True
+    )
     imported_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=utcnow
     )
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     total_rows: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    valid_rows: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    invalid_rows: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
+    duplicate_rows: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default="0"
+    )
     successful_rows: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     skipped_rows: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    errors: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    mapping: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    preview_rows: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON, nullable=True)
+    errors: Mapped[list[dict[str, Any]]] = mapped_column(JSON, nullable=False, default=list)
+    created_by: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )

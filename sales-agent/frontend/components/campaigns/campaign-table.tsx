@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Campaign } from "@/lib/api/types";
 import { CampaignStatusBadge } from "./status-badge";
+import { provinceToFormValue } from "@/features/campaigns/mapping";
 import { formatDate, joinList } from "@/lib/utils";
 
 export function CampaignTable({ campaigns }: { campaigns: Campaign[] }) {
@@ -46,7 +47,10 @@ export function CampaignTable({ campaigns }: { campaigns: Campaign[] }) {
               <td className="max-w-56 px-4 py-3 text-xs text-muted">
                 {campaign.province_filters.length === 0
                   ? "Todo el país"
-                  : joinList(campaign.province_filters, 2)}
+                  : joinList(
+                      campaign.province_filters.map(provinceToFormValue),
+                      2,
+                    )}
               </td>
               <td className="max-w-56 px-4 py-3 text-xs text-muted">
                 {joinList(campaign.sector_filters, 2)}

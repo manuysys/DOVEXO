@@ -16,7 +16,13 @@
   empresas, contactos, fuentes, deduplicación, alta manual y pantallas de
   búsqueda/prospectos/historial. 70 tests backend, 53 frontend y build de 20
   rutas. Búsqueda real de prueba: Córdoba/HVAC, límite 5, 5 empresas nuevas y 0
-  duplicados. La búsqueda nacional y el CSV quedan para la Fase 2B.
+  duplicados.
+- Se implementa la Fase 2B: importación CSV con preview/confirmación idempotente,
+  campañas con una corrida por provincia, revisión de posibles duplicados y
+  exportación CSV de empresas. 84 tests backend, 75 frontend y build de 20 rutas.
+  Campaña real Buenos Aires/instalaciones eléctricas: 5 empresas nuevas, 0
+  duplicados. Enriquecimiento, scoring, mensajes, WhatsApp y CRM quedan para las
+  fases 3-5.
 - Root directories de Vercel actualizados y deploy verificado: `saas-gestion-web`
   apunta a `products/dovexo/apps/web` y `saas-gestion-api` a
   `products/dovexo/apps/api`. Web production `kie45n9mj` Ready; API production

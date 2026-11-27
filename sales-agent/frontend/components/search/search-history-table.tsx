@@ -46,6 +46,14 @@ export function SearchHistoryTable({
                 <td className="px-4 py-3">
                   <p className="font-medium text-ink">#{run.id || "sin id"}</p>
                   <p className="text-xs text-muted">{run.provider || "—"}</p>
+                  {run.campaign_id ? (
+                    <Link
+                      href={`/campaigns/${run.campaign_id}`}
+                      className="text-xs text-accent hover:underline"
+                    >
+                      Campaña #{run.campaign_id}
+                    </Link>
+                  ) : null}
                 </td>
                 <td className="px-4 py-3">
                   <SearchRunStatusBadge

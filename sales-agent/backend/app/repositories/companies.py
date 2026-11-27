@@ -17,8 +17,12 @@ def _company_conditions(
     query: str | None,
     province: str | None,
     sector: str | None,
+    discovery_status: str | None = None,
 ) -> list[object]:
     conditions: list[object] = []
+
+    if discovery_status:
+        conditions.append(Company.discovery_status == discovery_status)
 
     if search_run_id is not None:
         conditions.append(
@@ -59,7 +63,8 @@ def list_companies(
     query: str | None = None,
     province: str | None = None,
     sector: str | None = None,
-    limit: int = 20,
+    discovery_status: str | None = None,
+    limit: int | None = 20,
     offset: int = 0,
 ) -> tuple[list[Company], int]:
     conditions = _company_conditions(
@@ -67,19 +72,19 @@ def list_companies(
         query=query,
         province=province,
         sector=sector,
+        discovery_status=discovery_status,
     )
 
     total = int(db.scalar(select(func.count()).select_from(Company).where(*conditions)) or 0)
-    items = list(
-        db.scalars(
-            select(Company)
-            .where(*conditions)
-            .order_by(Company.created_at.desc(), Company.id.desc())
-            .offset(offset)
-            .limit(limit)
-        )
+    stmt = (
+        select(Company)
+        .where(*conditions)
+        .order_by(Company.created_at.desc(), Company.id.desc())
+        .offset(offset)
     )
-    return items, total
+    if limit is not None:
+        stmt = stmt.limit(limit)
+    return list(db.scalars(stmt)), total
 
 
 def get_company(db: Session, company_id: int) -> Company | None:
@@ -157,3 +162,19 @@ def load_company_relations(
         sectors[company_id].sort(key=lambda sector: sector.name)
 
     return contacts, sectors, source_counts
+
+
+def load_company_sources(
+    db: Session,
+    company_ids: list[int],
+) -> dict[int, list[CompanySource]]:
+    sources: dict[int, list[CompanySource]] = defaultdict(list)
+    if not company_ids:
+        return sources
+    for source in db.scalars(
+        select(CompanySource)
+        .where(CompanySource.company_id.in_(company_ids))
+        .order_by(CompanySource.collected_at.desc(), CompanySource.id.desc())
+    ):
+        sources[source.company_id].append(source)
+    return sources

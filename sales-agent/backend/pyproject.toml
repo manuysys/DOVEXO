@@ -15,6 +15,7 @@ dependencies = [
     "httpx>=0.28",
     "phonenumbers>=8.13",
     "rapidfuzz>=3.9",
+    "python-multipart>=0.0.20",
 ]
 
 [dependency-groups]

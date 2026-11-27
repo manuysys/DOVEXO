@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models import Campaign
+from app.models import Campaign, SearchRun
 
 
 def list_campaigns(db: Session) -> list[Campaign]:
@@ -36,3 +36,12 @@ def update_campaign(db: Session, campaign: Campaign, changes: dict[str, Any]) ->
     db.commit()
     db.refresh(campaign)
     return campaign
+
+
+def count_campaign_runs(db: Session, campaign_id: int) -> dict[str, int]:
+    rows = db.execute(
+        select(SearchRun.status, func.count())
+        .where(SearchRun.campaign_id == campaign_id)
+        .group_by(SearchRun.status)
+    )
+    return {status: int(count) for status, count in rows}

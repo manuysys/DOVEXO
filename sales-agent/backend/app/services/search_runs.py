@@ -90,10 +90,13 @@ def create_search_run(
     db.add(run)
     db.flush()
 
+    payload = {"search_run_id": run.id}
+    if campaign_id is not None:
+        payload["campaign_id"] = campaign_id
     db.add(
         Job(
             job_type="search_run",
-            payload={"search_run_id": run.id},
+            payload=payload,
             status="pending",
         )
     )
@@ -118,10 +121,13 @@ def retry_search_run(db: Session, run: SearchRun) -> SearchRun:
     run.errors = []
     run.started_at = None
     run.finished_at = None
+    payload = {"search_run_id": run.id}
+    if run.campaign_id is not None:
+        payload["campaign_id"] = run.campaign_id
     db.add(
         Job(
             job_type="search_run",
-            payload={"search_run_id": run.id},
+            payload=payload,
             status="pending",
         )
     )

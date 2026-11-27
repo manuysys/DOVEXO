@@ -61,6 +61,13 @@ export interface Campaign {
   search_config: Record<string, unknown>;
   status: CampaignStatus;
   raw_status: string;
+  /** Conteos de corridas que devuelve `GET /campaigns/{id}`. */
+  search_runs_total: number;
+  search_runs_pending: number;
+  search_runs_running: number;
+  search_runs_completed: number;
+  search_runs_failed: number;
+  search_runs_cancelled: number;
   created_at: string | null;
   updated_at: string | null;
 }
@@ -75,6 +82,21 @@ export interface CampaignInput {
   sector_filters: string[];
   search_config: Record<string, unknown>;
   status: "draft" | "active";
+}
+
+/** Corrida provincial creada al iniciar una campaña. */
+export interface CampaignSearchRunRef {
+  id: EntityId;
+  province_code: string;
+  province_name: string | null;
+  status: SearchRunStatus;
+  raw_status: string;
+}
+
+export interface CampaignStartResult {
+  campaign: Campaign | null;
+  search_runs: CampaignSearchRunRef[];
+  total_jobs: number;
 }
 
 /**
@@ -155,6 +177,7 @@ export interface SearchRunInput {
 }
 
 export interface SearchRunFilters {
+  campaign_id?: EntityId;
   limit?: number;
   offset?: number;
 }
@@ -219,6 +242,7 @@ export interface CompanyFilters {
   query?: string;
   province?: string;
   sector?: string;
+  discovery_status?: string;
   limit?: number;
   offset?: number;
 }
@@ -232,4 +256,75 @@ export interface CompanyInput {
   sector_slugs: string[];
   phone?: string;
   email?: string;
+}
+
+export type DiscoveryStatus =
+  | "discovered"
+  | "possible_duplicate"
+  | "rejected"
+  | "unknown";
+
+/** Cambios aceptados por `PATCH /companies/{id}`. */
+export interface CompanyUpdateInput {
+  name?: string;
+  website?: string;
+  province?: string;
+  locality?: string;
+  address?: string;
+  discovery_status?: Exclude<DiscoveryStatus, "unknown">;
+  sector_slugs?: string[];
+}
+
+/** Fila de la previsualización de importación CSV. */
+export interface ImportPreviewRow {
+  row_number: number;
+  name: string;
+  website: string | null;
+  province: string | null;
+  locality: string | null;
+  phone: string | null;
+  email: string | null;
+  sectors: string[];
+  status: string;
+  errors: string[];
+}
+
+export interface ImportRowError {
+  row_number: number;
+  message: string;
+}
+
+/** Resultado de `POST /imports/preview`. */
+export interface ImportPreview {
+  batch_id: EntityId;
+  filename: string;
+  total_rows: number;
+  valid_rows: number;
+  invalid_rows: number;
+  duplicates: number;
+  preview: ImportPreviewRow[];
+  errors: ImportRowError[];
+}
+
+/** Resultado de `POST /imports/{id}/confirm`. */
+export interface ImportConfirmResult {
+  batch_id: EntityId;
+  created: number;
+  skipped: number;
+  errors: ImportRowError[];
+}
+
+/** Lote de importación (`GET /imports`). */
+export interface ImportBatch {
+  id: EntityId;
+  filename: string;
+  status: string;
+  total_rows: number;
+  created: number;
+  skipped: number;
+  duplicates: number;
+  imported_at: string | null;
+  confirmed_at: string | null;
+  errors: ImportRowError[];
+  report_url: string | null;
 }

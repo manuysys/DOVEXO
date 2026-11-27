@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Alert } from "@/components/ui/alert";
@@ -8,13 +9,23 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { LoadingBlock } from "@/components/ui/spinner";
-import { useCompanies } from "@/hooks/use-companies";
+import { LoadingBlock, Spinner } from "@/components/ui/spinner";
+import {
+  useCompanies,
+  useExportCompanies,
+  useUpdateCompany,
+} from "@/hooks/use-companies";
 import { useSectors } from "@/hooks/use-dashboard";
 import { useProvinces } from "@/hooks/use-provinces";
 import { useSearchRuns } from "@/hooks/use-search-runs";
-import type { CompanyFilters, ProvinceOption } from "@/lib/api/types";
+import type {
+  Company,
+  CompanyFilters,
+  ProvinceOption,
+} from "@/lib/api/types";
+import { companyStatusLabel } from "@/components/prospects/company-status-badge";
 import { ARGENTINA_PROVINCE_CODES } from "@/lib/data/provinces";
+import { downloadBlob } from "@/lib/download";
 import { getErrorMessage } from "@/lib/errors";
 import { formatDateTime, pluralize } from "@/lib/utils";
 import { ProspectsTable } from "./prospects-table";
@@ -25,10 +36,12 @@ export function ProspectsView() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const searchRunId = searchParams.get("search_run_id") ?? "";
   const province = searchParams.get("province") ?? "";
   const sector = searchParams.get("sector") ?? "";
+  const discoveryStatus = searchParams.get("discovery_status") ?? "";
   const query = searchParams.get("q") ?? "";
   const parsedOffset = Number(searchParams.get("offset") ?? "0");
   const offset =
@@ -37,14 +50,25 @@ export function ProspectsView() {
   const provincesQuery = useProvinces();
   const sectorsQuery = useSectors();
   const searchRunsQuery = useSearchRuns();
+  const updateCompanyMutation = useUpdateCompany();
+  const exportMutation = useExportCompanies();
 
   const filters: CompanyFilters = {
     search_run_id: searchRunId || undefined,
     province: province || undefined,
     sector: sector || undefined,
+    discovery_status: discoveryStatus || undefined,
     query: query || undefined,
     limit: PAGE_SIZE,
     offset,
+  };
+
+  const exportFilters: CompanyFilters = {
+    search_run_id: searchRunId || undefined,
+    province: province || undefined,
+    sector: sector || undefined,
+    discovery_status: discoveryStatus || undefined,
+    query: query || undefined,
   };
 
   const companiesQuery = useCompanies(filters);
@@ -54,7 +78,9 @@ export function ProspectsView() {
       ? provincesQuery.data
       : ARGENTINA_PROVINCE_CODES;
 
-  const hasFilters = Boolean(searchRunId || province || sector || query);
+  const hasFilters = Boolean(
+    searchRunId || province || sector || query || discoveryStatus,
+  );
 
   const updateParams = (patch: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -72,6 +98,30 @@ export function ProspectsView() {
 
   const clearFilters = () => router.replace(pathname, { scroll: false });
 
+  const handleStatusChange = (
+    company: Company,
+    status: "discovered" | "rejected",
+  ) => {
+    const label = company.name || "esta empresa";
+    const message =
+      status === "rejected"
+        ? `¿Descartar "${label}"? Queda marcada como descartada y podés restaurarla después.`
+        : `¿Marcar "${label}" como que no es un duplicado?`;
+    if (!window.confirm(message)) return;
+
+    setUpdatingId(company.id);
+    updateCompanyMutation.mutate(
+      { id: company.id, input: { discovery_status: status } },
+      { onSettled: () => setUpdatingId(null) },
+    );
+  };
+
+  const handleExport = () => {
+    exportMutation.mutate(exportFilters, {
+      onSuccess: ({ blob, filename }) => downloadBlob(blob, filename),
+    });
+  };
+
   const page = companiesQuery.data;
   const companies = page?.items ?? [];
   const total = page?.total ?? 0;
@@ -84,16 +134,33 @@ export function ProspectsView() {
       <Card className="mb-4">
         <CardHeader
           title="Filtros"
-          description="Los filtros se guardan en la URL, así podés compartir o recargar la vista sin perderlos."
+          description="Los filtros se guardan en la URL, así podés compartir o recargar la vista sin perderlos. La exportación usa los mismos filtros."
           action={
-            hasFilters ? (
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
-                Limpiar filtros
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={exportMutation.isPending}
+                onClick={handleExport}
+              >
+                {exportMutation.isPending ? (
+                  <>
+                    <Spinner label="Exportando" />
+                    Exportando…
+                  </>
+                ) : (
+                  "Exportar CSV"
+                )}
               </Button>
-            ) : undefined
+              {hasFilters ? (
+                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  Limpiar filtros
+                </Button>
+              ) : null}
+            </div>
           }
         />
-        <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <form
             className="flex items-end gap-2"
             onSubmit={(event) => {
@@ -152,6 +219,22 @@ export function ProspectsView() {
           </label>
 
           <label className="flex flex-col gap-1 text-xs font-medium text-muted">
+            Estado
+            <Select
+              value={discoveryStatus}
+              onChange={(event) =>
+                updateParams({ discovery_status: event.target.value })
+              }
+              className="h-9 py-1"
+            >
+              <option value="">Todos los estados</option>
+              <option value="possible_duplicate">Posibles duplicados</option>
+              <option value="discovered">Descubiertas</option>
+              <option value="rejected">Descartadas</option>
+            </Select>
+          </label>
+
+          <label className="flex flex-col gap-1 text-xs font-medium text-muted">
             Búsqueda de origen
             <Select
               value={searchRunId}
@@ -186,6 +269,32 @@ export function ProspectsView() {
         </Alert>
       ) : null}
 
+      {discoveryStatus ? (
+        <Alert variant="info" className="mb-4">
+          Mostrando empresas con estado{" "}
+          <strong>{companyStatusLabel(discoveryStatus)}</strong>.{" "}
+          <button
+            type="button"
+            onClick={() => updateParams({ discovery_status: "" })}
+            className="font-semibold underline"
+          >
+            Quitar filtro
+          </button>
+        </Alert>
+      ) : null}
+
+      {exportMutation.isError ? (
+        <Alert variant="danger" title="No se pudo exportar el CSV" className="mb-4">
+          {getErrorMessage(exportMutation.error)}
+        </Alert>
+      ) : null}
+
+      {updateCompanyMutation.isError ? (
+        <Alert variant="danger" title="No se pudo cambiar el estado" className="mb-4">
+          {getErrorMessage(updateCompanyMutation.error)}
+        </Alert>
+      ) : null}
+
       {companiesQuery.isPending ? (
         <LoadingBlock label="Cargando empresas…" />
       ) : companiesQuery.isError ? (
@@ -204,14 +313,16 @@ export function ProspectsView() {
       ) : companies.length === 0 ? (
         <EmptyState
           title={
-            hasFilters
-              ? "Ninguna empresa coincide con los filtros"
-              : "Todavía no hay empresas descubiertas"
+            discoveryStatus === "possible_duplicate" && !searchRunId && !query
+              ? "No hay posibles duplicados pendientes"
+              : hasFilters
+                ? "Ninguna empresa coincide con los filtros"
+                : "Todavía no hay empresas descubiertas"
           }
           description={
             hasFilters
               ? "Probá con otra provincia, otro rubro o sin filtros. Los datos salen de la base, no hay resultados de ejemplo."
-              : "Ejecutá una búsqueda por provincia y rubro, o cargá una empresa manualmente. Esta lista muestra solo lo que existe en la base."
+              : "Ejecutá una búsqueda por provincia y rubro, importá un CSV o cargá una empresa manualmente. Esta lista muestra solo lo que existe en la base."
           }
           action={
             hasFilters ? (
@@ -227,6 +338,12 @@ export function ProspectsView() {
                   Buscar empresas
                 </Link>
                 <Link
+                  href="/imports"
+                  className={buttonStyles({ variant: "secondary", size: "sm" })}
+                >
+                  Importar CSV
+                </Link>
+                <Link
                   href="/prospects/new"
                   className={buttonStyles({ variant: "secondary", size: "sm" })}
                 >
@@ -238,7 +355,11 @@ export function ProspectsView() {
         />
       ) : (
         <>
-          <ProspectsTable companies={companies} />
+          <ProspectsTable
+            companies={companies}
+            onStatusChange={handleStatusChange}
+            updatingId={updatingId}
+          />
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-muted">
               Mostrando {from}–{to} de {pluralize(total, "empresa", "empresas")}

@@ -1,20 +1,31 @@
-import { apiRequest } from "./client";
+import { apiRequest, apiRequestFile } from "./client";
 import { normalizeCompany, normalizeCompanyPage } from "./normalize";
 import type {
   Company,
   CompanyFilters,
   CompanyInput,
   CompanyPage,
+  CompanyUpdateInput,
 } from "./types";
 
-function buildQuery(filters: CompanyFilters): string {
-  const params = new URLSearchParams();
+function appendFilters(
+  params: URLSearchParams,
+  filters: CompanyFilters,
+): void {
   if (filters.search_run_id) params.set("search_run_id", filters.search_run_id);
   if (filters.query && filters.query.trim().length > 0) {
     params.set("query", filters.query.trim());
   }
   if (filters.province) params.set("province", filters.province);
   if (filters.sector) params.set("sector", filters.sector);
+  if (filters.discovery_status) {
+    params.set("discovery_status", filters.discovery_status);
+  }
+}
+
+function buildQuery(filters: CompanyFilters): string {
+  const params = new URLSearchParams();
+  appendFilters(params, filters);
   if (filters.limit !== undefined) params.set("limit", String(filters.limit));
   if (filters.offset !== undefined) {
     params.set("offset", String(filters.offset));
@@ -63,4 +74,52 @@ export async function createCompany(input: CompanyInput): Promise<Company> {
     body: toPayload(input),
   });
   return normalizeCompany(payload);
+}
+
+/** Correcciones y cambios de estado (`PATCH /companies/{id}`). */
+export async function updateCompany(
+  id: string,
+  input: CompanyUpdateInput,
+): Promise<Company> {
+  const payload = await apiRequest<unknown>(
+    `/companies/${encodeURIComponent(id)}`,
+    { method: "PATCH", body: input },
+  );
+  return normalizeCompany(payload);
+}
+
+/** Ruta de exportación con los mismos filtros de la tabla, sin paginación. */
+export function companiesExportPath(filters: CompanyFilters = {}): string {
+  const params = new URLSearchParams();
+  appendFilters(params, filters);
+  const query = params.toString();
+  return `/companies/export.csv${query.length > 0 ? `?${query}` : ""}`;
+}
+
+function filenameFromDisposition(value: string | null): string | null {
+  if (!value) return null;
+  const utf8 = /filename\*=UTF-8''([^;]+)/i.exec(value);
+  if (utf8?.[1]) return decodeURIComponent(utf8[1]);
+  const plain = /filename="?([^";]+)"?/i.exec(value);
+  return plain?.[1] ?? null;
+}
+
+export interface ExportedFile {
+  blob: Blob;
+  filename: string;
+}
+
+/**
+ * Descarga el CSV de empresas respetando los filtros activos. El navegador
+ * envía la cookie de sesión, igual que el resto de las llamadas.
+ */
+export async function exportCompaniesCsv(
+  filters: CompanyFilters = {},
+): Promise<ExportedFile> {
+  const response = await apiRequestFile(companiesExportPath(filters));
+  const blob = await response.blob();
+  const filename =
+    filenameFromDisposition(response.headers.get("content-disposition")) ??
+    `empresas-${new Date().toISOString().slice(0, 10)}.csv`;
+  return { blob, filename };
 }

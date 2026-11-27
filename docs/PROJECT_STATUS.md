@@ -24,14 +24,14 @@ CRM. Es multiproducto: DOVEXO es el primer producto configurado, no código
 hardcodeado. Usa Next.js + FastAPI + SQLite en local, worker con cola persistente
 y fuentes gratuitas (OpenStreetMap/Overpass, CSV y alta manual).
 
-**Fase 2A completada y verificada localmente:** login, dashboard, productos,
+**Fase 2B completada y verificada localmente:** login, dashboard, productos,
 campañas, worker persistente, seed de DOVEXO, descubrimiento provincial con
-OpenStreetMap/Overpass, empresas, contactos, alta manual y deduplicación. Una
-búsqueda real en Córdoba/HVAC con límite 5 devolvió 5 empresas nuevas y 0
-duplicados. 70 tests backend, 53 frontend y build de 20 rutas. La API corre en
-`localhost:8001` y la web en `localhost:3001`. La búsqueda nacional, la ejecución
-completa de campañas y el CSV quedan para la Fase 2B; no se cargan datos
-ficticios.
+OpenStreetMap/Overpass, empresas, contactos, alta manual, deduplicación,
+importación CSV, campañas con una corrida por provincia y exportación CSV.
+Búsquedas reales: Córdoba/HVAC (5 empresas) y Buenos Aires/instalaciones
+eléctricas (5 empresas nuevas, 0 duplicados). 84 tests backend, 75 frontend y
+build de 20 rutas. La API corre en `localhost:8001` y la web en `localhost:3001`.
+Enriquecimiento, scoring, mensajes, WhatsApp y CRM son las fases 3-5.
 
 - Especificación: [`sales-agent/docs/SPEC.md`](../sales-agent/docs/SPEC.md)
 - Estado de implementación:
@@ -57,8 +57,11 @@ ficticios.
 - [x] Implementar la Fase 2A del Sales Agent: descubrimiento provincial
   OSM/Overpass, empresas, contactos, alta manual y deduplicación (70 tests
   backend + 53 frontend; búsqueda real con 5 empresas).
-- [ ] Implementar la Fase 2B del Sales Agent: CSV, búsqueda nacional y ejecución
-  completa de campañas por provincia/rubro.
+- [x] Implementar la Fase 2B del Sales Agent: CSV, campañas con una corrida por
+  provincia, revisión de duplicados y exportación CSV (84 tests backend + 75
+  frontend; campaña real de Buenos Aires con 5 empresas).
+- [ ] Implementar enriquecimiento, scoring, mensajes, WhatsApp y CRM del Sales
+  Agent (fases 3-5).
 - [ ] Cerrar la auditoría externa de DOVEXO (legal, exportación CSV, soporte,
   backups).
 - [ ] Aplicar la migración de planes de DOVEXO en Neon.

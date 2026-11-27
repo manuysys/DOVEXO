@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, require_admin
+from app.core.constants import PROVINCE_CODES
 from app.database.session import get_db
 from app.models import SearchRun, User
 from app.schemas.search_run import SearchRunCreate, SearchRunRead
@@ -19,6 +20,8 @@ from app.services.search_runs import (
 )
 
 router = APIRouter(prefix="/search-runs", tags=["search-runs"])
+
+_SEARCH_RUN_STATUSES = frozenset({"pending", "running", "completed", "failed", "cancelled"})
 
 
 def _get_search_run_or_404(db: Session, search_run_id: int) -> SearchRun:
@@ -53,12 +56,42 @@ def create_search_run_endpoint(
 
 @router.get("", response_model=list[SearchRunRead])
 def list_search_runs_endpoint(
+    campaign_id: int | None = Query(default=None, ge=1),
+    status_filter: str | None = Query(default=None, alias="status", max_length=20),
+    province_code: str | None = Query(default=None, max_length=10),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     _user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> list[SearchRunRead]:
-    runs = db.scalars(select(SearchRun).order_by(SearchRun.id.desc()).offset(offset).limit(limit))
+    conditions = []
+    if campaign_id is not None:
+        conditions.append(SearchRun.campaign_id == campaign_id)
+
+    if status_filter is not None:
+        if status_filter not in _SEARCH_RUN_STATUSES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Estado de búsqueda inválido: {status_filter}",
+            )
+        conditions.append(SearchRun.status == status_filter)
+
+    if province_code is not None:
+        code = province_code.strip().upper()
+        if code not in PROVINCE_CODES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Provincia desconocida: {province_code}",
+            )
+        conditions.append(SearchRun.search_config["province_code"].as_string() == code)
+
+    runs = db.scalars(
+        select(SearchRun)
+        .where(*conditions)
+        .order_by(SearchRun.id.desc())
+        .offset(offset)
+        .limit(limit)
+    )
     return [SearchRunRead.model_validate(run) for run in runs]
 
 

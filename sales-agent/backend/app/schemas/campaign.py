@@ -48,7 +48,22 @@ class CampaignRead(BaseModel):
     updated_at: datetime
 
 
+class CampaignRunSummary(BaseModel):
+    id: int
+    province_code: str
+    status: str
+
+
 class CampaignStartResponse(BaseModel):
     campaign: CampaignRead
-    search_run_id: int
-    job_id: int
+    search_runs: list[CampaignRunSummary]
+    total_jobs: int
+
+
+class CampaignDetailRead(CampaignRead):
+    search_runs_total: int = 0
+    search_runs_pending: int = 0
+    search_runs_running: int = 0
+    search_runs_completed: int = 0
+    search_runs_failed: int = 0
+    search_runs_cancelled: int = 0

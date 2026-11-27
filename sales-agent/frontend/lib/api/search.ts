@@ -1,6 +1,10 @@
 import { apiRequest } from "./client";
 import { normalizeSearchRun, normalizeSearchRuns } from "./normalize";
-import type { SearchRun, SearchRunInput } from "./types";
+import type {
+  SearchRun,
+  SearchRunFilters,
+  SearchRunInput,
+} from "./types";
 
 /** Payload del POST: no se envían claves vacías ni `null`. */
 function toPayload(input: SearchRunInput): Record<string, unknown> {
@@ -18,8 +22,19 @@ function toPayload(input: SearchRunInput): Record<string, unknown> {
   return payload;
 }
 
-export async function listSearchRuns(): Promise<SearchRun[]> {
-  const payload = await apiRequest<unknown>("/search-runs");
+export async function listSearchRuns(
+  filters: SearchRunFilters = {},
+): Promise<SearchRun[]> {
+  const params = new URLSearchParams();
+  if (filters.campaign_id) params.set("campaign_id", filters.campaign_id);
+  if (filters.limit !== undefined) params.set("limit", String(filters.limit));
+  if (filters.offset !== undefined) {
+    params.set("offset", String(filters.offset));
+  }
+  const query = params.toString();
+  const payload = await apiRequest<unknown>(
+    `/search-runs${query.length > 0 ? `?${query}` : ""}`,
+  );
   return normalizeSearchRuns(payload);
 }
 

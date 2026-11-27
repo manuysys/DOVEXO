@@ -1,5 +1,7 @@
 import type {
   Campaign,
+  CampaignSearchRunRef,
+  CampaignStartResult,
   CampaignStatus,
   Company,
   CompanyContact,
@@ -7,6 +9,11 @@ import type {
   CompanySource,
   DashboardJob,
   DashboardMetrics,
+  ImportBatch,
+  ImportConfirmResult,
+  ImportPreview,
+  ImportPreviewRow,
+  ImportRowError,
   Product,
   ProvinceOption,
   SearchRun,
@@ -228,6 +235,30 @@ export function normalizeCampaign(payload: unknown): Campaign {
     search_config: readRecord(record, ["search_config", "searchConfig"]),
     status: normalizeCampaignStatus(rawStatus),
     raw_status: rawStatus,
+    search_runs_total: readNumber(record, [
+      "search_runs_total",
+      "searchRunsTotal",
+    ]),
+    search_runs_pending: readNumber(record, [
+      "search_runs_pending",
+      "searchRunsPending",
+    ]),
+    search_runs_running: readNumber(record, [
+      "search_runs_running",
+      "searchRunsRunning",
+    ]),
+    search_runs_completed: readNumber(record, [
+      "search_runs_completed",
+      "searchRunsCompleted",
+    ]),
+    search_runs_failed: readNumber(record, [
+      "search_runs_failed",
+      "searchRunsFailed",
+    ]),
+    search_runs_cancelled: readNumber(record, [
+      "search_runs_cancelled",
+      "searchRunsCancelled",
+    ]),
     created_at: readNullableString(record, ["created_at", "createdAt"]),
     updated_at: readNullableString(record, ["updated_at", "updatedAt"]),
   };
@@ -605,4 +636,216 @@ export function normalizeCompanyPage(payload: unknown): CompanyPage {
     limit: readNumber(record, ["limit", "page_size"], items.length),
     offset: readNumber(record, ["offset", "skip"], 0),
   };
+}
+
+export function normalizeCampaignSearchRunRef(
+  payload: unknown,
+): CampaignSearchRunRef {
+  const record = isRecord(payload) ? payload : {};
+  const rawStatus = readString(record, ["status", "state"], "pending");
+  return {
+    id: readId(record),
+    province_code: readString(record, [
+      "province_code",
+      "provinceCode",
+      "province",
+    ]),
+    province_name: readNullableString(record, [
+      "province_name",
+      "provinceName",
+      "location",
+    ]),
+    status: normalizeSearchRunStatus(rawStatus),
+    raw_status: rawStatus,
+  };
+}
+
+/**
+ * `POST /campaigns/{id}/start` devuelve `{ campaign, search_runs, total_jobs }`.
+ * Se tolera también la respuesta anterior, que era la campaña sola.
+ */
+export function normalizeCampaignStart(payload: unknown): CampaignStartResult {
+  if (!isRecord(payload)) {
+    return { campaign: null, search_runs: [], total_jobs: 0 };
+  }
+
+  const nested = isRecord(payload.campaign) ? payload.campaign : null;
+  const campaign = normalizeCampaign(nested ?? payload);
+  const rawRuns = payload.search_runs ?? payload.searchRuns ?? payload.runs;
+  const searchRuns = Array.isArray(rawRuns)
+    ? rawRuns.map(normalizeCampaignSearchRunRef)
+    : [];
+
+  return {
+    campaign: campaign.id ? campaign : null,
+    search_runs: searchRuns,
+    total_jobs: readNumber(
+      payload,
+      ["total_jobs", "totalJobs"],
+      searchRuns.length,
+    ),
+  };
+}
+
+function normalizeImportRowError(payload: unknown): ImportRowError | null {
+  if (typeof payload === "string") {
+    const message = payload.trim();
+    return message.length > 0 ? { row_number: 0, message } : null;
+  }
+  if (!isRecord(payload)) return null;
+  const message = readString(payload, ["message", "detail", "error", "msg"]);
+  if (message.trim().length === 0) return null;
+  return {
+    row_number: readNumber(payload, ["row_number", "rowNumber", "row", "line"]),
+    message,
+  };
+}
+
+function normalizeImportErrors(payload: unknown): ImportRowError[] {
+  if (!Array.isArray(payload)) return [];
+  return payload
+    .map(normalizeImportRowError)
+    .filter((error): error is ImportRowError => error !== null);
+}
+
+const VALID_ROW_STATUSES = new Set(["", "valid", "ok", "new", "ready"]);
+const DUPLICATE_ROW_STATUSES = new Set([
+  "duplicate",
+  "duplicated",
+  "possible_duplicate",
+  "possible-duplicate",
+]);
+
+function normalizeImportPreviewRow(payload: unknown): ImportPreviewRow {
+  const record = isRecord(payload) ? payload : {};
+  const baseStatus = readString(record, ["status", "state"], "valid").toLowerCase();
+  const possibleDuplicate = readBoolean(record, [
+    "possible_duplicate",
+    "possibleDuplicate",
+  ]);
+  const status =
+    possibleDuplicate && VALID_ROW_STATUSES.has(baseStatus)
+      ? "possible_duplicate"
+      : baseStatus;
+  const errors = readStringArray(record, ["errors", "messages"]);
+  const message = readNullableString(record, ["message", "detail"]);
+
+  return {
+    row_number: readNumber(record, ["row_number", "rowNumber", "row", "line"]),
+    name: readString(record, ["name", "company", "razon_social"]),
+    website: readNullableString(record, ["website", "web", "url"]),
+    province: readNullableString(record, ["province", "provincia"]),
+    locality: readNullableString(record, ["locality", "localidad", "city"]),
+    phone: readNullableString(record, ["phone", "telefono", "phone_number"]),
+    email: readNullableString(record, ["email", "mail"]),
+    sectors: readStringArray(record, ["sectors", "sector_slugs", "rubros"]),
+    status,
+    errors:
+      errors.length > 0
+        ? errors
+        : message && message.trim().length > 0
+          ? [message]
+          : [],
+  };
+}
+
+export function normalizeImportPreview(payload: unknown): ImportPreview {
+  const record = isRecord(payload) ? payload : {};
+  const preview = extractItems(payload, ["preview", "rows", "items"]).map(
+    normalizeImportPreviewRow,
+  );
+  const invalidFromRows = preview.filter(
+    (row) =>
+      !VALID_ROW_STATUSES.has(row.status) &&
+      !DUPLICATE_ROW_STATUSES.has(row.status),
+  ).length;
+  const duplicatesFromRows = preview.filter((row) =>
+    DUPLICATE_ROW_STATUSES.has(row.status),
+  ).length;
+
+  return {
+    batch_id: readId(record) || readString(record, ["batch_id", "batchId"]),
+    filename: readString(record, ["filename", "file_name", "fileName"]),
+    total_rows: readNumber(
+      record,
+      ["total_rows", "totalRows"],
+      preview.length,
+    ),
+    valid_rows: readNumber(
+      record,
+      ["valid_rows", "validRows"],
+      Math.max(preview.length - invalidFromRows - duplicatesFromRows, 0),
+    ),
+    invalid_rows: readNumber(
+      record,
+      ["invalid_rows", "invalidRows"],
+      invalidFromRows,
+    ),
+    duplicates: readNumber(
+      record,
+      ["duplicates", "duplicated"],
+      duplicatesFromRows,
+    ),
+    preview,
+    errors: normalizeImportErrors(record.errors),
+  };
+}
+
+export function normalizeImportConfirm(payload: unknown): ImportConfirmResult {
+  const record = isRecord(payload) ? payload : {};
+  return {
+    batch_id: readId(record) || readString(record, ["batch_id", "batchId"]),
+    created: readNumber(record, [
+      "created",
+      "created_companies",
+      "imported",
+      "successful_rows",
+    ]),
+    skipped: readNumber(record, ["skipped", "skipped_rows", "duplicates"]),
+    errors: normalizeImportErrors(record.errors),
+  };
+}
+
+export function normalizeImportBatch(payload: unknown): ImportBatch {
+  const record = extractObject(payload, ["batch", "import", "data"]);
+  const reportUrl = readNullableString(record, [
+    "report_url",
+    "reportUrl",
+    "report",
+  ]);
+  return {
+    id: readId(record),
+    filename: readString(record, ["filename", "file_name", "fileName"]),
+    status: readString(record, ["status", "state"], "unknown").toLowerCase(),
+    total_rows: readNumber(record, ["total_rows", "totalRows"]),
+    created: readNumber(record, [
+      "created",
+      "created_companies",
+      "imported",
+      "successful_rows",
+    ]),
+    skipped: readNumber(record, ["skipped", "skipped_rows"]),
+    duplicates: readNumber(record, [
+      "duplicates",
+      "duplicated",
+      "duplicate_rows",
+      "duplicateRows",
+    ]),
+    imported_at: readNullableString(record, [
+      "imported_at",
+      "importedAt",
+      "created_at",
+      "createdAt",
+    ]),
+    confirmed_at: readNullableString(record, [
+      "confirmed_at",
+      "confirmedAt",
+    ]),
+    errors: normalizeImportErrors(record.errors),
+    report_url: reportUrl ?? null,
+  };
+}
+
+export function normalizeImports(payload: unknown): ImportBatch[] {
+  return extractItems(payload, ["imports", "batches"]).map(normalizeImportBatch);
 }

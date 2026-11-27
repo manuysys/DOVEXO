@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import csv
+import io
+
 from fastapi.testclient import TestClient
 
 
@@ -263,3 +266,116 @@ def test_companies_filters_and_pagination(auth_client: TestClient) -> None:
 def test_companies_require_session(client: TestClient) -> None:
     assert client.get("/api/v1/companies").status_code == 401
     assert client.post("/api/v1/companies", json={"name": "Sin sesión"}).status_code == 401
+
+
+def test_possible_duplicates_can_be_filtered_and_resolved(auth_client: TestClient) -> None:
+    _create(auth_client, name="Refrigeración del Sur", locality="Córdoba")
+    fuzzy = _create(auth_client, name="Refrigeraciones del Sur", locality="Córdoba")
+    assert fuzzy["discovery_status"] == "possible_duplicate"
+
+    possible = auth_client.get(
+        "/api/v1/companies", params={"discovery_status": "possible_duplicate"}
+    ).json()
+    assert possible["total"] == 1
+    assert possible["items"][0]["id"] == fuzzy["id"]
+
+    resolved = auth_client.patch(
+        f"/api/v1/companies/{fuzzy['id']}", json={"discovery_status": "discovered"}
+    )
+    assert resolved.status_code == 200
+    assert resolved.json()["discovery_status"] == "discovered"
+
+    assert (
+        auth_client.get(
+            "/api/v1/companies", params={"discovery_status": "possible_duplicate"}
+        ).json()["total"]
+        == 0
+    )
+
+    rejected = auth_client.patch(
+        f"/api/v1/companies/{fuzzy['id']}", json={"discovery_status": "rejected"}
+    )
+    assert rejected.status_code == 200
+    assert rejected.json()["discovery_status"] == "rejected"
+
+    invalid = auth_client.get("/api/v1/companies", params={"discovery_status": "no-existe"})
+    assert invalid.status_code == 400
+
+    invalid_patch = auth_client.patch(
+        f"/api/v1/companies/{fuzzy['id']}", json={"discovery_status": "no-existe"}
+    )
+    assert invalid_patch.status_code == 422
+
+
+def test_export_csv_headers_filters_and_formula_neutralization(
+    auth_client: TestClient,
+) -> None:
+    dangerous = _create(
+        auth_client,
+        name="=SUM(1,1)",
+        website="formula.com.ar",
+        phone="+54 351 455 6677",
+        province="AR-X",
+        locality="Córdoba",
+        sector_slugs=["hvac"],
+    )
+    _create(
+        auth_client,
+        name="Empresa Exportable",
+        website="exportable.com.ar",
+        province="AR-B",
+        locality="La Plata",
+        sector_slugs=["it_support"],
+    )
+
+    response = auth_client.get("/api/v1/companies/export.csv")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/csv")
+    assert response.content.startswith(b"\xef\xbb\xbf")
+
+    text = response.content.decode("utf-8-sig")
+    rows = list(csv.reader(io.StringIO(text)))
+    headers = rows[0]
+    assert headers == [
+        "ID",
+        "Nombre",
+        "Descripción",
+        "Sitio web",
+        "Provincia",
+        "Localidad",
+        "Dirección",
+        "Estado",
+        "Rubros",
+        "Teléfono principal",
+        "Email principal",
+        "WhatsApp",
+        "Fuente",
+        "Creada",
+    ]
+    assert len(rows) == 3
+
+    name_index = headers.index("Nombre")
+    phone_index = headers.index("Teléfono principal")
+    dangerous_row = next(row for row in rows[1:] if row[name_index] == "'=SUM(1,1)")
+    assert dangerous_row[phone_index] == "'+543514556677"
+
+    # Los datos guardados no se alteran.
+    stored = auth_client.get(f"/api/v1/companies/{dangerous['id']}").json()
+    assert stored["name"] == "=SUM(1,1)"
+
+    filtered = auth_client.get("/api/v1/companies/export.csv", params={"query": "Exportable"})
+    filtered_rows = list(csv.reader(io.StringIO(filtered.content.decode("utf-8-sig"))))
+    assert len(filtered_rows) == 2
+    assert filtered_rows[1][name_index] == "Empresa Exportable"
+
+    by_province = auth_client.get("/api/v1/companies/export.csv", params={"province": "AR-B"})
+    province_rows = list(csv.reader(io.StringIO(by_province.content.decode("utf-8-sig"))))
+    assert len(province_rows) == 2
+
+    by_sector = auth_client.get("/api/v1/companies/export.csv", params={"sector": "it_support"})
+    sector_rows = list(csv.reader(io.StringIO(by_sector.content.decode("utf-8-sig"))))
+    assert len(sector_rows) == 2
+
+
+def test_export_requires_session(client: TestClient) -> None:
+    assert client.get("/api/v1/companies/export.csv").status_code == 401

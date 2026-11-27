@@ -6,11 +6,18 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { createCompany, getCompany, listCompanies } from "@/lib/api/companies";
+import {
+  createCompany,
+  exportCompaniesCsv,
+  getCompany,
+  listCompanies,
+  updateCompany,
+} from "@/lib/api/companies";
 import type {
   Company,
   CompanyFilters,
   CompanyInput,
+  CompanyUpdateInput,
 } from "@/lib/api/types";
 
 export const companyKeys = {
@@ -49,5 +56,30 @@ export function useCreateCompany() {
         queryClient.invalidateQueries({ queryKey: ["search-runs"] }),
       ]);
     },
+  });
+}
+
+/** Correcciones y cambios de estado (por ejemplo, resolver un duplicado). */
+export function useUpdateCompany() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: CompanyUpdateInput }) =>
+      updateCompany(id, input),
+    onSuccess: (company) => {
+      if (company.id) {
+        queryClient.setQueryData(companyKeys.detail(company.id), company);
+      }
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: companyKeys.all }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+      ]);
+    },
+  });
+}
+
+/** Descarga el CSV con los filtros activos de la tabla. */
+export function useExportCompanies() {
+  return useMutation({
+    mutationFn: (filters: CompanyFilters) => exportCompaniesCsv(filters),
   });
 }

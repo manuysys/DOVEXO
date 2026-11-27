@@ -8,6 +8,7 @@ from app.api.v1 import (
     companies,
     dashboard,
     health,
+    imports,
     jobs,
     meta,
     products,
@@ -22,5 +23,6 @@ api_router.include_router(products.router)
 api_router.include_router(campaigns.router)
 api_router.include_router(search_runs.router)
 api_router.include_router(companies.router)
+api_router.include_router(imports.router)
 api_router.include_router(dashboard.router)
 api_router.include_router(jobs.router)

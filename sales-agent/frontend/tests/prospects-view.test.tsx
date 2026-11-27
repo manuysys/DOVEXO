@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import { ProspectsView } from "@/components/prospects/prospects-view";
-import { useCompanies } from "@/hooks/use-companies";
+import {
+  useCompanies,
+  useExportCompanies,
+  useUpdateCompany,
+} from "@/hooks/use-companies";
 import { useSectors } from "@/hooks/use-dashboard";
 import { useProvinces } from "@/hooks/use-provinces";
 import { useSearchRuns } from "@/hooks/use-search-runs";
@@ -15,7 +19,11 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-vi.mock("@/hooks/use-companies", () => ({ useCompanies: vi.fn() }));
+vi.mock("@/hooks/use-companies", () => ({
+  useCompanies: vi.fn(),
+  useUpdateCompany: vi.fn(),
+  useExportCompanies: vi.fn(),
+}));
 vi.mock("@/hooks/use-provinces", () => ({ useProvinces: vi.fn() }));
 vi.mock("@/hooks/use-dashboard", () => ({ useSectors: vi.fn() }));
 vi.mock("@/hooks/use-search-runs", () => ({ useSearchRuns: vi.fn() }));
@@ -33,6 +41,16 @@ function mockMeta() {
     data: [],
     isError: false,
   } as unknown as ReturnType<typeof useSearchRuns>);
+  vi.mocked(useUpdateCompany).mockReturnValue({
+    mutate: vi.fn(),
+    isError: false,
+    isPending: false,
+  } as unknown as ReturnType<typeof useUpdateCompany>);
+  vi.mocked(useExportCompanies).mockReturnValue({
+    mutate: vi.fn(),
+    isError: false,
+    isPending: false,
+  } as unknown as ReturnType<typeof useExportCompanies>);
 }
 
 describe("ProspectsView", () => {

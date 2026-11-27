@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Company } from "@/lib/api/types";
 import { formatDate } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { CompanyStatusBadge } from "./company-status-badge";
 
 function externalHref(value: string): string {
@@ -19,10 +20,76 @@ function whatsappHref(value: string): string {
   return `https://wa.me/${value.replace(/\D/g, "")}`;
 }
 
-export function ProspectsTable({ companies }: { companies: Company[] }) {
+export interface ProspectsTableProps {
+  companies: Company[];
+  /** Marca o descarta una empresa; el backend guarda el nuevo estado. */
+  onStatusChange?: (
+    company: Company,
+    status: "discovered" | "rejected",
+  ) => void;
+  updatingId?: string | null;
+}
+
+function StatusActions({
+  company,
+  onStatusChange,
+  updatingId,
+}: {
+  company: Company;
+  onStatusChange?: ProspectsTableProps["onStatusChange"];
+  updatingId?: string | null;
+}) {
+  if (!onStatusChange) {
+    return <span className="text-xs text-muted">—</span>;
+  }
+  const status = company.discovery_status.trim().toLowerCase();
+  const busy = updatingId === company.id;
+
+  return (
+    <div className="flex justify-end gap-1">
+      {status === "possible_duplicate" ||
+      status === "possible-duplicate" ||
+      status === "duplicate" ? (
+        <Button
+          variant="secondary"
+          size="sm"
+          disabled={busy}
+          onClick={() => onStatusChange(company, "discovered")}
+        >
+          No es duplicado
+        </Button>
+      ) : null}
+      {status === "rejected" ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={busy}
+          onClick={() => onStatusChange(company, "discovered")}
+        >
+          Restaurar
+        </Button>
+      ) : (
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={busy}
+          onClick={() => onStatusChange(company, "rejected")}
+        >
+          Descartar
+        </Button>
+      )}
+    </div>
+  );
+}
+
+export function ProspectsTable({
+  companies,
+  onStatusChange,
+  updatingId = null,
+}: ProspectsTableProps) {
   return (
     <div className="overflow-x-auto rounded-lg border border-line bg-surface">
-      <table className="w-full min-w-[1080px] border-collapse text-sm">
+      <table className="w-full min-w-[1180px] border-collapse text-sm">
         <thead>
           <tr className="border-b border-line bg-canvas/60 text-left text-xs font-semibold tracking-wide text-muted uppercase">
             <th className="px-4 py-3">Nombre</th>
@@ -34,6 +101,7 @@ export function ProspectsTable({ companies }: { companies: Company[] }) {
             <th className="px-4 py-3">WhatsApp</th>
             <th className="px-4 py-3">Estado</th>
             <th className="px-4 py-3">Descubierta</th>
+            <th className="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-line">
@@ -119,6 +187,13 @@ export function ProspectsTable({ companies }: { companies: Company[] }) {
               </td>
               <td className="px-4 py-3 text-xs text-muted">
                 {formatDate(company.created_at)}
+              </td>
+              <td className="px-4 py-3">
+                <StatusActions
+                  company={company}
+                  onStatusChange={onStatusChange}
+                  updatingId={updatingId}
+                />
               </td>
             </tr>
           ))}

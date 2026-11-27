@@ -7,6 +7,8 @@ const STATUS_LABELS: Record<string, string> = {
   verified: "Verificada",
   manual: "Carga manual",
   duplicate: "Duplicada",
+  possible_duplicate: "Posible duplicado",
+  "possible-duplicate": "Posible duplicado",
   rejected: "Descartada",
   pending: "Pendiente",
 };
@@ -17,19 +19,22 @@ const STATUS_VARIANTS: Record<string, BadgeVariant> = {
   verified: "success",
   manual: "neutral",
   duplicate: "warning",
+  possible_duplicate: "warning",
+  "possible-duplicate": "warning",
   rejected: "danger",
   pending: "neutral",
 };
 
+export function companyStatusLabel(status: string): string {
+  const key = status.trim().toLowerCase();
+  return STATUS_LABELS[key] ?? (status.trim().length > 0 ? status : "Sin estado");
+}
+
 export function CompanyStatusBadge({ status }: { status: string }) {
   const key = status.trim().toLowerCase();
-  const label = STATUS_LABELS[key];
-  if (!label) {
-    return (
-      <Badge variant="neutral">
-        {status.trim().length > 0 ? status : "Sin estado"}
-      </Badge>
-    );
-  }
-  return <Badge variant={STATUS_VARIANTS[key] ?? "neutral"}>{label}</Badge>;
+  return (
+    <Badge variant={STATUS_VARIANTS[key] ?? "neutral"}>
+      {companyStatusLabel(status)}
+    </Badge>
+  );
 }

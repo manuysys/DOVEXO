@@ -156,3 +156,35 @@ def test_search_run_can_reference_campaign_in_db(auth_client: TestClient) -> Non
         assert stored is not None
         assert stored.campaign_id == campaign_id
         assert db.get(Campaign, campaign_id) is not None
+
+
+def test_search_runs_filters(auth_client: TestClient) -> None:
+    campaign = auth_client.post(
+        "/api/v1/campaigns",
+        json={
+            "product_id": auth_client.get("/api/v1/products").json()[0]["id"],
+            "name": "Campaña filtros",
+            "province_filters": ["AR-X", "AR-B"],
+            "sector_filters": ["hvac"],
+        },
+    ).json()
+    started = auth_client.post(f"/api/v1/campaigns/{campaign['id']}/start").json()
+
+    by_campaign = auth_client.get(
+        "/api/v1/search-runs", params={"campaign_id": campaign["id"]}
+    ).json()
+    assert len(by_campaign) == 2
+    assert {run["id"] for run in by_campaign} == {run["id"] for run in started["search_runs"]}
+
+    by_province = auth_client.get("/api/v1/search-runs", params={"province_code": "AR-X"}).json()
+    assert len(by_province) == 1
+    assert by_province[0]["search_config"]["province_code"] == "AR-X"
+
+    by_status = auth_client.get("/api/v1/search-runs", params={"status": "pending"}).json()
+    assert len(by_status) == 2
+
+    invalid_status = auth_client.get("/api/v1/search-runs", params={"status": "no-existe"})
+    assert invalid_status.status_code == 400
+
+    invalid_province = auth_client.get("/api/v1/search-runs", params={"province_code": "AR-XX"})
+    assert invalid_province.status_code == 400

@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, require_admin
+from app.core.constants import COMPANY_DISCOVERY_STATUSES
 from app.database.session import get_db
 from app.models import Company, Contact, Sector, User
 from app.repositories.companies import (
@@ -16,6 +17,7 @@ from app.repositories.companies import (
     get_company_sources,
     list_companies,
     load_company_relations,
+    load_company_sources,
 )
 from app.schemas.company import (
     CompanyCreate,
@@ -37,6 +39,7 @@ from app.services.companies import (
     create_manual_company,
     update_company,
 )
+from app.services.companies_export import build_rows, render_csv
 
 router = APIRouter(prefix="/companies", tags=["companies"])
 
@@ -116,6 +119,7 @@ def list_companies_endpoint(
     query: str | None = Query(default=None, max_length=200),
     province: str | None = Query(default=None, max_length=120),
     sector: str | None = Query(default=None, max_length=80),
+    discovery_status: str | None = Query(default=None, max_length=40),
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     _user: User = Depends(get_current_user),
@@ -127,6 +131,11 @@ def list_companies_endpoint(
             canonical = canonical_province(province)
         except CompanyValidationError as exc:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    if discovery_status and discovery_status not in COMPANY_DISCOVERY_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Estado de descubrimiento inválido: {discovery_status}",
+        )
 
     companies, total = list_companies(
         db,
@@ -134,6 +143,7 @@ def list_companies_endpoint(
         query=query,
         province=canonical,
         sector=sector,
+        discovery_status=discovery_status,
         limit=limit,
         offset=offset,
     )
@@ -150,6 +160,57 @@ def list_companies_endpoint(
         for company in companies
     ]
     return CompanyListResponse(items=items, total=total, limit=limit, offset=offset)
+
+
+@router.get("/export.csv")
+def export_companies_endpoint(
+    search_run_id: int | None = Query(default=None, ge=1),
+    query: str | None = Query(default=None, max_length=200),
+    province: str | None = Query(default=None, max_length=120),
+    sector: str | None = Query(default=None, max_length=80),
+    discovery_status: str | None = Query(default=None, max_length=40),
+    _admin: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> Response:
+    canonical = None
+    if province:
+        try:
+            canonical = canonical_province(province)
+        except CompanyValidationError as exc:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    if discovery_status and discovery_status not in COMPANY_DISCOVERY_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Estado de descubrimiento inválido: {discovery_status}",
+        )
+
+    companies, _total = list_companies(
+        db,
+        search_run_id=search_run_id,
+        query=query,
+        province=canonical,
+        sector=sector,
+        discovery_status=discovery_status,
+        limit=None,
+        offset=0,
+    )
+    contacts_map, sectors_map, _source_counts = load_company_relations(
+        db, [company.id for company in companies]
+    )
+    sources_map = load_company_sources(db, [company.id for company in companies])
+    content = render_csv(
+        build_rows(
+            companies,
+            contacts=contacts_map,
+            sectors=sectors_map,
+            sources=sources_map,
+        )
+    )
+    return Response(
+        content=content,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="empresas.csv"'},
+    )
 
 
 @router.get("/{company_id}", response_model=CompanyDetailRead)

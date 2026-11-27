@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import csv
+import io
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -111,6 +114,11 @@ def test_worker_saves_companies_sources_contacts_and_sectors(
         source["source_url"].startswith("https://www.openstreetmap.org/")
         for source in detail["sources"]
     )
+
+    exported = auth_client.get("/api/v1/companies/export.csv", params={"search_run_id": run["id"]})
+    exported_rows = list(csv.reader(io.StringIO(exported.content.decode("utf-8-sig"))))
+    assert len(exported_rows) == 2
+    assert exported_rows[1][1] == "Frío Córdoba"
 
 
 def test_worker_marks_fuzzy_match_as_possible_duplicate(

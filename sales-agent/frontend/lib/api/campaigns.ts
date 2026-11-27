@@ -1,6 +1,14 @@
 import { apiRequest } from "./client";
-import { normalizeCampaign, normalizeCampaigns } from "./normalize";
-import type { Campaign, CampaignInput } from "./types";
+import {
+  normalizeCampaign,
+  normalizeCampaignStart,
+  normalizeCampaigns,
+} from "./normalize";
+import type {
+  Campaign,
+  CampaignInput,
+  CampaignStartResult,
+} from "./types";
 
 export async function listCampaigns(): Promise<Campaign[]> {
   const payload = await apiRequest<unknown>("/campaigns");
@@ -24,7 +32,19 @@ export async function createCampaign(
   return normalizeCampaign(payload);
 }
 
-type CampaignAction = "start" | "pause" | "cancel";
+/**
+ * `POST /campaigns/{id}/start` crea una corrida por provincia y devuelve
+ * `{ campaign, search_runs, total_jobs }`.
+ */
+export async function startCampaign(id: string): Promise<CampaignStartResult> {
+  const payload = await apiRequest<unknown>(
+    `/campaigns/${encodeURIComponent(id)}/start`,
+    { method: "POST" },
+  );
+  return normalizeCampaignStart(payload);
+}
+
+export type CampaignAction = "pause" | "cancel";
 
 export async function runCampaignAction(
   id: string,

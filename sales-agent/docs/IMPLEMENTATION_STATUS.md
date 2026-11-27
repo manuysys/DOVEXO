@@ -1,69 +1,64 @@
 # Estado de implementación — ARVOKTA Sales Agent
 
 **Última actualización:** 2026-11-27
-**Fase actual:** Fase 2A completada y verificada localmente; Fase 2B pendiente.
+**Fase actual:** Fase 2B completada y verificada localmente; Fase 3 y outreach
+pendientes.
 
 ## Fase 0 — Estructura y especificación
 
-- [x] Repositorio ARVOKTA con `products/dovexo` y `sales-agent`.
-- [x] Especificación en `sales-agent/docs/SPEC.md`.
-- [x] `AGENTS.md`, README y documentación base.
-- [x] Stack y restricciones de costo cero.
-- [x] Scripts PowerShell.
+- [x] Monorepo ARVOKTA con `products/dovexo` y `sales-agent`.
+- [x] Especificación, AGENTS, README y documentación base.
+- [x] Stack, restricciones de costo cero y scripts PowerShell.
 
 ## Fase 1 — Núcleo funcional
 
-- [x] Backend FastAPI, SQLite con WAL, Alembic.
-- [x] Login Argon2id, JWT en cookie HttpOnly, `/me`, logout; sin registro público.
-- [x] Productos CRUD con DOVEXO precargado.
-- [x] Siete rubros y 24 provincias.
-- [x] Campañas CRUD, start/pause/cancel.
-- [x] Campaña inicial `DOVEXO — Argentina — Prospección inicial`.
-- [x] Dashboard con métricas reales y ceros sin datos.
-- [x] Worker persistente con cola `jobs`.
-- [x] Frontend Next.js: login, layout, dashboard, productos, campañas, detalle.
-- [x] Tests: 33 backend, 29 frontend; build de 19 rutas.
+- [x] Backend FastAPI, SQLite WAL, Alembic, auth con cookie HttpOnly y Argon2id.
+- [x] Productos CRUD, DOVEXO precargado, siete rubros y 24 provincias.
+- [x] Campañas CRUD, dashboard, worker persistente, campaña inicial.
+- [x] Frontend login, layout, dashboard, productos y campañas.
+- [x] 33 tests backend, 29 frontend.
 
 ## Fase 2A — Descubrimiento provincial
 
-Implementado y verificado localmente:
+- [x] `OverpassProvider` con HTTPX, reintentos, backoff y límites.
+- [x] Búsqueda por provincia/rubro; empresas, sectores, fuentes OSM y contactos.
+- [x] Worker `search_run`, deduplicación y alta manual.
+- [x] `/search`, `/prospects`, detalle, alta manual e historial.
+- [x] 70 tests backend, 53 frontend; búsqueda real Córdoba/HVAC con 5 empresas.
 
-- [x] `CompanyDiscoveryProvider` y `OverpassProvider` con HTTPX, timeout,
-  reintentos, backoff, User-Agent y URL configurable.
-- [x] Búsqueda por provincia argentina (`ISO3166-2`) y por rubro, con límite
-  total; una consulta por rubro, sin consultas gigantes.
-- [x] Guardado de empresas, sectores, fuentes OSM y contactos publicados
-  (teléfono, email, web, WhatsApp publicado).
-- [x] `search_runs` con estado, conteos, error, `search_config`, `limit` y
-  `company_sources.search_run_id`.
-- [x] Worker `search_run`: ejecuta el provider, guarda, deduplica y actualiza
-  contadores; cancelación y retry.
-- [x] Deduplicación por dominio, teléfono, URL OSM, nombre + localidad y
-  RapidFuzz; duplicados exactos se omiten, posibles duplicados quedan marcados
-  para revisión. No hay fusión automática.
-- [x] API: `/search-runs`, `/companies`, detalle, alta manual, contactos.
-- [x] Frontend: `/search` real con polling, `/prospects` con filtros y
-  paginación, `/prospects/[id]`, `/prospects/new`, `/search-history`.
-- [x] 70 tests backend, 53 tests frontend, build de 20 rutas.
+## Fase 2B — Importación, campañas y exportación
+
+- [x] Importación CSV con preview, validación, duplicados, confirmación
+  idempotente e historial. Límites: 2 MB / 500 filas; columnas `nombre` y
+  `rubros` obligatorias.
+- [x] Una búsqueda por provincia al iniciar una campaña; jobs `search_run`
+  encolados; pausa/cancelación; conteos y progreso en la UI.
+- [x] Revisión de `possible_duplicate`: filtrar, marcar como descubierta o
+  descartada, sin borrar.
+- [x] Exportación CSV de empresas con filtros, BOM, contactos y neutralización de
+  fórmulas solo en la salida.
+- [x] 84 tests backend, 75 tests frontend, build de 20 rutas.
 
 ## Verificación ejecutada
 
 ```text
 Backend  uv run ruff check .              -> All checks passed
-         uv run ruff format --check .     -> 81 files already formatted
-         uv run pytest -q                 -> 70 passed
-         alembic upgrade/downgrade/upgrade -> OK
+         uv run ruff format --check .     -> 86 files already formatted
+         uv run pytest -q                 -> 84 passed
+         alembic upgrade/check            -> OK
 Frontend pnpm typecheck                   -> OK
-         pnpm test                        -> 53 passed (13 archivos)
+         pnpm test                        -> 75 passed (18 archivos)
          pnpm build                       -> 20 rutas
-Smoke    login admin -> dashboard         -> OK
-         búsqueda real Overpass AR-X/hvac -> 5 empresas, 5 nuevas, 0 duplicados
-         /prospects y detalle             -> OK, 0 errores de consola
-         worker search_run                -> completed en ~41 s
+Smoke    campaña AR-B / electrical_installations / limit 5
+         -> 1 search run, 5 empresas nuevas, 0 duplicados, completed
+         CSV preview real -> 2 filas, 1 válida, 1 con error, 0 duplicados
+         CSV export -> 1.205 bytes, BOM, 5 filas de Buenos Aires
+         consola del navegador -> 0 errores
 ```
 
-La búsqueda real se ejecutó con límite 5 sobre Córdoba y el rubro HVAC. Guardó
-cinco empresas reales de OpenStreetMap con teléfonos y una web publicada.
+La campaña real de Buenos Aires se ejecutó con Overpass y guardó cinco empresas
+de instalaciones eléctricas. La importación CSV se probó en preview; no se
+confirmó para no cargar una empresa ficticia en la base real.
 
 ## Cómo ejecutar
 
@@ -84,24 +79,22 @@ pnpm dev
 API: `http://localhost:8001`. Web: `http://localhost:3001`. Credenciales locales
 en `sales-agent/backend/.env` (no versionado).
 
-## Limitaciones de la Fase 2A
+## Limitaciones de 2B
 
-- Búsqueda **por provincia**; la búsqueda nacional y la ejecución completa de una
-  campaña con 24 provincias quedan para la Fase 2B. La campaña inicial no debe
-  ejecutarse como búsqueda nacional todavía.
-- CSV, importación masiva y alta manual desde archivo quedan para Fase 2B.
-- El mapeo de etiquetas OSM para `industrial_maintenance` y `gates_automation` es
-  conservador y puede necesitar ajuste con datos reales.
-- La deduplicación difusa limita a 500 candidatos y exige localidad; es adecuada
-  para la escala provincial inicial.
-- Sin enriquecimiento de sitios, scoring, generación de mensajes ni CRM; esas
-  son las fases 3-5.
-- La búsqueda real depende de la disponibilidad de Overpass; los tests no usan
-  internet y el sistema informa el error si el proveedor falla.
+- Una campaña nacional con 24 provincias y 7 rubros genera hasta 168 consultas
+  Overpass y puede tardar. El worker las procesa secuencialmente; pausar deja
+  terminar la consulta en curso y cancelar descarta sus resultados.
+- CSV solo admite filas con al menos un rubro válido; no hay XLSX ni mapeo
+  interactivo de columnas todavía.
+- El informe de importación no tiene `report_url` descargable; el CSV de empresas
+  sí se descarga.
+- La deduplicación difusa sigue limitada a 500 candidatos y exige localidad.
+- Sin enriquecimiento de sitios, scoring, mensajes, WhatsApp ni CRM todavía.
 
-## Próxima fase — 2B
+## Próxima fase — Enriquecimiento, scoring y outreach
 
-- CSV: preview, mapeo, validación, duplicados, confirmación e informe.
-- Búsqueda nacional y por campaña con trabajos subdivididos por provincia/rubro.
-- Reintentos y límites de frecuencia; caché.
-- Completar el flujo de revisión de posibles duplicados.
+- Enriquecimiento de sitios oficiales y evidencias.
+- Scoring de compatibilidad y confianza explicable.
+- Generación de mensajes con aprobación humana.
+- WhatsApp Cloud API, webhook, chatbot de respuestas y handoff al fundador.
+- CRM, actividades, seguimientos, lista de no contacto y exportación.

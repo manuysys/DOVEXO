@@ -220,6 +220,13 @@ def execute_search(
     run: SearchRun,
     provider: CompanyDiscoveryProvider,
 ) -> SearchRun:
+    refreshed = _current_run(db, run.id)
+    if refreshed is None:
+        return run
+    run = refreshed
+    if run.status == "cancelled":
+        return run
+
     config = run.search_config or {}
     province_code = str(config.get("province_code") or "").strip().upper()
     sector_slugs = [str(slug) for slug in (config.get("sector_slugs") or []) if slug]

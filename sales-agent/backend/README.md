@@ -1,9 +1,10 @@
-# ARVOKTA Sales Agent — Backend (Fase 1 + 2A)
+# ARVOKTA Sales Agent — Backend (Fases 1, 2A y 2B)
 
-API interna en FastAPI + SQLite con worker de cola persistente. La Fase 2A
-agrega descubrimiento real por provincia con OpenStreetMap/Overpass, alta manual,
-contactos, fuentes, deduplicación y listado de empresas. El enriquecimiento de
-sitios oficiales y el scoring quedan para fases posteriores.
+API interna en FastAPI + SQLite con worker de cola persistente. Incluye login,
+productos, campañas, descubrimiento provincial con OpenStreetMap/Overpass,
+importación y exportación CSV, alta manual, contactos, fuentes y deduplicación.
+El enriquecimiento de sitios oficiales y el scoring quedan para fases
+posteriores.
 
 ## Requisitos
 
@@ -59,13 +60,65 @@ Todos bajo `/api/v1`, salvo salud. La autenticación usa cookie HttpOnly
 - `GET|POST /products`, `GET|PATCH|DELETE /products/{id}` (`DELETE` desactiva)
 - `GET|POST /campaigns`, `GET|PATCH /campaigns/{id}`,
   `POST /campaigns/{id}/start|pause|cancel`
-- `POST /search-runs`, `GET /search-runs`, `GET /search-runs/{id}`,
+- `POST /search-runs`, `GET /search-runs` (`campaign_id`, `status`,
+  `province_code`, `limit`, `offset`), `GET /search-runs/{id}`,
   `POST /search-runs/{id}/retry|cancel`
-- `GET /companies` (`search_run_id`, `query`, `province`, `sector`, `limit`,
-  `offset`), `GET|POST /companies`, `GET|PATCH /companies/{id}`,
-  `GET|POST /companies/{id}/contacts`
+- `POST /imports/preview`, `POST /imports/{id}/confirm`, `GET /imports`,
+  `GET /imports/{id}`
+- `GET /companies` (`search_run_id`, `query`, `province`, `sector`,
+  `discovery_status`, `limit`, `offset`), `GET|POST /companies`,
+  `GET|PATCH /companies/{id}`, `GET|POST /companies/{id}/contacts`,
+  `GET /companies/export.csv` (solo admin)
 - `GET /dashboard/metrics|activity|jobs`
 - `POST /jobs/noop` (solo admin; encola un trabajo de prueba)
+
+## Campañas nacionales y por provincia
+
+`POST /campaigns/{id}/start` crea **una búsqueda por provincia** del filtro de la
+campaña (o las 24 si no hay filtros), con los rubros y el `limit` configurado en
+`search_config` (1–200, por defecto 50). Cada búsqueda recibe su job `search_run`
+en una única transacción. La respuesta es
+`{campaign, search_runs: [{id, province_code, status}], total_jobs}`. El request
+no llama a Overpass: solo encola.
+
+El worker procesa los jobs secuencialmente. Una campaña nacional con 7 rubros
+genera 24 jobs y hasta 168 consultas a Overpass, con espera entre consultas; puede
+tardar varios minutos. `pause` cancela las búsquedas pendientes y deja terminar la
+que ya esté en curso; `cancel` marca también las que están corriendo para que el
+worker descarte sus resultados. Al reanudar con `start` se generan búsquedas
+nuevas.
+
+Solo se puede iniciar una campaña en `draft` o `paused`; una campaña `active` o
+`cancelled` responde 409. `GET /campaigns/{id}` incluye los conteos de búsquedas
+por estado. Cancelar una campaña no revierte las empresas que el worker ya haya
+guardado.
+
+## Importación CSV
+
+`POST /imports/preview` recibe `multipart/form-data` con `file`:
+
+- UTF-8 (acepta BOM), hasta 2 MB y 500 filas de datos.
+- Detecta columnas por alias: `name`/`nombre`/`empresa`/`razón social`,
+  `website`/`web`/`sitio`, `phone`/`teléfono`, `email`/`correo`,
+  `province`/`provincia`, `locality`/`localidad`, `address`/`dirección` y
+  `sectors`/`sector`/`rubro`.
+- Acepta separadores `,`, `;` o tab. Los rubros se separan con `,`, `;`, `|` o
+  `/` y se normalizan contra el catálogo (slug, nombre o sinónimo).
+- Valida provincia, web, teléfono, email y rubros. Las filas inválidas se
+  informan con `row_number` y `message`; las duplicadas se detectan contra la
+  base y dentro del archivo.
+- El preview no crea empresas.
+
+`POST /imports/{id}/confirm` crea solo las filas válidas y no duplicadas. Es
+idempotente: si se repite devuelve los mismos conteos y no duplica empresas. Las
+empresas importadas quedan con `discovery_status = imported` (o
+`possible_duplicate` si el nombre es parecido), `source_type = csv_import` y la
+referencia del archivo en la fuente.
+
+Retención: del lote se guardan el mapeo, las filas válidas normalizadas y los
+errores; **no se guarda el archivo original**. Esos datos contienen contactos
+comerciales y quedan en la base local hasta que un administrador los depure
+manualmente. No hay borrado automático en esta fase.
 
 `POST /search-runs` recibe `{province_code, sector_slugs, keywords?, limit?,
 campaign_id?}`. Valida provincia y rubros y crea un `SearchRun` + `Job`
@@ -77,6 +130,21 @@ marca `failed` con un error legible en lugar de recorrer 24 provincias.
 teléfono o nombre + localidad responde 409 con `detail` y `duplicate_of`. Si la
 coincidencia es difusa, guarda la empresa como `possible_duplicate` y la
 devuelve. `DELETE` no se implementó para empresas: se corrigen con `PATCH`.
+
+## Revisión de posibles duplicados
+
+`GET /companies?discovery_status=possible_duplicate` lista los registros que
+coincidieron de forma difusa. Se corrigen con `PATCH /companies/{id}` y
+`discovery_status` puede pasar a `discovered`, `possible_duplicate`, `rejected`,
+`archived`, `manual`, `imported` o `enriched`. No hay borrado de empresas.
+
+## Exportación CSV
+
+`GET /companies/export.csv` (admin) acepta los mismos filtros que el listado y
+devuelve UTF-8 con BOM, encabezados en español y una fila por empresa con rubros,
+contactos principales y fuente. Las celdas que comienzan con `=`, `+`, `-`, `@`,
+tab, CR o LF se prefijan con un apóstrofo para que Excel no las ejecute como
+fórmula; los datos guardados no se modifican.
 
 ## Descubrimiento con OpenStreetMap (Fase 2A)
 
@@ -134,7 +202,7 @@ aun así se registra la fuente de la corrida para poder filtrar por
 `search_run_id`. Los difusos se guardan con `discovery_status =
 possible_duplicate`. No hay fusión automática. La comparación difusa se limita a
 500 candidatos y exige coincidencia de localidad normalizada; está pensada para
-la escala local de la Fase 2A.
+la escala local de la Fase 2A/2B.
 
 ## Worker
 

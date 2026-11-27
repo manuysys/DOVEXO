@@ -1,17 +1,31 @@
-import { PhasePlaceholder } from "@/components/layout/phase-placeholder";
+"use client";
+
+import Link from "next/link";
+import { buttonStyles } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { ImportsView } from "@/components/imports/imports-view";
+import {
+  IMPORT_MAX_ROWS,
+  formatBytes,
+  IMPORT_MAX_BYTES,
+} from "@/features/imports/limits";
 
 export default function ImportsPage() {
   return (
-    <PhasePlaceholder
-      title="Importaciones"
-      phase={2}
-      summary="La importación de CSV con previsualización, mapeo de columnas y detección de duplicados llega junto con el descubrimiento."
-      planned={[
-        "Subida de archivo CSV y previsualización de filas.",
-        "Mapeo de columnas a los campos de empresa y contacto.",
-        "Validación, normalización y detección de duplicados.",
-        "Informe de importación por lote.",
-      ]}
-    />
+    <>
+      <PageHeader
+        title="Importaciones"
+        description={`Carga masiva de empresas desde CSV. Límites: ${formatBytes(IMPORT_MAX_BYTES)} y ${IMPORT_MAX_ROWS} filas de datos por archivo.`}
+        actions={
+          <Link
+            href="/prospects"
+            className={buttonStyles({ variant: "secondary", size: "md" })}
+          >
+            Ver empresas
+          </Link>
+        }
+      />
+      <ImportsView />
+    </>
   );
 }

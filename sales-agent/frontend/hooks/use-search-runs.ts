@@ -16,11 +16,15 @@ import type {
 
 export const searchRunKeys = {
   all: ["search-runs"] as const,
+  list: (campaignId?: string) =>
+    ["search-runs", "list", campaignId ?? "all"] as const,
   detail: (id: string) => ["search-runs", id] as const,
 };
 
 /** Intervalo de consulta al backend mientras la corrida sigue activa. */
 export const SEARCH_RUN_POLL_MS = 2_000;
+/** La campaña consulta más espaciado: hay una corrida por provincia. */
+export const CAMPAIGN_RUNS_POLL_MS = 5_000;
 
 export function isTerminalSearchRunStatus(status: SearchRunStatus): boolean {
   return (
@@ -28,8 +32,37 @@ export function isTerminalSearchRunStatus(status: SearchRunStatus): boolean {
   );
 }
 
-export function useSearchRuns() {
-  return useQuery({ queryKey: searchRunKeys.all, queryFn: listSearchRuns });
+/** Historial de corridas; con `campaignId` solo las de esa campaña. */
+export function useSearchRuns(campaignId?: string) {
+  return useQuery({
+    queryKey: searchRunKeys.list(campaignId),
+    queryFn: () =>
+      listSearchRuns(campaignId ? { campaign_id: campaignId } : {}),
+  });
+}
+
+/**
+ * Corridas provinciales de una campaña. Se refresca cada 5 s mientras alguna
+ * siga pendiente o en ejecución.
+ */
+export function useCampaignSearchRuns(
+  campaignId: string,
+  { poll = true }: { poll?: boolean } = {},
+) {
+  return useQuery({
+    queryKey: searchRunKeys.list(campaignId),
+    queryFn: () => listSearchRuns({ campaign_id: campaignId }),
+    enabled: Boolean(campaignId),
+    refetchInterval: (query) => {
+      if (!poll) return false;
+      const runs = query.state.data;
+      if (!runs) return CAMPAIGN_RUNS_POLL_MS;
+      const active = runs.some(
+        (run) => !isTerminalSearchRunStatus(run.status),
+      );
+      return active ? CAMPAIGN_RUNS_POLL_MS : false;
+    },
+  });
 }
 
 /**

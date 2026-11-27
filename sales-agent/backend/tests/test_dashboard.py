@@ -90,7 +90,7 @@ def test_noop_job_is_queued_and_processed(auth_client: TestClient) -> None:
     assert metrics["jobs_failed"] == 0
 
 
-def test_campaign_search_run_fails_without_province(auth_client: TestClient) -> None:
+def test_campaign_start_queues_runs_without_companies(auth_client: TestClient) -> None:
     product_id = auth_client.get("/api/v1/products").json()[0]["id"]
     campaign = auth_client.post(
         "/api/v1/campaigns",
@@ -103,21 +103,12 @@ def test_campaign_search_run_fails_without_province(auth_client: TestClient) -> 
     ).json()
     started = auth_client.post(f"/api/v1/campaigns/{campaign['id']}/start")
     assert started.status_code == 200
-    job_id = started.json()["job_id"]
-    search_run_id = started.json()["search_run_id"]
-
-    with SessionLocal() as db:
-        job = run_once(db)
-        assert job is not None
-        assert job.id == job_id
-        # La búsqueda de campaña no tiene provincia única: falla sin inventar.
-        assert job.status == "completed"
-        assert job.result is not None
-        assert job.result["status"] == "failed"
+    body = started.json()
+    assert body["total_jobs"] == 1
+    search_run_id = body["search_runs"][0]["id"]
 
     run = auth_client.get(f"/api/v1/search-runs/{search_run_id}").json()
-    assert run["status"] == "failed"
-    assert run["errors"]
+    assert run["status"] == "pending"
     assert run["records_found"] == 0
     assert auth_client.get("/api/v1/companies").json()["total"] == 0
 

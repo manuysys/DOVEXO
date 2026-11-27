@@ -17,7 +17,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/approvals", label: "Pendientes de aprobación", phase: 4 },
   { href: "/contacts", label: "Contactos", phase: 3 },
   { href: "/crm", label: "CRM", phase: 5 },
-  { href: "/imports", label: "Importaciones", phase: 2 },
+  { href: "/imports", label: "Importaciones" },
   { href: "/search-history", label: "Historial de búsquedas" },
   { href: "/settings", label: "Configuración" },
 ];

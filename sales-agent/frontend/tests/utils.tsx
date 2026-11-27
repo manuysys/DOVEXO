@@ -5,6 +5,8 @@ import type {
   Campaign,
   Company,
   DashboardJob,
+  ImportBatch,
+  ImportPreview,
   Product,
   SearchRun,
   Sector,
@@ -63,6 +65,12 @@ export function makeCampaign(overrides: Partial<Campaign> = {}): Campaign {
     search_config: { max_results: 100, sources: ["osm"] },
     status: "draft",
     raw_status: "draft",
+    search_runs_total: 0,
+    search_runs_pending: 0,
+    search_runs_running: 0,
+    search_runs_completed: 0,
+    search_runs_failed: 0,
+    search_runs_cancelled: 0,
     created_at: "2026-11-01T10:00:00Z",
     updated_at: "2026-11-01T10:00:00Z",
     ...overrides,
@@ -153,6 +161,67 @@ export function makeSearchRun(overrides: Partial<SearchRun> = {}): SearchRun {
     created_at: "2026-11-20T12:00:00Z",
     started_at: "2026-11-20T12:00:05Z",
     finished_at: "2026-11-20T12:01:00Z",
+    ...overrides,
+  };
+}
+
+/** Fixture de previsualización de importación (no es un archivo real). */
+export function makeImportPreview(
+  overrides: Partial<ImportPreview> = {},
+): ImportPreview {
+  return {
+    batch_id: "3",
+    filename: "empresas.csv",
+    total_rows: 2,
+    valid_rows: 1,
+    invalid_rows: 1,
+    duplicates: 0,
+    preview: [
+      {
+        row_number: 2,
+        name: "Empresa de prueba",
+        website: "https://empresa-de-prueba.com.ar",
+        province: "AR-S",
+        locality: "Rosario",
+        phone: null,
+        email: "contacto@empresa-de-prueba.com.ar",
+        sectors: ["hvac"],
+        status: "valid",
+        errors: [],
+      },
+      {
+        row_number: 3,
+        name: "Sin localidad",
+        website: null,
+        province: null,
+        locality: null,
+        phone: null,
+        email: null,
+        sectors: [],
+        status: "invalid",
+        errors: ["Falta la provincia"],
+      },
+    ],
+    errors: [],
+    ...overrides,
+  };
+}
+
+export function makeImportBatch(
+  overrides: Partial<ImportBatch> = {},
+): ImportBatch {
+  return {
+    id: "3",
+    filename: "empresas.csv",
+    status: "confirmed",
+    total_rows: 2,
+    created: 1,
+    skipped: 1,
+    duplicates: 0,
+    imported_at: "2026-11-21T09:00:00Z",
+    confirmed_at: "2026-11-21T09:01:00Z",
+    errors: [],
+    report_url: null,
     ...overrides,
   };
 }

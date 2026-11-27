@@ -79,16 +79,37 @@ def resolve_sectors(db: Session, slugs: list[str]) -> list[Sector]:
     return sectors
 
 
-def _manual_source(company: Company, website: str | None) -> CompanySource:
+def _manual_source(
+    company: Company,
+    website: str | None,
+    *,
+    source_type: str = "manual",
+    source_label: str = "Alta manual",
+    source_reference: str | None = None,
+) -> CompanySource:
+    if website:
+        source_url = website
+    elif source_reference:
+        source_url = f"import:{source_reference}"
+    else:
+        source_url = MANUAL_SOURCE_URL
+
+    evidence = (
+        f"Datos importados desde {source_reference}."
+        if source_reference
+        else "Datos ingresados manualmente desde la API."
+    )
     return CompanySource(
         company_id=company.id,
-        source_type="manual",
-        source_url=website or MANUAL_SOURCE_URL,
-        title="Alta manual",
-        evidence_excerpt="Datos ingresados manualmente desde la API.",
+        source_type=source_type,
+        source_url=source_url,
+        title=source_label[:300],
+        evidence_excerpt=evidence,
         collected_at=utcnow(),
         confidence=None,
-        content_hash=hashlib.sha256(f"manual|{company.id}|{company.name}".encode()).hexdigest(),
+        content_hash=hashlib.sha256(
+            f"{source_type}|{company.id}|{company.name}".encode()
+        ).hexdigest(),
     )
 
 
@@ -103,6 +124,9 @@ def create_manual_company(
     address: str | None = None,
     phone: str | None = None,
     email: str | None = None,
+    source_type: str = "manual",
+    source_label: str = "Alta manual",
+    source_reference: str | None = None,
 ) -> tuple[Company, DuplicateMatch | None]:
     clean_name = name.strip()
     if len(clean_name) < 2:
@@ -144,12 +168,22 @@ def create_manual_company(
         locality=clean_locality,
         address=clean_address,
         country="Argentina",
-        discovery_status="possible_duplicate" if duplicate else "manual",
+        discovery_status=(
+            "possible_duplicate"
+            if duplicate
+            else ("imported" if source_type == "csv_import" else "manual")
+        ),
     )
     db.add(company)
     db.flush()
 
-    source = _manual_source(company, clean_website)
+    source = _manual_source(
+        company,
+        clean_website,
+        source_type=source_type,
+        source_label=source_label,
+        source_reference=source_reference,
+    )
     db.add(source)
     db.flush()
 
@@ -170,7 +204,7 @@ def create_manual_company(
                 contact_type="phone",
                 original_value=phone.strip(),
                 normalized_value=normalized_phone,
-                label="Alta manual",
+                label=source_label,
                 is_primary=True,
                 verification_status="unverified",
                 source_id=source.id,
@@ -184,7 +218,7 @@ def create_manual_company(
                 contact_type="email",
                 original_value=email.strip(),
                 normalized_value=normalized_email,
-                label="Alta manual",
+                label=source_label,
                 is_primary=True,
                 verification_status="unverified",
                 source_id=source.id,

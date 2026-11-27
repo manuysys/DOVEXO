@@ -105,6 +105,42 @@ no se fusionan automáticamente. Cada empresa conserva fuentes y contactos con s
 origen.
 
 **Consecuencias:** una empresa puede aparecer en varias búsquedas sin perder
-trazabilidad. La revisión de posibles duplicados todavía es una lista; falta la
-pantalla de fusión/revisión en 2B. La búsqueda difusa se limita a 500 candidatos
-y exige localidad, adecuada para la escala provincial inicial.
+trazabilidad. La revisión de posibles duplicados ya tiene filtros y acciones en
+la Fase 2B; la fusión automática sigue prohibida. La búsqueda difusa se limita a
+500 candidatos y exige localidad, adecuada para la escala provincial inicial.
+
+## ADR-S008 — Importación CSV con preview y confirmación idempotente
+
+**Fecha:** 2026-11-27
+**Estado:** aceptada
+
+**Decisión:** CSV UTF-8 de hasta 2 MB y 500 filas, con columnas `nombre` y
+`rubros` obligatorias; se aceptan alias de columnas y separadores `,`, `;` o tab.
+El preview valida filas, provincias, rubros, web, teléfono y email, detecta
+duplicados contra la base y dentro del archivo, y no crea empresas. La
+confirmación crea solo filas válidas y no duplicadas, es idempotente y registra
+el lote. No se guarda el archivo original; se guarda el mapeo, las filas
+normalizadas y los errores.
+
+**Consecuencias:** el operador ve exactamente qué se va a crear antes de
+confirmar. Las filas sin rubro válido se rechazan. El informe descargable por
+lote queda pendiente; el CSV de empresas se exporta por separado.
+
+## ADR-S009 — Campañas con una búsqueda por provincia y exportación CSV
+
+**Fecha:** 2026-11-27
+**Estado:** aceptada
+
+**Decisión:** iniciar una campaña crea una `SearchRun` y un `job` por provincia
+(24 si no hay filtros), con los rubros y el límite de la campaña; el worker las
+procesa secuencialmente. Pausar cancela las pendientes; cancelar cancela
+pendientes y en ejecución. La UI muestra el progreso por provincia y los
+conteos reales. La exportación CSV de empresas usa los filtros del listado,
+UTF-8 con BOM, encabezados en español y neutralización de fórmulas solo en la
+salida.
+
+**Consecuencias:** una campaña nacional 24×7 puede generar hasta 168 consultas
+Overpass y tardar; es una operación de fondo, no un request. La pausa deja
+terminar la consulta en curso. La base conserva los datos exactos; el apóstrofo
+de neutralización aparece solo en el CSV.
+

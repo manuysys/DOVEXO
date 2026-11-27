@@ -41,6 +41,15 @@ def test_alembic_upgrade_from_scratch_and_downgrade(tmp_path: Path) -> None:
         assert {"companies", "company_sources", "search_runs", "jobs", "sectors"} <= tables
         assert {"search_config", "limit"} <= _table_columns(connection, "search_runs")
         assert "search_run_id" in _table_columns(connection, "company_sources")
+        assert {
+            "status",
+            "valid_rows",
+            "invalid_rows",
+            "duplicate_rows",
+            "preview_rows",
+            "created_by",
+            "confirmed_at",
+        } <= _table_columns(connection, "import_batches")
 
     _alembic(database_url, "downgrade", "base")
 

@@ -9,6 +9,7 @@ from app.api.deps import get_current_user, require_admin
 from app.database.session import get_db
 from app.models import Campaign, User
 from app.repositories.campaigns import (
+    count_campaign_runs,
     create_campaign,
     get_campaign,
     list_campaigns,
@@ -17,7 +18,9 @@ from app.repositories.campaigns import (
 from app.repositories.products import get_product
 from app.schemas.campaign import (
     CampaignCreate,
+    CampaignDetailRead,
     CampaignRead,
+    CampaignRunSummary,
     CampaignStartResponse,
     CampaignUpdate,
 )
@@ -41,6 +44,20 @@ def _get_campaign_or_404(db: Session, campaign_id: int) -> Campaign:
             detail="Campaña no encontrada.",
         )
     return campaign
+
+
+def _campaign_detail(db: Session, campaign: Campaign) -> CampaignDetailRead:
+    counts = count_campaign_runs(db, campaign.id)
+    base = CampaignRead.model_validate(campaign)
+    return CampaignDetailRead(
+        **base.model_dump(),
+        search_runs_total=sum(counts.values()),
+        search_runs_pending=counts.get("pending", 0),
+        search_runs_running=counts.get("running", 0),
+        search_runs_completed=counts.get("completed", 0),
+        search_runs_failed=counts.get("failed", 0),
+        search_runs_cancelled=counts.get("cancelled", 0),
+    )
 
 
 def _ensure_product_available(db: Session, product_id: int) -> None:
@@ -92,13 +109,13 @@ def create_campaign_endpoint(
     return CampaignRead.model_validate(campaign)
 
 
-@router.get("/{campaign_id}", response_model=CampaignRead)
+@router.get("/{campaign_id}", response_model=CampaignDetailRead)
 def get_campaign_endpoint(
     campaign_id: int,
     _user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-) -> CampaignRead:
-    return CampaignRead.model_validate(_get_campaign_or_404(db, campaign_id))
+) -> CampaignDetailRead:
+    return _campaign_detail(db, _get_campaign_or_404(db, campaign_id))
 
 
 @router.patch("/{campaign_id}", response_model=CampaignRead)
@@ -130,7 +147,7 @@ def start_campaign_endpoint(
 ) -> CampaignStartResponse:
     campaign = _get_campaign_or_404(db, campaign_id)
     try:
-        search_run, job_id = start_campaign(db, campaign)
+        campaign, runs, total_jobs = start_campaign(db, campaign)
     except CampaignStateError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=exc.message) from exc
     except CampaignValidationError as exc:
@@ -138,8 +155,15 @@ def start_campaign_endpoint(
 
     return CampaignStartResponse(
         campaign=CampaignRead.model_validate(campaign),
-        search_run_id=search_run.id,
-        job_id=job_id,
+        search_runs=[
+            CampaignRunSummary(
+                id=run.id,
+                province_code=str((run.search_config or {}).get("province_code", "")),
+                status=run.status,
+            )
+            for run in runs
+        ],
+        total_jobs=total_jobs,
     )
 
 
