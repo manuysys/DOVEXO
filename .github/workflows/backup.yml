@@ -37,7 +37,7 @@ jobs:
           echo "Dump verificado: $(wc -c < backup.dump) bytes"
       - name: Upload backup artifact
         if: ${{ env.DATABASE_URL != '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: neon-backup-${{ github.run_id }}
           path: |
