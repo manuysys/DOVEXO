@@ -33,7 +33,7 @@ humana, WhatsApp con provider de consola y simulador, bot de respuestas, CRM,
 actividades, supresiones y métricas reales.
 
 Búsquedas reales: Córdoba/HVAC (5 empresas) y Buenos Aires/instalaciones
-eléctricas (5 empresas nuevas, 0 duplicados). 106 tests backend, 102 frontend y
+eléctricas (5 empresas nuevas, 0 duplicados). 116 tests backend, 102 frontend y
 build de 21 rutas. La API corre en `localhost:8001` y la web en `localhost:3001`.
 
 El flujo local completo se verificó: empresa → oportunidad → score 68/80 →
@@ -81,7 +81,7 @@ Pendientes del Sales Agent:
   provincia, revisión de duplicados y exportación CSV (84 tests backend + 75
   frontend; campaña real de Buenos Aires con 5 empresas).
 - [x] Implementar scoring, mensajes, WhatsApp (consola/simulador), bot de
-  respuestas y CRM del Sales Agent (106 tests backend + 102 frontend; flujo local
+  respuestas y CRM del Sales Agent (116 tests backend + 102 frontend; flujo local
   verificado; sin envíos reales).
 - [ ] Implementar el enriquecimiento de sitios y evidencias del Sales Agent.
 - [ ] Cargar credenciales Meta/WhatsApp, plantilla de primer contacto y número

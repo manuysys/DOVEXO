@@ -59,6 +59,11 @@ class Settings(BaseSettings):
     whatsapp_api_version: str = "v23.0"
     whatsapp_timeout_seconds: float = 30.0
     founder_phone: str = ""
+    # Plantilla aprobada de Meta para el primer contacto (fuera de la ventana de
+    # atención solo se puede enviar una plantilla, no texto libre). Vacío =
+    # el primer contacto por Meta falla con un error de configuración.
+    whatsapp_first_contact_template: str = ""
+    whatsapp_template_language: str = "es_AR"
 
     # Descubrimiento con OpenStreetMap/Overpass (Fase 2A).
     overpass_url: str = "https://overpass-api.de/api/interpreter"
@@ -95,6 +100,14 @@ class Settings(BaseSettings):
     @property
     def whatsapp_mode(self) -> str:
         return "meta" if self.whatsapp_configured else "console"
+
+    @property
+    def whatsapp_first_contact_template_name(self) -> str:
+        return self.whatsapp_first_contact_template.strip()
+
+    @property
+    def whatsapp_template_configured(self) -> bool:
+        return bool(self.whatsapp_first_contact_template_name)
 
 
 @lru_cache

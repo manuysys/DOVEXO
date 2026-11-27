@@ -40,8 +40,9 @@
   reales a terceros.
 - Se verificó localmente: empresa → oportunidad → score 68/80 → mensaje →
   aprobación → envío simulado → entrante → bot → thread → CRM/dashboard.
-- 106 tests backend, 102 frontend, build de 21 rutas. La plantilla de primer
-  contacto de Meta y el enriquecimiento de sitios quedan pendientes.
+- 116 tests backend, 102 frontend, build de 21 rutas. La plantilla de primer
+  contacto de Meta ya tiene soporte de código; faltan credenciales y la prueba
+  real. El enriquecimiento de sitios queda pendiente.
 
 ## Producto DOVEXO
 

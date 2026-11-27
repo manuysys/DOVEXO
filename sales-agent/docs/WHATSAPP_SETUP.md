@@ -19,6 +19,8 @@ WHATSAPP_APP_SECRET=
 WHATSAPP_SENDER_PHONE=
 WHATSAPP_API_VERSION=v23.0
 WHATSAPP_TIMEOUT_SECONDS=30
+WHATSAPP_FIRST_CONTACT_TEMPLATE=
+WHATSAPP_TEMPLATE_LANGUAGE=es_AR
 FOUNDER_PHONE=
 ```
 
@@ -30,6 +32,10 @@ FOUNDER_PHONE=
   `X-Hub-Signature-256`. Sin este valor el `POST` falla cerrado con 503.
 - `WHATSAPP_SENDER_PHONE`: número visible del remitente, solo para mostrar en la
   UI; no se usa para enviar.
+- `WHATSAPP_FIRST_CONTACT_TEMPLATE`: nombre exacto de la plantilla aprobada para
+  el primer contacto. Sin este valor, un envío real de primer contacto falla con
+  un error claro y **no** cae a texto libre.
+- `WHATSAPP_TEMPLATE_LANGUAGE`: código de idioma de la plantilla (`es_AR`).
 - `FOUNDER_PHONE`: número del fundador para avisos de respuestas. Si está vacío,
   el aviso queda registrado como no enviado.
 
@@ -54,10 +60,12 @@ https://<host-publico>/api/v1/webhooks/whatsapp
 ## 3. Plantilla de primer contacto
 
 Meta no permite enviar texto libre a un contacto que nunca escribió. El primer
-contacto debe usar una **plantilla aprobada** por Meta. La versión actual del
-provider envía texto; **antes de usar un número real hay que completar la
-integración de plantillas** o el envío será rechazado fuera de la ventana de
-24 horas.
+contacto debe usar una **plantilla aprobada** por Meta. El provider ya soporta
+`send_template`; configurá `WHATSAPP_FIRST_CONTACT_TEMPLATE` con el nombre exacto.
+Si falta, el envío real falla con un error claro y no se envía texto libre. La
+plantilla aprobada debe declarar **dos parámetros de body**: `{{1}}` = nombre de
+la empresa y `{{2}}` = nombre del producto (DOVEXO). El envío de follow-up
+dentro de la ventana de atención sigue usando texto.
 
 Plantilla sugerida para aprobar en Meta (los parámetros exactos se ajustan al
 texto que se quiera enviar):
@@ -99,7 +107,9 @@ No usar números de terceros para las pruebas.
 - [ ] `WHATSAPP_PHONE_NUMBER_ID` y `WHATSAPP_ACCESS_TOKEN` cargados.
 - [ ] Webhook público con HTTPS y `WHATSAPP_VERIFY_TOKEN` coincidente.
 - [ ] `WHATSAPP_APP_SECRET` cargado; probar que un POST sin firma devuelve 403.
-- [ ] Plantilla de primer contacto aprobada y mapeada al mensaje.
+- [ ] Plantilla de primer contacto aprobada en Meta; cargar
+  `WHATSAPP_FIRST_CONTACT_TEMPLATE` con dos parámetros (`{{1}}` empresa,
+  `{{2}}` producto) y probar un envío autorizado.
 - [ ] `FOUNDER_PHONE` configurado y probado con un mensaje autorizado.
 - [ ] Probar con un número propio de prueba antes de contactar empresas.
 - [ ] Revisar opt-in, lista de no contacto y límites de frecuencia.

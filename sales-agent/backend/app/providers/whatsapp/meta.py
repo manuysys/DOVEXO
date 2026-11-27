@@ -40,6 +40,41 @@ class MetaWhatsAppProvider(WhatsAppProvider):
             "type": "text",
             "text": {"body": body},
         }
+        return self._deliver(payload)
+
+    def send_template(
+        self,
+        *,
+        to: str,
+        template_name: str,
+        language: str,
+        parameters: list[str],
+    ) -> SendResult:
+        """Envía una plantilla aprobada.
+
+        Los parámetros se envían como componentes de body en orden: la plantilla
+        aprobada en Meta debe declarar las mismas variables `{{1}}`, `{{2}}`, ...
+        """
+        payload: dict[str, Any] = {
+            "messaging_product": "whatsapp",
+            "to": to,
+            "type": "template",
+            "template": {
+                "name": template_name,
+                "language": {"code": language},
+                "components": [
+                    {
+                        "type": "body",
+                        "parameters": [
+                            {"type": "text", "text": parameter} for parameter in parameters
+                        ],
+                    }
+                ],
+            },
+        }
+        return self._deliver(payload)
+
+    def _deliver(self, payload: dict[str, Any]) -> SendResult:
         headers = {"Authorization": f"Bearer {self.access_token}"}
         try:
             with self._http_client() as client:

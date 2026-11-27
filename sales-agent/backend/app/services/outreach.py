@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.models import Company, Contact, Lead, OutreachMessage, Product, Sector
 from app.models.company import CompanySector
-from app.providers.whatsapp import SendResult, WhatsAppProvider, get_whatsapp_provider
+from app.providers.whatsapp import (
+    MetaWhatsAppProvider,
+    SendResult,
+    WhatsAppProvider,
+    get_whatsapp_provider,
+)
 from app.providers.whatsapp.base import WhatsAppProviderError
 from app.services.leads import record_activity
 from app.services.suppressions import is_blocked
@@ -19,6 +27,12 @@ MESSAGE_LABELS = {
     "follow_up": "Seguimiento",
     "demo_invite": "Invitación a demo",
 }
+
+MISSING_TEMPLATE_ERROR = (
+    "El primer contacto por Meta requiere una plantilla aprobada: configurá "
+    "WHATSAPP_FIRST_CONTACT_TEMPLATE. Fuera de la ventana de atención no se envía "
+    "texto libre."
+)
 
 
 class OutreachError(ValueError):
@@ -279,8 +293,34 @@ def send_message(
     message.metadata_json = metadata
 
     provider = provider or get_whatsapp_provider()
+    uses_template = message.message_type == "first_contact" and isinstance(
+        provider, MetaWhatsAppProvider
+    )
+    template_name = settings.whatsapp_first_contact_template_name
+    if uses_template and not template_name:
+        # Primer contacto real: Meta solo acepta plantillas aprobadas fuera de la
+        # ventana de atención. No se degrada a texto libre.
+        raise WhatsAppProviderError(MISSING_TEMPLATE_ERROR)
+
+    template_parameters: list[str] = []
+    if uses_template:
+        product = db.get(Product, lead.product_id)
+        if product is None:
+            raise OutreachError("El lead no tiene un producto válido para la plantilla.")
+        # La plantilla aprobada debe declarar dos variables en el body:
+        # {{1}} = nombre de la empresa, {{2}} = nombre del producto.
+        template_parameters = [company.name, product.name]
+
     try:
-        result = provider.send_text(to=contact.normalized_value, body=_message_text(message))
+        if uses_template:
+            result = provider.send_template(
+                to=contact.normalized_value,
+                template_name=template_name,
+                language=settings.whatsapp_template_language,
+                parameters=template_parameters,
+            )
+        else:
+            result = provider.send_text(to=contact.normalized_value, body=_message_text(message))
     except WhatsAppProviderError as exc:
         message.delivery_status = "failed"
         message.delivery_error = str(exc)[:1000]
@@ -299,11 +339,19 @@ def send_message(
     message.provider_message_id = result.provider_message_id
     message.delivery_error = None
     metadata = dict(message.metadata_json or {})
-    metadata["delivery"] = {
+    delivery: dict[str, Any] = {
         "status": result.status,
         "provider": result.provider,
         "provider_message_id": result.provider_message_id,
+        "kind": "template" if uses_template else "text",
     }
+    if uses_template:
+        delivery["template"] = {
+            "name": template_name,
+            "language": settings.whatsapp_template_language,
+            "parameters": template_parameters,
+        }
+    metadata["delivery"] = delivery
     message.metadata_json = metadata
 
     if result.status == "sent":

@@ -69,14 +69,17 @@ pendientes.
   humano y notificación al fundador cuando `FOUNDER_PHONE` está configurado.
 - [x] Dashboard con métricas reales de empresas, oportunidades, contactos,
   contactados, respuestas y reuniones.
-- [x] 106 tests backend, 102 tests frontend, build de 21 rutas.
+- [x] Primer contacto real preparado con plantilla aprobada de Meta
+  (`send_template`), sin fallback a texto libre si falta configuración; modo
+  consola intacto.
+- [x] 116 tests backend, 102 tests frontend, build de 21 rutas.
 
 ## Verificación ejecutada
 
 ```text
 Backend  uv run ruff check .              -> All checks passed
          uv run ruff format --check .     -> 113 files already formatted
-         uv run pytest -q                 -> 106 passed, 1 warning (TestClient)
+         uv run pytest -q                 -> 116 passed, 1 warning (TestClient)
          uv run alembic check             -> No new upgrade operations detected
 Frontend pnpm typecheck                   -> OK
          pnpm lint                        -> OK
@@ -123,8 +126,10 @@ en `sales-agent/backend/.env` (no versionado).
 - Sin credenciales de Meta/WhatsApp: todo envío real se simula en consola; el
   webhook falla cerrado si falta `WHATSAPP_APP_SECRET`.
 - El primer contacto real con Meta requiere una plantilla aprobada. El provider
-  actual envía texto; antes de usar producción hay que configurar la plantilla y
-  el número de negocio. Ver `docs/WHATSAPP_SETUP.md`.
+  ya implementa `send_template` y el envío se niega con un error claro si falta
+  `WHATSAPP_FIRST_CONTACT_TEMPLATE`; no cae a texto libre. La plantilla debe
+  declarar `{{1}}` = empresa y `{{2}}` = producto. Falta la prueba real con
+  credenciales. Ver `docs/WHATSAPP_SETUP.md`.
 - `FOUNDER_PHONE` no está configurado; las notificaciones al fundador quedan
   registradas como no enviadas.
 - La vista de oportunidades está limitada a 100 registros; no hay paginación

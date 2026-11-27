@@ -23,3 +23,18 @@ class WhatsAppProvider(ABC):
     @abstractmethod
     def send_text(self, *, to: str, body: str) -> SendResult:
         """Envía un texto. Puede ser simulado en desarrollo."""
+
+    @abstractmethod
+    def send_template(
+        self,
+        *,
+        to: str,
+        template_name: str,
+        language: str,
+        parameters: list[str],
+    ) -> SendResult:
+        """Envía una plantilla aprobada.
+
+        Fuera de la ventana de atención de 24 h, Meta solo acepta plantillas
+        aprobadas; el texto libre se rechaza. Puede ser simulado en desarrollo.
+        """

@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from app.providers.discovery.base import CompanyDiscoveryProvider, DiscoveredCompany
+from app.providers.whatsapp.base import SendResult, WhatsAppProvider
 
 
 @dataclass
@@ -29,6 +31,42 @@ class FakeDiscoveryProvider(CompanyDiscoveryProvider):
             }
         )
         return list(self.results)[:limit]
+
+
+@dataclass
+class FakeWhatsAppProvider(WhatsAppProvider):
+    """Provider en memoria que registra textos y plantillas enviados."""
+
+    status: str = "simulated"
+    provider: str = "fake"
+    text_calls: list[dict[str, Any]] = field(default_factory=list)
+    template_calls: list[dict[str, Any]] = field(default_factory=list)
+
+    def send_text(self, *, to: str, body: str) -> SendResult:
+        self.text_calls.append({"to": to, "body": body})
+        return SendResult(status=self.status, provider=self.provider, payload={"to": to})
+
+    def send_template(
+        self,
+        *,
+        to: str,
+        template_name: str,
+        language: str,
+        parameters: list[str],
+    ) -> SendResult:
+        self.template_calls.append(
+            {
+                "to": to,
+                "template_name": template_name,
+                "language": language,
+                "parameters": list(parameters),
+            }
+        )
+        return SendResult(
+            status=self.status,
+            provider=self.provider,
+            payload={"to": to, "template": template_name},
+        )
 
 
 def osm_company(
