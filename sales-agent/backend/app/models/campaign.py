@@ -56,5 +56,7 @@ class SearchRun(Base):
     new_companies: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     duplicates: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     errors: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    search_config: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    limit: Mapped[int] = mapped_column(Integer, nullable=False, default=50, server_default="50")
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

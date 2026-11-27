@@ -50,6 +50,13 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = ""
 
+    # Descubrimiento con OpenStreetMap/Overpass (Fase 2A).
+    overpass_url: str = "https://overpass-api.de/api/interpreter"
+    overpass_timeout_seconds: float = 60.0
+    overpass_max_retries: int = 2
+    overpass_request_delay_seconds: float = 0.5
+    overpass_user_agent: str = "ARVOKTA-Sales-Agent/0.1 (internal prospecting tool)"
+
     @field_validator("log_level")
     @classmethod
     def _normalize_log_level(cls, value: str) -> str:

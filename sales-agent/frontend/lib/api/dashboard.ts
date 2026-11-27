@@ -2,9 +2,15 @@ import { apiRequest } from "./client";
 import {
   normalizeJobs,
   normalizeMetrics,
+  normalizeProvinces,
   normalizeSectors,
 } from "./normalize";
-import type { DashboardJob, DashboardMetrics, Sector } from "./types";
+import type {
+  DashboardJob,
+  DashboardMetrics,
+  ProvinceOption,
+  Sector,
+} from "./types";
 
 export async function getDashboardMetrics(
   productId?: string,
@@ -25,4 +31,10 @@ export async function getDashboardJobs(): Promise<DashboardJob[]> {
 export async function listSectors(): Promise<Sector[]> {
   const payload = await apiRequest<unknown>("/meta/sectors");
   return normalizeSectors(payload);
+}
+
+/** Provincias de referencia (`GET /meta/provinces`). */
+export async function listProvinces(): Promise<ProvinceOption[]> {
+  const payload = await apiRequest<unknown>("/meta/provinces");
+  return normalizeProvinces(payload);
 }

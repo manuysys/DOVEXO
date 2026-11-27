@@ -98,6 +98,19 @@ PROVINCES: tuple[dict[str, str], ...] = (
 )
 
 PROVINCE_CODES: frozenset[str] = frozenset(province["code"] for province in PROVINCES)
+PROVINCE_NAME_BY_CODE: dict[str, str] = {
+    province["code"]: province["name"] for province in PROVINCES
+}
+
+COMPANY_DISCOVERY_STATUSES: tuple[str, ...] = (
+    "discovered",
+    "imported",
+    "manual",
+    "possible_duplicate",
+    "enriched",
+    "rejected",
+    "archived",
+)
 
 SECTORS: tuple[dict[str, Any], ...] = (
     {

@@ -24,11 +24,14 @@ CRM. Es multiproducto: DOVEXO es el primer producto configurado, no código
 hardcodeado. Usa Next.js + FastAPI + SQLite en local, worker con cola persistente
 y fuentes gratuitas (OpenStreetMap/Overpass, CSV y alta manual).
 
-**Fase 1 completada y verificada localmente:** login, dashboard, productos,
-campañas, worker persistente, seed de DOVEXO, 33 tests de backend, 29 de frontend
-y build de 19 rutas. La API corre en `localhost:8001` y la web en
-`localhost:3001`. El descubrimiento de empresas queda para la Fase 2; no se
-cargan datos ficticios.
+**Fase 2A completada y verificada localmente:** login, dashboard, productos,
+campañas, worker persistente, seed de DOVEXO, descubrimiento provincial con
+OpenStreetMap/Overpass, empresas, contactos, alta manual y deduplicación. Una
+búsqueda real en Córdoba/HVAC con límite 5 devolvió 5 empresas nuevas y 0
+duplicados. 70 tests backend, 53 frontend y build de 20 rutas. La API corre en
+`localhost:8001` y la web en `localhost:3001`. La búsqueda nacional, la ejecución
+completa de campañas y el CSV quedan para la Fase 2B; no se cargan datos
+ficticios.
 
 - Especificación: [`sales-agent/docs/SPEC.md`](../sales-agent/docs/SPEC.md)
 - Estado de implementación:
@@ -51,8 +54,11 @@ cargan datos ficticios.
   `200` contra Vercel + Neon. Rama `feat/arvokta-monorepo` mergeada a `main`.
 - [x] Completar la Fase 1 del Sales Agent: login, dashboard, productos,
   campañas, worker, seed de DOVEXO y tests (33 backend + 29 frontend).
-- [ ] Implementar la Fase 2 del Sales Agent: descubrimiento OSM/Overpass, CSV,
-  alta manual y deduplicación.
+- [x] Implementar la Fase 2A del Sales Agent: descubrimiento provincial
+  OSM/Overpass, empresas, contactos, alta manual y deduplicación (70 tests
+  backend + 53 frontend; búsqueda real con 5 empresas).
+- [ ] Implementar la Fase 2B del Sales Agent: CSV, búsqueda nacional y ejecución
+  completa de campañas por provincia/rubro.
 - [ ] Cerrar la auditoría externa de DOVEXO (legal, exportación CSV, soporte,
   backups).
 - [ ] Aplicar la migración de planes de DOVEXO en Neon.

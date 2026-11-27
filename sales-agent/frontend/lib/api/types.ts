@@ -107,3 +107,129 @@ export interface Sector {
   name: string;
   is_active: boolean;
 }
+
+/** Provincia de referencia (`GET /meta/provinces`). */
+export interface ProvinceOption {
+  code: string;
+  name: string;
+}
+
+export type SearchRunStatus =
+  | "pending"
+  | "running"
+  | "completed"
+  | "failed"
+  | "cancelled"
+  | "unknown";
+
+/** Corrida de descubrimiento (`/search-runs`). */
+export interface SearchRun {
+  id: EntityId;
+  campaign_id: EntityId | null;
+  provider: string;
+  /** Código ISO de la provincia (por ejemplo `AR-X`). */
+  province_code: string;
+  province_name: string | null;
+  sector_slugs: string[];
+  keywords: string[];
+  limit: number;
+  status: SearchRunStatus;
+  raw_status: string;
+  /** Registros devueltos por el proveedor. */
+  records_found: number;
+  new_companies: number;
+  duplicates: number;
+  errors: string[];
+  created_at: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+}
+
+export interface SearchRunInput {
+  province_code: string;
+  sector_slugs: string[];
+  /** Texto libre; el backend lo guarda como una sola cadena. */
+  keywords?: string;
+  limit?: number;
+  campaign_id?: EntityId | null;
+}
+
+export interface SearchRunFilters {
+  limit?: number;
+  offset?: number;
+}
+
+export interface SectorRef {
+  slug: string;
+  name: string;
+}
+
+/** Contacto público de una empresa (`GET /companies/{id}`). */
+export interface CompanyContact {
+  id: EntityId;
+  contact_type: string;
+  value: string;
+  label: string | null;
+  is_primary: boolean;
+  verification_status: string;
+  do_not_contact: boolean;
+}
+
+/** Fuente que respalda los datos de una empresa. */
+export interface CompanySource {
+  id: EntityId;
+  source_type: string;
+  source_url: string;
+  title: string | null;
+  evidence_excerpt: string | null;
+  collected_at: string | null;
+  confidence: number | null;
+}
+
+export interface Company {
+  id: EntityId;
+  name: string;
+  description: string;
+  website: string | null;
+  province: string | null;
+  locality: string | null;
+  address: string | null;
+  discovery_status: string;
+  raw_discovery_status: string;
+  sectors: SectorRef[];
+  contacts: CompanyContact[];
+  primary_phone: string | null;
+  primary_email: string | null;
+  whatsapp: string | null;
+  source_count: number;
+  sources: CompanySource[];
+  created_at: string | null;
+}
+
+/** Respuesta paginada de `GET /companies`. */
+export interface CompanyPage {
+  items: Company[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface CompanyFilters {
+  search_run_id?: string;
+  query?: string;
+  province?: string;
+  sector?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CompanyInput {
+  name: string;
+  website?: string;
+  province?: string;
+  locality?: string;
+  address?: string;
+  sector_slugs: string[];
+  phone?: string;
+  email?: string;
+}

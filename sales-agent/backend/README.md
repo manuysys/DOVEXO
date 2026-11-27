@@ -1,8 +1,9 @@
-# ARVOKTA Sales Agent — Backend (Fase 1)
+# ARVOKTA Sales Agent — Backend (Fase 1 + 2A)
 
-API interna en FastAPI + SQLite con worker de cola persistente. No incluye
-descubrimiento de empresas ni enriquecimiento: eso corresponde a la Fase 2 en
-adelante.
+API interna en FastAPI + SQLite con worker de cola persistente. La Fase 2A
+agrega descubrimiento real por provincia con OpenStreetMap/Overpass, alta manual,
+contactos, fuentes, deduplicación y listado de empresas. El enriquecimiento de
+sitios oficiales y el scoring quedan para fases posteriores.
 
 ## Requisitos
 
@@ -37,6 +38,11 @@ que hay que ejecutar `alembic upgrade head`.
 | `APP_ENV` | `development` o `production`. En producción se desactivan docs y la cookie es `Secure`. |
 | `LOG_LEVEL` | Nivel de logging (no se registran cuerpos, contraseñas ni tokens). |
 | `OLLAMA_BASE_URL` / `OLLAMA_MODEL` | Reservadas para IA local opcional; no se usan en Fase 1. |
+| `OVERPASS_URL` | Endpoint de Overpass. Por defecto `https://overpass-api.de/api/interpreter`. |
+| `OVERPASS_TIMEOUT_SECONDS` | Timeout de consulta/HTTP. Por defecto 60. |
+| `OVERPASS_MAX_RETRIES` | Reintentos ante 429/5xx o error de red. Por defecto 2. |
+| `OVERPASS_REQUEST_DELAY_SECONDS` | Espera entre consultas por rubro. Por defecto 0,5 s. |
+| `OVERPASS_USER_AGENT` | User-Agent identificable enviado a Overpass. |
 
 SQLite se abre con `journal_mode=WAL`, `foreign_keys=ON` y `busy_timeout` para
 que API y worker compartan el archivo con transacciones cortas.
@@ -53,12 +59,82 @@ Todos bajo `/api/v1`, salvo salud. La autenticación usa cookie HttpOnly
 - `GET|POST /products`, `GET|PATCH|DELETE /products/{id}` (`DELETE` desactiva)
 - `GET|POST /campaigns`, `GET|PATCH /campaigns/{id}`,
   `POST /campaigns/{id}/start|pause|cancel`
+- `POST /search-runs`, `GET /search-runs`, `GET /search-runs/{id}`,
+  `POST /search-runs/{id}/retry|cancel`
+- `GET /companies` (`search_run_id`, `query`, `province`, `sector`, `limit`,
+  `offset`), `GET|POST /companies`, `GET|PATCH /companies/{id}`,
+  `GET|POST /companies/{id}/contacts`
 - `GET /dashboard/metrics|activity|jobs`
 - `POST /jobs/noop` (solo admin; encola un trabajo de prueba)
 
-`start` valida producto y filtros, y crea un `search_run` + `job` en estado
-`pending`. En Fase 1 no hay proveedores: el worker **no** procesa `search_run` y
-los deja pendientes para la Fase 2.
+`POST /search-runs` recibe `{province_code, sector_slugs, keywords?, limit?,
+campaign_id?}`. Valida provincia y rubros y crea un `SearchRun` + `Job`
+`search_run` en una sola transacción. La Fase 2A solo ejecuta búsquedas
+provinciales: el `start` de una campaña nacional crea su run, pero el worker lo
+marca `failed` con un error legible en lugar de recorrer 24 provincias.
+
+`POST /companies` es el alta manual. Ante un duplicado exacto por dominio,
+teléfono o nombre + localidad responde 409 con `detail` y `duplicate_of`. Si la
+coincidencia es difusa, guarda la empresa como `possible_duplicate` y la
+devuelve. `DELETE` no se implementó para empresas: se corrigen con `PATCH`.
+
+## Descubrimiento con OpenStreetMap (Fase 2A)
+
+El provider consulta Overpass una vez por rubro, filtrando por
+`area["ISO3166-2"="AR-X"]["boundary"="administrative"]`. Los resultados se
+normalizan (nombre, web, teléfono, email, WhatsApp publicado, dirección,
+localidad, coordenadas, URL de OSM y tags) y se descartan los elementos sin
+nombre. Si Overpass devuelve una lista vacía, la búsqueda termina `completed`
+con `records_found = 0`; no se inventan empresas.
+
+Mapeo conservador de etiquetas:
+
+| Rubro | Etiquetas OSM |
+| --- | --- |
+| `hvac` | `craft=hvac`, `shop=hvac` |
+| `it_support` | `office=it`, `shop=computer` |
+| `electronic_security` | `shop=security` |
+| `industrial_maintenance` | `industrial=machine_shop` |
+| `gates_automation` | `shop=doors` |
+| `appliance_repair` | `craft=electronics_repair` |
+| `electrical_installations` | `craft=electrician` |
+
+Dudas documentadas:
+
+- `industrial=machine_shop` es un proxy imperfecto: identifica talleres
+  industriales, no necesariamente empresas de mantenimiento.
+- `shop=doors` incluye venta de puertas y aberturas; no garantiza
+  automatización de portones.
+- `shop=appliance` y `shop=electrical` se excluyeron porque son principalmente
+  retail y no servicio técnico.
+- `office=security` se excluyó porque suele incluir vigilancia y no
+  necesariamente seguridad electrónica.
+- El rubro se infiere de etiquetas explícitas; cuando el mapeo no alcanza, la
+  empresa queda sin rubro y se revisa manualmente.
+
+La búsqueda por palabras clave agrega una consulta por `name` sobre elementos con
+`craft`, `shop`, `office` o `industrial`. No reemplaza la búsqueda por rubro y
+respeta el mismo límite total.
+
+Los datos de OpenStreetMap requieren atribución (`© OpenStreetMap contributors`)
+cuando se muestren en la interfaz. El backend conserva la URL del elemento para
+poder trazarlos.
+
+Los teléfonos se normalizan con `phonenumbers` (región AR) y se conserva el valor
+original. Un teléfono **nunca** se convierte en WhatsApp: solo se guarda como
+WhatsApp un enlace `wa.me`/`api.whatsapp.com` publicado o una carga manual
+explícita. Los contactos de OSM quedan `published`; los manuales, `unverified`.
+
+## Deduplicación
+
+Orden: dominio normalizado, teléfono normalizado, URL de OSM (ID de proveedor),
+nombre normalizado + localidad y RapidFuzz (`WRatio` ≥ 90) para posibles
+duplicados. Los exactos no crean una empresa nueva y se cuentan en `duplicates`;
+aun así se registra la fuente de la corrida para poder filtrar por
+`search_run_id`. Los difusos se guardan con `discovery_status =
+possible_duplicate`. No hay fusión automática. La comparación difusa se limita a
+500 candidatos y exige coincidencia de localidad normalizada; está pensada para
+la escala local de la Fase 2A.
 
 ## Worker
 
@@ -69,8 +145,10 @@ uv run python -m app.workers.runner --max-jobs 10 --poll-seconds 5
 ```
 
 Toma trabajos `pending` con un `UPDATE` condicional (un solo worker gana cada
-trabajo). Solo procesa `noop`; los errores se guardan en `error_message` y se
-reintentan hasta `max_attempts` con espera creciente.
+trabajo). Procesa `noop` y `search_run`. Las transacciones de guardado son por
+empresa; si el proveedor falla, la búsqueda queda `failed` con error legible y
+el job se reintenta con espera creciente. Si se cancela una búsqueda en curso, el
+worker deja de persistir resultados.
 
 ## Definiciones del dashboard
 
@@ -92,4 +170,7 @@ uv run ruff check .
 uv run ruff format --check .
 ```
 
-Las pruebas usan un SQLite temporal y no acceden a internet.
+Las pruebas usan un SQLite temporal y no acceden a internet. Overpass se simula
+con `httpx.MockTransport`; el worker se prueba con un provider fake. La suite
+incluye un test de migración que ejecuta `alembic upgrade head` y
+`downgrade base` sobre una base temporal desde cero.

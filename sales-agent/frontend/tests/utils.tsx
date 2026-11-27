@@ -3,8 +3,10 @@ import { render } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import type {
   Campaign,
+  Company,
   DashboardJob,
   Product,
+  SearchRun,
   Sector,
 } from "@/lib/api/types";
 
@@ -83,6 +85,74 @@ export function makeJob(overrides: Partial<DashboardJob> = {}): DashboardJob {
     type: "discovery",
     status: "running",
     created_at: "2026-11-01T10:00:00Z",
+    ...overrides,
+  };
+}
+
+/** Fixture de empresa para pruebas de UI (no son datos reales). */
+export function makeCompany(overrides: Partial<Company> = {}): Company {
+  return {
+    id: "10",
+    name: "Empresa de prueba",
+    description: "Service de refrigeración.",
+    website: "https://empresa-de-prueba.com.ar",
+    province: "AR-S",
+    locality: "Rosario",
+    address: "Calle 123",
+    discovery_status: "discovered",
+    raw_discovery_status: "discovered",
+    sectors: [{ slug: "hvac", name: "Climatización" }],
+    contacts: [
+      {
+        id: "1",
+        contact_type: "email",
+        value: "contacto@empresa-de-prueba.com.ar",
+        label: null,
+        is_primary: true,
+        verification_status: "published",
+        do_not_contact: false,
+      },
+    ],
+    primary_phone: null,
+    primary_email: "contacto@empresa-de-prueba.com.ar",
+    whatsapp: "+5493415550000",
+    source_count: 1,
+    sources: [
+      {
+        id: "1",
+        source_type: "osm",
+        source_url: "https://www.openstreetmap.org/node/1",
+        title: "OpenStreetMap",
+        evidence_excerpt: null,
+        collected_at: "2026-11-20T12:00:00Z",
+        confidence: null,
+      },
+    ],
+    created_at: "2026-11-20T12:00:00Z",
+    ...overrides,
+  };
+}
+
+/** Fixture de corrida de búsqueda (no es un resultado real). */
+export function makeSearchRun(overrides: Partial<SearchRun> = {}): SearchRun {
+  return {
+    id: "7",
+    campaign_id: null,
+    provider: "osm",
+    province_code: "AR-X",
+    province_name: "Córdoba",
+    sector_slugs: ["hvac"],
+    keywords: [],
+    limit: 50,
+    status: "completed",
+    raw_status: "completed",
+    records_found: 12,
+    new_companies: 9,
+    duplicates: 3,
+    errors: [],
+    created_at: "2026-11-20T12:00:00Z",
+    started_at: "2026-11-20T12:00:05Z",
+    finished_at: "2026-11-20T12:01:00Z",
     ...overrides,
   };
 }

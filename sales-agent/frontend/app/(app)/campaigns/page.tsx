@@ -17,7 +17,7 @@ export default function CampaignsPage() {
     <>
       <PageHeader
         title="Campañas"
-        description="Una campaña combina producto, provincias, rubros, fuentes y límite de resultados. La ejecución de búsquedas se habilita en la Fase 2."
+        description="Una campaña combina producto, provincias, rubros, fuentes y límite de resultados. La ejecución por campaña completa se habilita en la Fase 2B; las búsquedas por provincia ya funcionan en Buscar empresas."
         actions={
           <Link
             href="/campaigns/new"

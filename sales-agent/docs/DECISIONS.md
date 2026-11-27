@@ -70,3 +70,41 @@ contrato.
 
 **Consecuencias:** DOVEXO puede seguir usando 8000/3000 sin colisión. Los scripts
 de PowerShell arrancan cada proceso por separado.
+
+## ADR-S006 — Descubrimiento provincial con Overpass en Fase 2A
+
+**Fecha:** 2026-11-27
+**Estado:** aceptada
+
+**Contexto:** la Fase 1 no ejecutaba descubrimiento. La Fase 2 debe usar fuentes
+gratuitas y no inventar empresas.
+
+**Decisión:** `OverpassProvider` consulta OpenStreetMap por provincia argentina
+(`ISO3166-2`) y por rubro, con una consulta por rubro, límite total, timeout,
+reintentos con backoff, User-Agent identificable y sin APIs pagas. El worker
+procesa `search_run`, guarda empresas/fuentes/contactos/sectores y actualiza
+conteos. La Fase 2A es **provincial**: la búsqueda nacional y la ejecución
+completa de una campaña con 24 provincias quedan para 2B. Si una campaña
+nacional se intenta ejecutar, falla con un mensaje claro y no inventa datos.
+
+**Consecuencias:** los tests usan Overpass mockeado y no dependen de internet.
+El mapeo de etiquetas OSM para algunos rubros es conservador y debe revisarse con
+datos reales. La disponibilidad de Overpass afecta la búsqueda real; el error se
+informa y el job puede reintentarse.
+
+## ADR-S007 — Deduplicación con procedencia y revisión humana
+
+**Fecha:** 2026-11-27
+**Estado:** aceptada
+
+**Decisión:** comparar dominio normalizado, teléfono normalizado, URL estable de
+OSM, nombre normalizado + localidad y RapidFuzz. Los duplicados exactos se omiten
+pero dejan una fuente con `search_run_id` para trazabilidad. Los posibles
+duplicados se guardan con `discovery_status="possible_duplicate"` para revisión;
+no se fusionan automáticamente. Cada empresa conserva fuentes y contactos con su
+origen.
+
+**Consecuencias:** una empresa puede aparecer en varias búsquedas sin perder
+trazabilidad. La revisión de posibles duplicados todavía es una lista; falta la
+pantalla de fusión/revisión en 2B. La búsqueda difusa se limita a 500 candidatos
+y exige localidad, adecuada para la escala provincial inicial.

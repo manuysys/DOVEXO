@@ -1,10 +1,18 @@
 import type {
   Campaign,
   CampaignStatus,
+  Company,
+  CompanyContact,
+  CompanyPage,
+  CompanySource,
   DashboardJob,
   DashboardMetrics,
   Product,
+  ProvinceOption,
+  SearchRun,
+  SearchRunStatus,
   Sector,
+  SectorRef,
   User,
 } from "./types";
 
@@ -319,4 +327,282 @@ export function normalizeSector(payload: unknown): Sector {
 
 export function normalizeSectors(payload: unknown): Sector[] {
   return extractItems(payload, ["sectors"]).map(normalizeSector);
+}
+
+export function normalizeProvince(payload: unknown): ProvinceOption {
+  const record = extractObject(payload, ["province", "data"]);
+  const code = readString(record, ["code", "iso_code", "isoCode", "id"]);
+  const name = readString(record, ["name", "label", "province"]);
+  return { code, name: name || code };
+}
+
+/** `GET /meta/provinces` devuelve `[{ code, name }]`. */
+export function normalizeProvinces(payload: unknown): ProvinceOption[] {
+  return extractItems(payload, ["provinces"])
+    .map(normalizeProvince)
+    .filter((province) => province.code.length > 0);
+}
+
+/** Acepta listas de strings o de objetos `{ slug, name }`. */
+export function normalizeSectorRefs(payload: unknown): SectorRef[] {
+  const items = Array.isArray(payload) ? payload : [];
+  const refs: SectorRef[] = [];
+  for (const item of items) {
+    if (typeof item === "string") {
+      const value = item.trim();
+      if (value.length > 0) refs.push({ slug: value, name: value });
+      continue;
+    }
+    if (isRecord(item)) {
+      const slug = readString(item, ["slug", "sector_slug", "sectorSlug"]);
+      const name = readString(item, ["name", "sector_name", "sectorName"]);
+      const label = name || slug;
+      if (label.length > 0) refs.push({ slug: slug || label, name: label });
+    }
+  }
+  return refs;
+}
+
+/** Palabras clave: arreglo o texto separado por líneas, comas o punto y coma. */
+function readTextList(
+  record: Record<string, unknown>,
+  keys: string[],
+): string[] {
+  const value = pick(record, keys);
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => {
+        if (typeof item === "string") return item.trim();
+        if (typeof item === "number") return String(item);
+        return "";
+      })
+      .filter((item) => item.length > 0);
+  }
+  if (typeof value === "string") {
+    return value
+      .split(/[\n,;]+/)
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }
+  return [];
+}
+
+function readErrorList(
+  record: Record<string, unknown>,
+  keys: string[],
+): string[] {
+  const value = pick(record, keys);
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      if (typeof item === "string") return item.trim();
+      if (typeof item === "number") return String(item);
+      if (isRecord(item)) {
+        return readString(item, ["message", "detail", "error", "msg"]);
+      }
+      return "";
+    })
+    .filter((item) => item.length > 0);
+}
+
+const SEARCH_RUN_STATUSES: SearchRunStatus[] = [
+  "pending",
+  "running",
+  "completed",
+  "failed",
+  "cancelled",
+];
+
+export function normalizeSearchRunStatus(value: string): SearchRunStatus {
+  const normalized = value.trim().toLowerCase();
+  const found = SEARCH_RUN_STATUSES.find((status) => status === normalized);
+  return found ?? "unknown";
+}
+
+export function normalizeSearchRun(payload: unknown): SearchRun {
+  const record = extractObject(payload, ["search_run", "searchRun", "data"]);
+  const config = readRecord(record, ["search_config", "searchConfig"]);
+  const campaign = isRecord(record.campaign) ? record.campaign : {};
+  const rawStatus = readString(record, ["status", "state"], "pending");
+
+  // El backend actual guarda el alcance en `search_config` y en los campos
+  // `location`/`sector`; se aceptan además las claves planas del contrato.
+  const provinceCode =
+    readString(record, ["province_code", "provinceCode", "province"]) ||
+    readString(config, ["province_code", "provinceCode", "province"]);
+
+  const directSectors = readStringArray(record, [
+    "sector_slugs",
+    "sectorSlugs",
+    "sectors",
+  ]);
+  const configSectors = readStringArray(config, [
+    "sector_slugs",
+    "sectorSlugs",
+    "sectors",
+  ]);
+  const sectorSlugs =
+    directSectors.length > 0
+      ? directSectors
+      : configSectors.length > 0
+        ? configSectors
+        : readTextList(record, ["sector", "sector_name", "sectorName"]);
+
+  const directKeywords = readTextList(record, ["keywords"]);
+  const keywords =
+    directKeywords.length > 0
+      ? directKeywords
+      : readTextList(config, ["keywords"]);
+
+  return {
+    id: readId(record),
+    campaign_id:
+      readNullableString(record, ["campaign_id", "campaignId"]) ??
+      (isRecord(record.campaign) ? readId(campaign) || null : null),
+    provider: readString(record, ["provider"], "osm"),
+    province_code: provinceCode,
+    province_name: readNullableString(record, [
+      "province_name",
+      "provinceName",
+      "location",
+    ]),
+    sector_slugs: sectorSlugs,
+    keywords,
+    limit: readNumber(record, ["limit", "max_results", "maxResults"], 0),
+    status: normalizeSearchRunStatus(rawStatus),
+    raw_status: rawStatus,
+    records_found: readNumber(record, ["records_found", "recordsFound"]),
+    new_companies: readNumber(record, ["new_companies", "newCompanies"]),
+    duplicates: readNumber(record, ["duplicates", "duplicated"]),
+    errors: readErrorList(record, ["errors", "error_messages"]),
+    created_at: readNullableString(record, ["created_at", "createdAt"]),
+    started_at: readNullableString(record, ["started_at", "startedAt"]),
+    finished_at: readNullableString(record, ["finished_at", "finishedAt"]),
+  };
+}
+
+export function normalizeSearchRuns(payload: unknown): SearchRun[] {
+  return extractItems(payload, ["search_runs", "searchRuns", "runs"]).map(
+    normalizeSearchRun,
+  );
+}
+
+export function normalizeContact(payload: unknown): CompanyContact {
+  const record = extractObject(payload, ["contact", "data"]);
+  return {
+    id: readId(record),
+    contact_type: readString(
+      record,
+      ["contact_type", "contactType", "type", "channel"],
+      "other",
+    ),
+    value: readString(record, [
+      "value",
+      "normalized_value",
+      "normalizedValue",
+      "original_value",
+      "originalValue",
+    ]),
+    label: readNullableString(record, ["label", "name"]),
+    is_primary: readBoolean(record, ["is_primary", "isPrimary"]),
+    verification_status: readString(
+      record,
+      ["verification_status", "verificationStatus", "status"],
+      "unverified",
+    ),
+    do_not_contact: readBoolean(record, ["do_not_contact", "doNotContact"]),
+  };
+}
+
+export function normalizeContacts(payload: unknown): CompanyContact[] {
+  return extractItems(payload, ["contacts", "items"]).map(normalizeContact);
+}
+
+export function normalizeSource(payload: unknown): CompanySource {
+  const record = extractObject(payload, ["source", "data"]);
+  const confidence = readNumber(record, ["confidence"], Number.NaN);
+  return {
+    id: readId(record),
+    source_type: readString(record, ["source_type", "sourceType", "type"], "osm"),
+    source_url: readString(record, ["source_url", "sourceUrl", "url"]),
+    title: readNullableString(record, ["title", "name"]),
+    evidence_excerpt: readNullableString(record, [
+      "evidence_excerpt",
+      "evidenceExcerpt",
+      "excerpt",
+    ]),
+    collected_at: readNullableString(record, ["collected_at", "collectedAt"]),
+    confidence: Number.isNaN(confidence) ? null : confidence,
+  };
+}
+
+export function normalizeSources(payload: unknown): CompanySource[] {
+  return extractItems(payload, ["sources", "items"]).map(normalizeSource);
+}
+
+function findContactValue(
+  contacts: CompanyContact[],
+  types: string[],
+): string | null {
+  const matching = contacts.filter((contact) =>
+    types.includes(contact.contact_type.toLowerCase()),
+  );
+  const preferred = matching.find((contact) => contact.is_primary) ?? matching[0];
+  if (preferred && preferred.value.trim().length > 0) return preferred.value;
+  return null;
+}
+
+export function normalizeCompany(payload: unknown): Company {
+  const record = extractObject(payload, ["company", "data"]);
+  const contacts = normalizeContacts(record.contacts ?? []);
+  const sources = normalizeSources(record.sources ?? record.company_sources ?? []);
+  const rawStatus = readString(
+    record,
+    ["discovery_status", "discoveryStatus", "status"],
+    "unknown",
+  );
+  const sourceCount = readNumber(
+    record,
+    ["source_count", "sourceCount", "sources_count"],
+    Number.NaN,
+  );
+
+  return {
+    id: readId(record),
+    name: readString(record, ["name", "legal_name", "legalName"]),
+    description: readString(record, ["description"]),
+    website: readNullableString(record, ["website", "url", "domain"]),
+    province: readNullableString(record, ["province", "province_name"]),
+    locality: readNullableString(record, ["locality", "city", "town"]),
+    address: readNullableString(record, ["address", "street"]),
+    discovery_status: rawStatus.trim().toLowerCase(),
+    raw_discovery_status: rawStatus,
+    sectors: normalizeSectorRefs(record.sectors ?? record.company_sectors),
+    contacts,
+    primary_phone:
+      readNullableString(record, ["primary_phone", "primaryPhone", "phone"]) ??
+      findContactValue(contacts, ["phone", "whatsapp"]),
+    primary_email:
+      readNullableString(record, ["primary_email", "primaryEmail", "email"]) ??
+      findContactValue(contacts, ["email"]),
+    whatsapp:
+      readNullableString(record, ["whatsapp", "whatsapp_number"]) ??
+      findContactValue(contacts, ["whatsapp"]),
+    source_count: Number.isNaN(sourceCount) ? sources.length : sourceCount,
+    sources,
+    created_at: readNullableString(record, ["created_at", "createdAt"]),
+  };
+}
+
+export function normalizeCompanyPage(payload: unknown): CompanyPage {
+  const record = isRecord(payload) ? payload : {};
+  const items = extractItems(payload, ["items", "companies"]).map(
+    normalizeCompany,
+  );
+  return {
+    items,
+    total: readNumber(record, ["total", "count"], items.length),
+    limit: readNumber(record, ["limit", "page_size"], items.length),
+    offset: readNumber(record, ["offset", "skip"], 0),
+  };
 }

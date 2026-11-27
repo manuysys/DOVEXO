@@ -5,10 +5,11 @@ CRM. Es multiproducto: DOVEXO es el primer producto configurado.
 
 ## Estado
 
-Fase 0 y Fase 1 completadas y verificadas localmente: login, dashboard,
-productos, campañas, worker persistente, seed de DOVEXO y tests. El
-descubrimiento de empresas (OSM/Overpass, CSV y alta manual) corresponde a la
-Fase 2.
+Fases 0, 1 y 2A completadas y verificadas localmente: login, dashboard,
+productos, campañas, worker persistente, seed de DOVEXO, descubrimiento
+provincial con OpenStreetMap/Overpass, empresas, contactos, alta manual y
+deduplicación. La búsqueda nacional, la ejecución completa de campañas y la
+importación CSV corresponden a la Fase 2B.
 
 Ver [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md).
 

@@ -153,12 +153,13 @@ export function CampaignDetailView({ id }: { id: string }) {
       {campaign.status === "active" ? (
         <Alert
           variant="info"
-          title="Búsqueda pendiente de la Fase 2"
+          title="Búsqueda por campaña pendiente de la Fase 2B"
           className="mb-4"
         >
-          La campaña está activa, pero el descubrimiento de empresas todavía no
-          se ejecuta en esta fase. No se generaron resultados, empresas ni
-          prospectos.
+          La campaña está activa, pero la ejecución automática de toda la
+          campaña todavía no está implementada. Las búsquedas por provincia y
+          rubro ya funcionan en Buscar empresas. No se generaron resultados,
+          empresas ni prospectos desde esta campaña.
         </Alert>
       ) : null}
 
@@ -219,8 +220,10 @@ export function CampaignDetailView({ id }: { id: string }) {
               configuración y seguimiento.
             </p>
             <p>
-              El worker y las fuentes gratuitas se conectan en la Fase 2. Hasta
-              entonces, iniciar la campaña solo cambia su estado.
+              El descubrimiento por provincia y rubro ya está disponible en
+              Buscar empresas (Fase 2A). La ejecución automática de una campaña
+              completa llega en la Fase 2B; hasta entonces, iniciar la campaña
+              solo cambia su estado.
             </p>
             <p>
               No se muestran resultados porque todavía no existen en la base.

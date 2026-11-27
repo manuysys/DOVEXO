@@ -59,6 +59,9 @@ class CompanySource(Base):
     )
     confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     content_hash: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    search_run_id: Mapped[int | None] = mapped_column(
+        ForeignKey("search_runs.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
 
 class CompanySector(Base):

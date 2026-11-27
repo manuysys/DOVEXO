@@ -16,13 +16,14 @@ from sqlalchemy.orm import Session
 
 from app.core.logging import get_logger
 from app.models import Job
+from app.providers.discovery import get_discovery_provider
+from app.services.discovery import process_search_run_job
 from app.utils import utcnow
 
 logger = get_logger(__name__)
 
-# En Fase 1 solo se procesa `noop`. Los `search_run` quedan pendientes para la
-# Fase 2 y no se reclaman, para no simular resultados.
-SUPPORTED_JOB_TYPES: tuple[str, ...] = ("noop",)
+# En Fase 2A se procesan trabajos `noop` y búsquedas provinciales `search_run`.
+SUPPORTED_JOB_TYPES: tuple[str, ...] = ("noop", "search_run")
 
 
 def _handle_noop(_db: Session, job: Job) -> dict[str, Any]:
@@ -33,8 +34,15 @@ def _handle_noop(_db: Session, job: Job) -> dict[str, Any]:
     }
 
 
+def _handle_search_run(db: Session, job: Job) -> dict[str, Any]:
+    payload = job.payload or {}
+    provider = get_discovery_provider(str(payload.get("provider", "overpass")))
+    return process_search_run_job(db, payload, provider)
+
+
 HANDLERS: dict[str, Callable[[Session, Job], dict[str, Any]]] = {
     "noop": _handle_noop,
+    "search_run": _handle_search_run,
 }
 
 

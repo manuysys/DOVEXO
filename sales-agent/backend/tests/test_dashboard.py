@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from app.database.session import SessionLocal
-from app.models import Activity, Job
+from app.models import Activity
 from app.workers.queue import run_once
 
 
@@ -90,7 +90,7 @@ def test_noop_job_is_queued_and_processed(auth_client: TestClient) -> None:
     assert metrics["jobs_failed"] == 0
 
 
-def test_search_run_jobs_stay_pending(auth_client: TestClient) -> None:
+def test_campaign_search_run_fails_without_province(auth_client: TestClient) -> None:
     product_id = auth_client.get("/api/v1/products").json()[0]["id"]
     campaign = auth_client.post(
         "/api/v1/campaigns",
@@ -104,14 +104,22 @@ def test_search_run_jobs_stay_pending(auth_client: TestClient) -> None:
     started = auth_client.post(f"/api/v1/campaigns/{campaign['id']}/start")
     assert started.status_code == 200
     job_id = started.json()["job_id"]
+    search_run_id = started.json()["search_run_id"]
 
     with SessionLocal() as db:
-        # El worker no toma trabajos search_run en Fase 1.
-        assert run_once(db) is None
-        job = db.get(Job, job_id)
+        job = run_once(db)
         assert job is not None
-        assert job.status == "pending"
-        assert job.attempts == 0
+        assert job.id == job_id
+        # La búsqueda de campaña no tiene provincia única: falla sin inventar.
+        assert job.status == "completed"
+        assert job.result is not None
+        assert job.result["status"] == "failed"
+
+    run = auth_client.get(f"/api/v1/search-runs/{search_run_id}").json()
+    assert run["status"] == "failed"
+    assert run["errors"]
+    assert run["records_found"] == 0
+    assert auth_client.get("/api/v1/companies").json()["total"] == 0
 
 
 def test_noop_endpoint_requires_session(client: TestClient) -> None:
