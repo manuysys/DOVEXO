@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-11-27 — Exportación CSV por tenant
+
+- **API:** nuevos `GET /api/v1/exports/customers.csv`,
+  `/exports/orders.csv`, `/exports/quotes.csv` y `/exports/payments.csv`.
+- **Permisos:** `owner`, `admin` y `dispatcher` descargan; `viewer` y
+  `technician` reciben 403. Cada consulta filtra por el tenant de la membresía
+  validada, no por un `tenant_id` enviado por el cliente.
+- **Formato:** CSV UTF-8 con BOM, cabeceras en español, fechas en
+  `America/Argentina/Buenos_Aires` e importes con `Decimal` de 2 decimales. La
+  neutralización de fórmulas (`=`, `+`, `-`, `@`, tab, CR, LF) se aplica solo a
+  la salida; los datos persistidos no se modifican.
+- **Transporte:** respuesta en streaming y cabecera `Content-Disposition` con el
+  nombre del archivo (`clientes-2026-11-27.csv`); CORS la expone a la web.
+- **Auditoría:** cada descarga registra `export_downloaded` en `audit_logs`.
+- **Web:** ruta `/settings/export` con cuatro tarjetas (clientes, órdenes,
+  presupuestos y pagos) y descarga directa.
+- **Pruebas:** backend con **232 pytest** (permisos por rol, aislamiento por
+  tenant, BOM, cabeceras, fechas, `Decimal`, neutralización solo en salida y
+  auditoría) y ruff/format/basedpyright OK; frontend con **317 tests**, lint,
+  typecheck y build OK.
+- **Verificación en producción (2026-11-27):** los cuatro endpoints respondieron
+  200 con `demo@saasgestion.com`, `Content-Disposition` correcto y BOM `EF BB BF`;
+  `/settings/export` descargó `clientes-2026-11-27.csv` (573 bytes, 5 líneas) sin
+  errores de consola. El 403 de `viewer`/`technician` y el aislamiento entre
+  tenants están cubiertos solo por tests locales.
+- **Pendiente:** los demás puntos de la auditoría externa del 2026-11-26 —legal
+  con abogado, soporte con tiempos y backup real con restauración probada— no se
+  tocaron en esta entrada.
+
 ## 2026-11-26 — Correcciones de la auditoría externa
 
 - Se unificó el trial: `/terms` ya no promete “14 días”; ahora dice “acceso de
@@ -8,8 +37,8 @@
   pendientes y mantené cada cobro asociado a su orden”.
 - Se agregó `docs/GO_TO_MARKET/AUDIT_RESPONSE_2026-11-26.md` con la verificación
   de los hallazgos (precios viejos y “Arreglo” no están en producción; legal,
-  exportación CSV, soporte y backups quedan pendientes) y el guion de grabación
-  para el auditor.
+  exportación CSV, soporte y backups quedaban pendientes en esa fecha) y el guion
+  de grabación para el auditor.
 - Deploy web de las dos correcciones de copy.
 
 ## 2026-11-24 — Precios de lanzamiento v2 y cupos separados de oficina/técnicos

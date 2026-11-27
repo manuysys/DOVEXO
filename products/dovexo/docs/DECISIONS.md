@@ -718,3 +718,56 @@ Precios de lanzamiento v2 (ARS/mes):
   re-ejecutó las suites.
 - **Pendiente:** aplicar la migración en Neon, desplegar la landing, QA visual en
   producción y, más adelante, enforcement completo de límites y cobro real.
+
+## ADR-028 — Contrato de exportación CSV por tenant (2026-11-27)
+
+**Fecha:** 2026-11-27
+**Estado:** aceptada. Complementa ADR-017 (importador CSV/XLSX), del que reutiliza
+el criterio de neutralización de fórmulas solo en la salida.
+
+**Contexto:** la auditoría externa del 2026-11-26 marcó como brecha funcional la
+falta de exportación de datos. La FAQ solo prometía PDF de presupuestos. Sin
+descargas, el cliente no puede sacar sus datos y la política de portabilidad
+queda sin implementación. Se necesita un contrato único para no repetir lógica ni
+abrir una vía de fuga entre tenants.
+
+**Decisión:**
+
+- **Endpoints:** `GET /api/v1/exports/customers.csv`, `/exports/orders.csv`,
+  `/exports/quotes.csv` y `/exports/payments.csv`.
+- **Autorización en backend:** solo `owner`, `admin` y `dispatcher`. `viewer` y
+  `technician` reciben 403. El tenant sale de la membresía validada; nunca de un
+  `tenant_id` enviado por el cliente.
+- **Formato:** CSV UTF-8 con BOM (`EF BB BF`) para que Excel abra acentos y
+  tildes, cabeceras en español, fechas convertidas a
+  `America/Argentina/Buenos_Aires` e importes como `Decimal` con 2 decimales.
+- **Neutralización solo en la salida:** los valores que empiezan con `=`, `+`, `-`,
+  `@`, tab, CR o LF se prefijan al escribir el CSV. Los datos persistidos quedan
+  intactos, de modo que la exportación es una representación y no una mutación.
+- **Transporte:** streaming, sin materializar el tenant completo en memoria, y
+  `Content-Disposition` con el nombre del archivo. CORS expone esa cabecera para
+  que la web pueda leer el nombre.
+- **Auditoría:** cada descarga registra `export_downloaded` en `audit_logs` con
+  actor, recurso y conteo de filas.
+- **Web:** `/settings/export` con cuatro tarjetas y descarga directa.
+
+**Consecuencias:**
+
+- **Portabilidad cubierta, eliminación no.** La exportación resuelve el derecho a
+  sacar los datos; el borrado de datos del tenant sigue pendiente y es un punto
+  aparte de `PRODUCTION_CHECKLIST.md` y de la auditoría.
+- **Sin límite de filas explícito:** el streaming evita el problema de memoria,
+  pero no hay paginación ni tope documentado. Si el volumen crece, hay que decidir
+  un tope o un archivo diferido.
+- **Exportar no es un borrado seguro:** el CSV queda en la máquina del usuario
+  fuera del control del producto. La política de retención y el aviso legal
+  siguen abiertos.
+- **Cubierto por tests, no todo por producción:** permisos por rol y aislamiento
+  entre tenants tienen tests locales; en producción solo se verificó la descarga
+  con un owner de la demo.
+- **Verificación:** backend con 232 pytest y ruff/format/basedpyright OK;
+  frontend con 317 tests, lint, typecheck y build OK. En producción (2026-11-27),
+  los cuatro endpoints respondieron 200 con `demo@saasgestion.com`,
+  `Content-Disposition` correcto (`clientes-2026-11-27.csv`) y BOM `EF BB BF`; la
+  web descargó el archivo desde `/settings/export` sin errores de consola. Este
+  ADR no re-ejecutó las suites.

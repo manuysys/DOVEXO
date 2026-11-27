@@ -30,7 +30,9 @@ Estado al 2026-11-22. Marcar solo cuando esté verificado.
 - [ ] WhatsApp outbox, plantillas y consentimiento.
 - [ ] Cron de recordatorios y reintentos.
 - [ ] 2FA para owners/admins.
-- [ ] Exportación/eliminación de datos del tenant.
+- [ ] Exportación/eliminación de datos del tenant: **exportación implementada**
+  (CSV de clientes, órdenes, presupuestos y pagos, ADR-028); **eliminación
+  pendiente**.
 - [ ] Adjuntos en S3/R2 con URLs firmadas.
 - [ ] FKs compuestas por tenant o RLS.
 - [ ] Pruebas E2E con Playwright contra preview.

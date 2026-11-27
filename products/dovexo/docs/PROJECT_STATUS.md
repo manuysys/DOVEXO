@@ -1,16 +1,17 @@
 # Estado del proyecto
 
-**Última actualización:** 2026-11-24
+**Última actualización:** 2026-11-27
 **Fase:** preventa / customer discovery activa (GO_TO_MARKET) + precios de
-lanzamiento v2 con cupos separados de oficina y técnicos (ADR-027). La landing
-v7 “secciones por rol, sello y sistema compartido” está verificada y
+lanzamiento v2 con cupos separados de oficina y técnicos (ADR-027) + exportación
+CSV por tenant (ADR-028). La landing v7 “secciones por rol, sello y sistema
+compartido” está verificada y
 **desplegada en producción desde el 2026-11-24** (10 secciones, hero sin recorte
 ni tope de 1600 px, panel denso, sello integrado, migración con preview,
 secciones de oficina/técnico/cliente/control y tokens nuevos en dashboard,
 portal, PWA y Expo). Base técnica:
 Hito 2 completo + PWA, app móvil Android DOVEXO, portal del cliente, dashboard
 operativo, automatizaciones, IA con Groq, suscripciones, panel global, WhatsApp,
-importador CSV/XLSX, onboarding y reset de demo (pilot-ready).
+importador CSV/XLSX, exportación CSV, onboarding y reset de demo (pilot-ready).
 
 ## Resumen
 
@@ -21,8 +22,8 @@ técnicos, pagos, dashboard operativo, PWA para técnicos, app móvil Android
 DOVEXO para técnicos y clientes, portal del cliente, invitaciones de equipo,
 automatizaciones con notificaciones, asistente de IA, planes y suscripciones,
 panel global del SaaS, configuración de WhatsApp Cloud API, importador de clientes
-desde CSV y XLSX con vista previa, onboarding de cuatro pasos y reset del tenant
-demo.
+desde CSV y XLSX con vista previa, onboarding de cuatro pasos, reset del tenant
+demo y exportación CSV de clientes, órdenes, presupuestos y pagos.
 
 Desde el 2026-11-14 la etapa activa es **preventa / customer discovery**: el
 paquete comercial está en `docs/GO_TO_MARKET/` (21 prospectos verificados con
@@ -33,6 +34,50 @@ El frontend y la API están desplegados en Vercel. La base PostgreSQL está en
 Neon (plan Free, región `gru1`). La demo ya no depende de una máquina local ni
 de un túnel. La empresa es **ARVOKTA** y el producto **DOVEXO**; el dominio
 propio está pendiente.
+
+## Exportación CSV (2026-11-27)
+
+Implementada, verificada localmente y verificada en producción. Documentada en
+ADR-028 y `CHANGELOG.md`. Cierra la brecha de portabilidad que marcó la auditoría
+externa del 2026-11-26 (ver `GO_TO_MARKET/AUDIT_RESPONSE_2026-11-26.md`).
+
+- **Endpoints:** `GET /api/v1/exports/customers.csv`,
+  `/exports/orders.csv`, `/exports/quotes.csv` y `/exports/payments.csv`.
+- **Permisos:** `owner`, `admin` y `dispatcher`. `viewer` y `technician` reciben
+  403. La consulta filtra siempre por el tenant de la membresía validada, no por
+  un `tenant_id` del cliente.
+- **Formato:** CSV UTF-8 con BOM (`EF BB BF`) para que Excel abra los acentos,
+  cabeceras en español y fechas en `America/Argentina/Buenos_Aires`. Los importes
+  salen con `Decimal` y 2 decimales; no se usa `float`.
+- **Neutralización solo en la salida:** los valores que empiezan con `=`, `+`, `-`,
+  `@`, tab, CR o LF se prefijan igual que en `errors.csv` del importador. Los datos
+  persistidos no se modifican.
+- **Streaming:** la respuesta se genera en streaming, sin cargar el tenant entero
+  en memoria.
+- **Auditoría:** cada descarga registra `export_downloaded` en `audit_logs` con
+  actor, recurso y conteo de filas.
+- **CORS:** se expone `Content-Disposition` para que la web pueda leer el nombre
+  del archivo (`clientes-2026-11-27.csv`).
+- **Web:** ruta `/settings/export` con cuatro tarjetas (clientes, órdenes,
+  presupuestos y pagos) y descarga directa con el nombre que fija el backend.
+
+Verificación (local, 2026-11-27):
+
+```text
+Backend  ruff / format / basedpyright -> OK; pytest 232 passed
+         (incluye permisos por rol, aislamiento por tenant, BOM, cabeceras,
+          fechas, Decimal 2, neutralización solo en salida y auditoría)
+Frontend lint / typecheck -> OK; test 317/317; build OK (/settings/export)
+```
+
+**Verificado en producción (2026-11-27):** con `demo@saasgestion.com`, los cuatro
+endpoints respondieron 200, con `Content-Disposition` correcto
+(`clientes-2026-11-27.csv`), BOM `EF BB BF` y contenido válido. En la web,
+`/settings/export` mostró las cuatro tarjetas y descargó
+`clientes-2026-11-27.csv` (573 bytes, 5 líneas) sin errores de consola.
+
+**No verificado en producción:** el 403 de `viewer`/`technician` y el aislamiento
+entre tenants. Ambos están cubiertos solo por tests locales.
 
 ## Precios de lanzamiento v2 y cupos separados (2026-11-24)
 
@@ -390,9 +435,20 @@ cuando cambie la UI del panel.
 - [x] Botón “Reiniciar demo” en `/admin` para platform admins (2026-11-23):
   llama al endpoint existente, muestra los conteos del seed e invalida las
   queries de admin y dashboard.
+- [x] Exportación CSV por tenant (`/api/v1/exports/*.csv`, 2026-11-27):
+  - `GET /api/v1/exports/customers.csv`, `/exports/orders.csv`,
+    `/exports/quotes.csv` y `/exports/payments.csv`.
+  - Roles `owner`, `admin` y `dispatcher`; `viewer` y `technician` reciben 403.
+  - Filtra por el tenant de la membresía validada; aislamiento cubierto por tests.
+  - CSV UTF-8 con BOM, cabeceras en español, fechas en
+    `America/Argentina/Buenos_Aires` e importes con `Decimal` de 2 decimales.
+  - Neutralización de fórmulas solo en la salida; los datos persistidos no se
+    modifican. Respuesta en streaming.
+  - Cada descarga registra `export_downloaded` en `audit_logs`.
+  - Web en `/settings/export` con cuatro tarjetas; `Content-Disposition` expuesto
+    por CORS para leer el nombre del archivo.
 - [x] 179 pruebas pytest al cierre del bloque 2026-11-11. La cifra vigente es
-  207 (2026-11-24, con los cupos separados de oficina/técnicos; ver "Precios de
-  lanzamiento v2").
+  232 (2026-11-27, con la exportación CSV; ver "Exportación CSV").
 
 ### Frontend
 
@@ -440,8 +496,11 @@ cuando cambie la UI del panel.
 - [x] Onboarding en `/onboarding`: asistente de cuatro pasos (empresa, servicios
   y horarios, equipo, primeros datos) con progreso guardado y reanudable.
 - [x] Checklist de inicio en el dashboard (`OnboardingChecklist`).
-- [x] Vitest con 284 pruebas al 2026-11-24 (281 al 2026-11-18; 210 al cierre del
-  bloque 2026-11-11).
+- [x] Vitest con 317 pruebas al 2026-11-27 (284 al 2026-11-24; 281 al 2026-11-18;
+  210 al cierre del bloque 2026-11-11).
+- [x] Exportación CSV en `/settings/export`: cuatro tarjetas (clientes, órdenes,
+  presupuestos y pagos), descarga con el nombre que fija el backend y estados de
+  error y carga.
 
 ### App móvil
 
@@ -776,12 +835,14 @@ Free de Neon y el plan Hobby de Vercel tienen límites de uso y cold starts.
 
 ## Pendiente
 
-- [ ] Cerrar los hallazgos de la auditoría externa del 2026-11-26: legal con
-  abogado (región, backups, retención, exportación y eliminación), exportación
-  CSV de clientes/órdenes/presupuestos/pagos, soporte con tiempos y backup real
-  con restauración probada; ver
-  `docs/GO_TO_MARKET/AUDIT_RESPONSE_2026-11-26.md`. La contradicción del trial y
-  la copy de cobros ya están corregidas.
+- [x] Exportación CSV de clientes, órdenes, presupuestos y pagos (hecho el
+  2026-11-27; ver "Exportación CSV"). Incluye presupuestos, además de lo que pedía
+  la auditoría.
+- [ ] Cerrar el resto de los hallazgos de la auditoría externa del 2026-11-26:
+  legal con abogado (región, retención, exportación y eliminación), soporte con
+  tiempos y backup real con restauración probada; ver
+  `docs/GO_TO_MARKET/AUDIT_RESPONSE_2026-11-26.md`. La contradicción del trial, la
+  copy de cobros y la exportación CSV ya están resueltas.
 - [ ] Aplicar la migración de planes v2 en Neon, verificar `/api/v1/plans` y
   `/api/v1/subscription`, y quitar el override de display de `/settings/billing`
   (hoy la API sigue con 29.900/59.900/99.900; la landing y el panel muestran los
