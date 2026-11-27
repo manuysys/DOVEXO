@@ -26,7 +26,7 @@ y fuentes gratuitas (OpenStreetMap/Overpass, CSV y alta manual).
 
 **Fase 1 completada y verificada localmente:** login, dashboard, productos,
 campañas, worker persistente, seed de DOVEXO, 33 tests de backend, 29 de frontend
-y build de 18 rutas. La API corre en `localhost:8001` y la web en
+y build de 19 rutas. La API corre en `localhost:8001` y la web en
 `localhost:3001`. El descubrimiento de empresas queda para la Fase 2; no se
 cargan datos ficticios.
 

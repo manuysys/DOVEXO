@@ -29,7 +29,7 @@ Implementado y verificado localmente:
 - [x] Frontend Next.js: login, layout, dashboard, productos, campañas, detalle,
   placeholders honestos para Fase 2/3/5 y configuración.
 - [x] Tests: 33 backend, 29 frontend.
-- [x] Build de frontend con 18 rutas.
+- [x] Build de frontend con 19 rutas.
 
 ## Verificación ejecutada
 
@@ -39,7 +39,7 @@ Backend  uv run ruff check .              -> All checks passed
          uv run pytest -q                 -> 33 passed
 Frontend pnpm typecheck                   -> OK
          pnpm test                        -> 29 passed (7 archivos)
-         pnpm build                       -> 18 rutas
+         pnpm build                       -> 19 rutas
 Smoke    login admin -> dashboard         -> OK
          dashboard DOVEXO + campaña       -> OK
          /products, /campaigns, detalle   -> OK
