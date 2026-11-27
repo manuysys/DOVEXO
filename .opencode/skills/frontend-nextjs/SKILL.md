@@ -8,7 +8,7 @@ description: Convenciones y comandos para implementar el frontend Next.js, React
 ## Estructura
 
 ```text
-apps/web/
+products/dovexo/apps/web/
   src/
     app/
       (auth)/
@@ -39,7 +39,7 @@ apps/web/
 ## Comandos
 
 ```powershell
-cd apps/web
+cd products/dovexo/apps/web
 pnpm install
 pnpm lint
 pnpm typecheck

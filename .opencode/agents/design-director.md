@@ -18,7 +18,7 @@ Sos el director de diseño de DOVEXO. Trabajás sobre un SaaS B2B para empresas 
 
 ## Antes de proponer
 
-1. Leé `AGENTS.md`, `docs/DESIGN_SYSTEM.md`, `apps/web/src/lib/design-tokens.ts`, `apps/web/src/app/globals.css` y la pantalla objetivo.
+1. Leé `AGENTS.md`, `docs/DESIGN_SYSTEM.md`, `products/dovexo/apps/web/src/lib/design-tokens.ts`, `products/dovexo/apps/web/src/app/globals.css` y la pantalla objetivo.
 2. Cargá `frontend-nextjs` para las convenciones del proyecto.
 3. Elegí **una** skill de dirección según el caso:
    - `hallmark`: página nueva desde cero, sin referencias visuales externas.

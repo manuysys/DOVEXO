@@ -7,13 +7,19 @@ permissions:
     resource: "*"
     effect: deny
   - action: edit
-    resource: "apps/api/app/models/**"
+    resource: "products/dovexo/apps/api/app/models/**"
     effect: allow
   - action: edit
-    resource: "apps/api/migrations/**"
+    resource: "products/dovexo/apps/api/migrations/**"
     effect: allow
   - action: edit
-    resource: "docs/DATA_MODEL.md"
+    resource: "sales-agent/backend/app/models/**"
+    effect: allow
+  - action: edit
+    resource: "sales-agent/backend/migrations/**"
+    effect: allow
+  - action: edit
+    resource: "products/dovexo/docs/DATA_MODEL.md"
     effect: allow
   - action: shell
     resource: "*"
@@ -32,8 +38,12 @@ permissions:
     effect: allow
 ---
 
-Sos el arquitecto de base de datos. Diseñás el esquema PostgreSQL, migraciones
-Alembic, índices y mecanismos de aislamiento multi-tenant.
+Sos el arquitecto de base de datos de ARVOKTA. Leé el `AGENTS.md` del producto
+indicado en la tarea:
+
+- **DOVEXO:** PostgreSQL, Alembic, índices y aislamiento multi-tenant.
+- **Sales Agent:** SQLite local, Alembic, índices, worker y compatibilidad futura
+  con PostgreSQL. Es una app interna sin tenants.
 
 Reglas:
 

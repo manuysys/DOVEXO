@@ -1,17 +1,21 @@
 {
-  "name": "saas-gestion",
+  "name": "arvokta",
   "version": "0.1.0",
   "private": true,
+  "description": "Espacio de trabajo de ARVOKTA: DOVEXO y ARVOKTA Sales Agent",
   "scripts": {
-    "dev:web": "pnpm --dir apps/web dev",
-    "build:web": "pnpm --dir apps/web build",
-    "lint:web": "pnpm --dir apps/web lint",
-    "typecheck:web": "pnpm --dir apps/web typecheck",
-    "test:web": "pnpm --dir apps/web test",
-    "format:web": "pnpm --dir apps/web format",
-    "dev:mobile": "pnpm --dir apps/mobile start",
-    "android:mobile": "pnpm --dir apps/mobile android",
-    "typecheck:mobile": "pnpm --dir apps/mobile exec tsc --noEmit",
-    "verify": "powershell -ExecutionPolicy Bypass -File scripts/verify.ps1"
+    "dev:dovexo:web": "pnpm --dir products/dovexo/apps/web dev",
+    "build:dovexo:web": "pnpm --dir products/dovexo/apps/web build",
+    "lint:dovexo:web": "pnpm --dir products/dovexo/apps/web lint",
+    "typecheck:dovexo:web": "pnpm --dir products/dovexo/apps/web typecheck",
+    "test:dovexo:web": "pnpm --dir products/dovexo/apps/web test",
+    "dev:dovexo:mobile": "pnpm --dir products/dovexo/apps/mobile start",
+    "typecheck:dovexo:mobile": "pnpm --dir products/dovexo/apps/mobile exec tsc --noEmit",
+    "verify:dovexo": "powershell -ExecutionPolicy Bypass -File products/dovexo/scripts/verify.ps1",
+    "dev:sales-agent:web": "pnpm --dir sales-agent/frontend dev",
+    "build:sales-agent:web": "pnpm --dir sales-agent/frontend build",
+    "lint:sales-agent:web": "pnpm --dir sales-agent/frontend lint",
+    "typecheck:sales-agent:web": "pnpm --dir sales-agent/frontend typecheck",
+    "test:sales-agent:web": "pnpm --dir sales-agent/frontend test"
   }
 }

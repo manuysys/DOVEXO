@@ -18,7 +18,7 @@ description: Convenciones de esquema, migraciones, índices y aislamiento en Pos
 ## Migraciones
 
 ```powershell
-cd apps/api
+cd products/dovexo/apps/api
 uv run alembic revision --autogenerate -m "descripcion"
 uv run alembic upgrade head
 uv run alembic downgrade -1

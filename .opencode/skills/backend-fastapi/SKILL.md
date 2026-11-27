@@ -8,7 +8,7 @@ description: Convenciones y comandos para implementar el backend FastAPI con SQL
 ## Estructura
 
 ```text
-apps/api/
+products/dovexo/apps/api/
   app/
     api/          routers y dependencias
     core/         config, seguridad, errores, logging
@@ -34,7 +34,7 @@ apps/api/
 ## Comandos
 
 ```powershell
-cd apps/api
+cd products/dovexo/apps/api
 uv sync
 uv run alembic upgrade head
 uv run ruff check .

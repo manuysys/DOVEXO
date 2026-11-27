@@ -4,7 +4,7 @@ name: Chromatic
 on:
   push:
     paths:
-      - "apps/web/**"
+      - "products/dovexo/apps/web/**"
       - ".github/workflows/chromatic.yml"
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
           version: 12.4.2
           run_install: false
           cache: true
-          cache_dependency_path: apps/web/pnpm-lock.yaml
+          cache_dependency_path: products/dovexo/apps/web/pnpm-lock.yaml
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -35,12 +35,12 @@ jobs:
           node-version: 24
 
       - name: Install dependencies
-        working-directory: apps/web
+        working-directory: products/dovexo/apps/web
         run: pnpm install --frozen-lockfile
 
       - name: Publish Storybook to Chromatic
         uses: chromaui/action@latest
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-          workingDir: apps/web
+          workingDir: products/dovexo/apps/web
           buildScriptName: build-storybook

@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/mobile
+        working-directory: products/dovexo/apps/mobile
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: apps/mobile/pnpm-lock.yaml
+          cache-dependency-path: products/dovexo/apps/mobile/pnpm-lock.yaml
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck

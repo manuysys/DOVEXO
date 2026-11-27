@@ -24,7 +24,7 @@ You are responsible for implementing and verifying DOVEXO's web UI.
 
 \- The repository is a monorepo.
 
-\- The web application lives in `apps/web`.
+\- The web application lives in `products/dovexo/apps/web`.
 
 \- Use pnpm 12.4.2. Never use npm or yarn for project dependencies.
 
@@ -48,9 +48,9 @@ You are responsible for implementing and verifying DOVEXO's web UI.
 
 \- Preview and verify generated assets before integrating them.
 
-\- Keep editable Rive source files under `apps/web/rive-src/`.
+\- Keep editable Rive source files under `products/dovexo/apps/web/rive-src/`.
 
-\- Export application assets to `apps/web/public/rive/`.
+\- Export application assets to `products/dovexo/apps/web/public/rive/`.
 
 \- Use the existing `@rive-app/react-webgl2` runtime to integrate animations into React.
 
@@ -64,9 +64,9 @@ You are responsible for implementing and verifying DOVEXO's web UI.
 
 
 
-\- Use the existing Storybook configuration in `apps/web/.storybook/`.
+\- Use the existing Storybook configuration in `products/dovexo/apps/web/.storybook/`.
 
-\- Stories belong under `apps/web/src/` and must match the configured stories glob.
+\- Stories belong under `products/dovexo/apps/web/src/` and must match the configured stories glob.
 
 \- Import real application components. Do not recreate their implementation just for Storybook.
 
@@ -76,7 +76,7 @@ You are responsible for implementing and verifying DOVEXO's web UI.
 
 \- Never call production APIs from a Storybook story.
 
-\- Run the dev server with `pnpm run storybook` from `apps/web`.
+\- Run the dev server with `pnpm run storybook` from `products/dovexo/apps/web`.
 
 \- Use the Storybook MCP server when connected.
 

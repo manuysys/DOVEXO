@@ -1,9 +1,12 @@
 # Dependencias
 node_modules/
 .pnpm-store/
-apps/web/.next/
-apps/web/out/
-apps/web/.turbo/
+products/dovexo/apps/web/.next/
+products/dovexo/apps/web/out/
+products/dovexo/apps/web/.turbo/
+sales-agent/frontend/.next/
+sales-agent/frontend/out/
+sales-agent/frontend/.turbo/
 dist/
 build/
 coverage/
@@ -55,17 +58,18 @@ playwright-report/
 test-results/
 blob-report/
 .playwright-mcp/
-apps/web/playwright/.cache/
-apps/api/.pytest_cache/
+products/dovexo/apps/web/playwright/.cache/
+products/dovexo/apps/api/.pytest_cache/
+sales-agent/backend/data/
 *.log
 
 # Mobile (Expo)
-apps/mobile/.expo/
-apps/mobile/dist/
-apps/mobile/dist-android/
-apps/mobile/web-build/
-apps/mobile/android/
-apps/mobile/ios/
+products/dovexo/apps/mobile/.expo/
+products/dovexo/apps/mobile/dist/
+products/dovexo/apps/mobile/dist-android/
+products/dovexo/apps/mobile/web-build/
+products/dovexo/apps/mobile/android/
+products/dovexo/apps/mobile/ios/
 *.apk
 *.aab
 

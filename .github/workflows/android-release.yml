@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/mobile
+        working-directory: products/dovexo/apps/mobile
     steps:
       - uses: actions/checkout@v4
 
@@ -51,7 +51,7 @@ jobs:
           [ -z "$KEY_ALIAS" ] && missing="$missing ANDROID_KEY_ALIAS"
           [ -z "$KEY_PASSWORD" ] && missing="$missing ANDROID_KEY_PASSWORD"
           if [ -n "$missing" ]; then
-            echo "::error::Faltan secretos de firma:$missing. Configuralos en Settings > Secrets and variables > Actions (ver docs/ANDROID_RELEASE.md). Sin keystore de release no se genera AAB."
+            echo "::error::Faltan secretos de firma:$missing. Configuralos en Settings > Secrets and variables > Actions (ver products/dovexo/docs/ANDROID_RELEASE.md). Sin keystore de release no se genera AAB."
             exit 1
           fi
           echo "Secretos de firma presentes."
@@ -64,7 +64,7 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: apps/mobile/pnpm-lock.yaml
+          cache-dependency-path: products/dovexo/apps/mobile/pnpm-lock.yaml
 
       - uses: actions/setup-java@v4
         with:
@@ -111,7 +111,7 @@ jobs:
           echo "Keystore restaurada ($(wc -c < "$keystore") bytes)."
 
       - name: Configure release signing
-        working-directory: apps/mobile
+        working-directory: products/dovexo/apps/mobile
         run: |
           python3 - <<'PY'
           import pathlib
@@ -151,7 +151,7 @@ jobs:
           grep -n "signingConfig signingConfigs" android/app/build.gradle
 
       - name: Build AAB
-        working-directory: apps/mobile/android
+        working-directory: products/dovexo/apps/mobile/android
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -161,7 +161,7 @@ jobs:
           ./gradlew bundleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
 
       - name: Verify AAB signature
-        working-directory: apps/mobile/android
+        working-directory: products/dovexo/apps/mobile/android
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -192,7 +192,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dovexo-android-aab
-          path: apps/mobile/android/app/build/outputs/bundle/release/app-release.aab
+          path: products/dovexo/apps/mobile/android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 30
 

@@ -7,10 +7,10 @@ permissions:
     resource: "*"
     effect: deny
   - action: edit
-    resource: "apps/web/**"
+    resource: "products/dovexo/apps/web/**"
     effect: allow
   - action: edit
-    resource: "apps/mobile/**"
+    resource: "products/dovexo/apps/mobile/**"
     effect: allow
   - action: shell
     resource: "*"

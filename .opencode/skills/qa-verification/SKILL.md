@@ -14,7 +14,7 @@ description: Comandos y criterios para verificar cambios con evidencia real
 ## Backend
 
 ```powershell
-cd apps/api
+cd products/dovexo/apps/api
 uv run ruff check .
 uv run ruff format --check .
 uv run basedpyright
@@ -24,7 +24,7 @@ uv run pytest -q
 ## Frontend
 
 ```powershell
-cd apps/web
+cd products/dovexo/apps/web
 pnpm lint
 pnpm typecheck
 pnpm test -- --run
@@ -34,7 +34,7 @@ pnpm build
 ## E2E
 
 ```powershell
-cd apps/web
+cd products/dovexo/apps/web
 pnpm exec playwright test
 ```
 

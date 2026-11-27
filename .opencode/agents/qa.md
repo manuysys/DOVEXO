@@ -7,16 +7,25 @@ permissions:
     resource: "*"
     effect: deny
   - action: edit
-    resource: "apps/api/tests/**"
+    resource: "products/dovexo/apps/api/tests/**"
     effect: allow
   - action: edit
-    resource: "apps/web/**/*.test.*"
+    resource: "products/dovexo/apps/web/**/*.test.*"
     effect: allow
   - action: edit
-    resource: "apps/web/**/*.spec.*"
+    resource: "products/dovexo/apps/web/**/*.spec.*"
     effect: allow
   - action: edit
-    resource: "apps/web/e2e/**"
+    resource: "products/dovexo/apps/web/e2e/**"
+    effect: allow
+  - action: edit
+    resource: "sales-agent/backend/tests/**"
+    effect: allow
+  - action: edit
+    resource: "sales-agent/frontend/tests/**"
+    effect: allow
+  - action: edit
+    resource: "sales-agent/frontend/**/*.test.*"
     effect: allow
   - action: shell
     resource: "*"
