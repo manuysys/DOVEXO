@@ -2,6 +2,7 @@ import {
   CalendarDays,
   ClipboardList,
   CreditCard,
+  Download,
   FileText,
   Inbox,
   LayoutDashboard,
@@ -104,6 +105,12 @@ export const navigation: NavItem[] = [
     href: "/settings/import",
     label: "Importar clientes",
     icon: Upload,
+    roles: MANAGEMENT_ROLES,
+  },
+  {
+    href: "/settings/export",
+    label: "Exportar datos",
+    icon: Download,
     roles: MANAGEMENT_ROLES,
   },
   {

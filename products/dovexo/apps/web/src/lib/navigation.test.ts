@@ -33,6 +33,21 @@ describe("import and onboarding navigation", () => {
   });
 });
 
+describe("export navigation", () => {
+  it("shows Exportar datos to owner, admin and dispatcher (backend export roles)", () => {
+    expect(hrefsFor("owner")).toContain("/settings/export");
+    expect(hrefsFor("admin")).toContain("/settings/export");
+    expect(hrefsFor("dispatcher")).toContain("/settings/export");
+    expect(hrefsFor("technician")).not.toContain("/settings/export");
+    expect(hrefsFor("viewer")).not.toContain("/settings/export");
+  });
+
+  it("keeps the import link next to it", () => {
+    const hrefs = hrefsFor("owner");
+    expect(hrefs.indexOf("/settings/export")).toBe(hrefs.indexOf("/settings/import") + 1);
+  });
+});
+
 describe("portal access helpers", () => {
   it("requires a non-empty customer email to send by email", () => {
     expect(canSendPortalEmail("ana@example.com")).toBe(true);

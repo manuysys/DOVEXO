@@ -13,6 +13,7 @@ from app.api.routes import (
     customers,
     dashboard,
     demo,
+    exports,
     health,
     imports,
     notifications,
@@ -55,6 +56,9 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # Necesario para que el frontend en otro origen pueda leer el nombre del
+    # archivo exportado. No se expone ningún otro header.
+    expose_headers=["Content-Disposition"],
 )
 app.add_middleware(
     TrustedHostMiddleware,
@@ -80,6 +84,7 @@ app.include_router(payments.router, prefix="/api/v1")
 app.include_router(technicians.router, prefix="/api/v1")
 app.include_router(technician.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
+app.include_router(exports.router, prefix="/api/v1")
 app.include_router(billing.router, prefix="/api/v1")
 app.include_router(admin.router, prefix="/api/v1")
 app.include_router(demo.router, prefix="/api/v1")
