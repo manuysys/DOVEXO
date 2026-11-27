@@ -50,6 +50,16 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = ""
 
+    # WhatsApp (opcional). Sin token/phone id se usa el provider de consola.
+    whatsapp_access_token: str = ""
+    whatsapp_phone_number_id: str = ""
+    whatsapp_verify_token: str = ""
+    whatsapp_app_secret: str = ""
+    whatsapp_sender_phone: str = ""
+    whatsapp_api_version: str = "v23.0"
+    whatsapp_timeout_seconds: float = 30.0
+    founder_phone: str = ""
+
     # Descubrimiento con OpenStreetMap/Overpass (Fase 2A).
     overpass_url: str = "https://overpass-api.de/api/interpreter"
     overpass_timeout_seconds: float = 60.0
@@ -77,6 +87,14 @@ class Settings(BaseSettings):
     @property
     def uses_dev_jwt_secret(self) -> bool:
         return self.jwt_secret == _DEV_JWT_SECRET
+
+    @property
+    def whatsapp_configured(self) -> bool:
+        return bool(self.whatsapp_access_token and self.whatsapp_phone_number_id)
+
+    @property
+    def whatsapp_mode(self) -> str:
+        return "meta" if self.whatsapp_configured else "console"
 
 
 @lru_cache

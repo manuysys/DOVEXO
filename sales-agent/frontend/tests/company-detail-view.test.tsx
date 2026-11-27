@@ -1,10 +1,43 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { CompanyDetailView } from "@/components/prospects/company-detail-view";
-import { useCompany } from "@/hooks/use-companies";
-import { makeCompany } from "./utils";
+import { useCompany, useCreateCompanyContact } from "@/hooks/use-companies";
+import { useCreateLead, useLeads, useScoreLead, useUpdateLead } from "@/hooks/use-leads";
+import { useProducts } from "@/hooks/use-products";
+import { useLeadActivities } from "@/hooks/use-activities";
+import { useLeadMessages } from "@/hooks/use-messages";
+import { useWhatsAppStatus } from "@/hooks/use-whatsapp";
+import { makeCompany, makeProduct } from "./utils";
 
-vi.mock("@/hooks/use-companies", () => ({ useCompany: vi.fn() }));
+vi.mock("@/hooks/use-companies", () => ({
+  useCompany: vi.fn(),
+  useCreateCompanyContact: vi.fn(),
+}));
+
+vi.mock("@/hooks/use-leads", () => ({
+  useLeads: vi.fn(),
+  useCreateLead: vi.fn(),
+  useScoreLead: vi.fn(),
+  useUpdateLead: vi.fn(),
+}));
+
+vi.mock("@/hooks/use-products", () => ({ useProducts: vi.fn() }));
+
+vi.mock("@/hooks/use-activities", () => ({
+  useLeadActivities: vi.fn(),
+  useCreateLeadActivity: vi.fn(),
+}));
+
+vi.mock("@/hooks/use-messages", () => ({
+  useLeadMessages: vi.fn(),
+  useGenerateMessage: vi.fn(),
+  useUpdateMessage: vi.fn(),
+  useApproveMessage: vi.fn(),
+  useSendMessage: vi.fn(),
+  useMarkMessageSent: vi.fn(),
+}));
+
+vi.mock("@/hooks/use-whatsapp", () => ({ useWhatsAppStatus: vi.fn() }));
 
 function mockCompanyQuery(value: unknown) {
   vi.mocked(useCompany).mockReturnValue(
@@ -12,8 +45,63 @@ function mockCompanyQuery(value: unknown) {
   );
 }
 
+beforeEach(() => {
+  vi.mocked(useCreateCompanyContact).mockReturnValue({
+    mutate: vi.fn(),
+    isPending: false,
+    isError: false,
+    error: null,
+  } as unknown as ReturnType<typeof useCreateCompanyContact>);
+  vi.mocked(useLeads).mockReturnValue({
+    data: { items: [], total: 0, limit: 50, offset: 0 },
+    isPending: false,
+    isError: false,
+  } as unknown as ReturnType<typeof useLeads>);
+  vi.mocked(useCreateLead).mockReturnValue({
+    mutate: vi.fn(),
+    isPending: false,
+    isError: false,
+  } as unknown as ReturnType<typeof useCreateLead>);
+  vi.mocked(useScoreLead).mockReturnValue({
+    mutate: vi.fn(),
+    isPending: false,
+    isError: false,
+  } as unknown as ReturnType<typeof useScoreLead>);
+  vi.mocked(useUpdateLead).mockReturnValue({
+    mutate: vi.fn(),
+    isPending: false,
+    isError: false,
+    isSuccess: false,
+  } as unknown as ReturnType<typeof useUpdateLead>);
+  vi.mocked(useProducts).mockReturnValue({
+    data: [makeProduct()],
+    isPending: false,
+    isError: false,
+  } as unknown as ReturnType<typeof useProducts>);
+  vi.mocked(useLeadActivities).mockReturnValue({
+    data: [],
+    isPending: false,
+    isError: false,
+  } as unknown as ReturnType<typeof useLeadActivities>);
+  vi.mocked(useLeadMessages).mockReturnValue({
+    data: [],
+    isPending: false,
+    isError: false,
+  } as unknown as ReturnType<typeof useLeadMessages>);
+  vi.mocked(useWhatsAppStatus).mockReturnValue({
+    data: {
+      configured: false,
+      mode: "console",
+      sender_phone: null,
+      founder_phone_set: false,
+    },
+    isPending: false,
+    isError: false,
+  } as unknown as ReturnType<typeof useWhatsAppStatus>);
+});
+
 describe("CompanyDetailView", () => {
-  it("muestra datos, contactos enlazados, fuentes y el placeholder de Fase 4", () => {
+  it("muestra datos, contactos enlazados, fuentes y la oportunidad comercial", () => {
     mockCompanyQuery({
       data: makeCompany(),
       isPending: false,
@@ -42,20 +130,22 @@ describe("CompanyDetailView", () => {
     ).toHaveAttribute("href", "https://wa.me/5493415550000");
 
     // Fuentes / OSM y procedencia.
-    expect(screen.getByRole("link", { name: /openstreetmap.org/ })).toHaveAttribute(
-      "href",
-      "https://www.openstreetmap.org/node/1",
-    );
+    expect(
+      screen.getByRole("link", { name: /openstreetmap.org/ }),
+    ).toHaveAttribute("href", "https://www.openstreetmap.org/node/1");
     expect(screen.getAllByText("OpenStreetMap")).toHaveLength(3);
     expect(screen.getByText("Procedencia")).toBeInTheDocument();
 
-    // Sin scoring ni mensajes todavía.
+    // Oportunidad: sin lead se ofrece crearla para DOVEXO.
     expect(
-      screen.getByText(/Esta ficha todavía no calcula compatibilidad/),
+      screen.getByRole("heading", { name: "Oportunidad comercial" }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /generar mensaje/i }),
-    ).not.toBeInTheDocument();
+      screen.getByText(/todavía no tiene una oportunidad comercial/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Crear oportunidad · DOVEXO/ }),
+    ).toBeInTheDocument();
   });
 
   it("no inventa contactos ni fuentes cuando la empresa está vacía", () => {

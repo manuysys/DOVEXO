@@ -1,7 +1,9 @@
 import Link from "next/link";
-import type { Company } from "@/lib/api/types";
+import type { Company, Lead } from "@/lib/api/types";
 import { formatDate } from "@/lib/utils";
+import { formatScorePair } from "@/features/leads/score";
 import { Button } from "@/components/ui/button";
+import { LeadStatusBadge } from "@/components/leads/lead-status-badge";
 import { CompanyStatusBadge } from "./company-status-badge";
 
 function externalHref(value: string): string {
@@ -22,6 +24,8 @@ function whatsappHref(value: string): string {
 
 export interface ProspectsTableProps {
   companies: Company[];
+  /** Oportunidades por empresa (id de empresa → lead). */
+  leadsByCompany?: ReadonlyMap<string, Lead>;
   /** Marca o descarta una empresa; el backend guarda el nuevo estado. */
   onStatusChange?: (
     company: Company,
@@ -40,13 +44,26 @@ function StatusActions({
   updatingId?: string | null;
 }) {
   if (!onStatusChange) {
-    return <span className="text-xs text-muted">—</span>;
+    return (
+      <Link
+        href={`/prospects/${company.id}#oportunidad`}
+        className="text-xs font-medium text-accent hover:underline"
+      >
+        Preparar contacto
+      </Link>
+    );
   }
   const status = company.discovery_status.trim().toLowerCase();
   const busy = updatingId === company.id;
 
   return (
-    <div className="flex justify-end gap-1">
+    <div className="flex flex-wrap justify-end gap-1">
+      <Link
+        href={`/prospects/${company.id}#oportunidad`}
+        className="inline-flex h-8 items-center rounded-md border border-line px-3 text-xs font-medium text-ink hover:bg-canvas"
+      >
+        Preparar contacto
+      </Link>
       {status === "possible_duplicate" ||
       status === "possible-duplicate" ||
       status === "duplicate" ? (
@@ -84,12 +101,13 @@ function StatusActions({
 
 export function ProspectsTable({
   companies,
+  leadsByCompany,
   onStatusChange,
   updatingId = null,
 }: ProspectsTableProps) {
   return (
     <div className="overflow-x-auto rounded-lg border border-line bg-surface">
-      <table className="w-full min-w-[1180px] border-collapse text-sm">
+      <table className="w-full min-w-[1320px] border-collapse text-sm">
         <thead>
           <tr className="border-b border-line bg-canvas/60 text-left text-xs font-semibold tracking-wide text-muted uppercase">
             <th className="px-4 py-3">Nombre</th>
@@ -99,13 +117,17 @@ export function ProspectsTable({
             <th className="px-4 py-3">Web</th>
             <th className="px-4 py-3">Contacto</th>
             <th className="px-4 py-3">WhatsApp</th>
+            <th className="px-4 py-3">Score</th>
+            <th className="px-4 py-3">Oportunidad</th>
             <th className="px-4 py-3">Estado</th>
             <th className="px-4 py-3">Descubierta</th>
             <th className="px-4 py-3 text-right">Acciones</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-line">
-          {companies.map((company) => (
+          {companies.map((company) => {
+            const lead = leadsByCompany?.get(company.id) ?? null;
+            return (
             <tr key={company.id} className="align-top">
               <td className="max-w-72 px-4 py-3">
                 <Link
@@ -182,6 +204,28 @@ export function ProspectsTable({
                   <span className="text-muted">—</span>
                 )}
               </td>
+              <td className="px-4 py-3 text-xs">
+                {lead ? (
+                  <span
+                    className="font-medium text-ink tabular-nums"
+                    title="Compatibilidad / confianza de la información"
+                  >
+                    {formatScorePair(lead.score, lead.confidence)}
+                  </span>
+                ) : (
+                  <span className="text-muted">—</span>
+                )}
+              </td>
+              <td className="px-4 py-3">
+                {lead ? (
+                  <LeadStatusBadge
+                    status={lead.status}
+                    rawStatus={lead.raw_status}
+                  />
+                ) : (
+                  <span className="text-xs text-muted">Sin oportunidad</span>
+                )}
+              </td>
               <td className="px-4 py-3">
                 <CompanyStatusBadge status={company.discovery_status} />
               </td>
@@ -196,7 +240,8 @@ export function ProspectsTable({
                 />
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>

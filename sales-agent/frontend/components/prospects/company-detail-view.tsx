@@ -13,6 +13,8 @@ import { DetailItem } from "@/components/ui/detail-item";
 import { PageHeader } from "@/components/ui/page-header";
 import { LoadingBlock } from "@/components/ui/spinner";
 import { CompanyStatusBadge } from "./company-status-badge";
+import { OpportunityPanel } from "@/components/leads/opportunity-panel";
+import { ConfirmWhatsAppForm } from "@/components/whatsapp/confirm-whatsapp-form";
 
 const CONTACT_LABELS: Record<string, string> = {
   phone: "Teléfono",
@@ -328,6 +330,14 @@ export function CompanyDetailView({ id }: { id: string }) {
             description="Enlaces de contacto tal como fueron publicados. Abrir un enlace no envía nada."
           >
             <ContactList company={company} />
+            {!company.whatsapp ? (
+              <div className="mt-4 border-t border-line pt-4">
+                <ConfirmWhatsAppForm
+                  companyId={company.id}
+                  defaultPhone={company.primary_phone ?? ""}
+                />
+              </div>
+            ) : null}
           </Section>
 
           <Section
@@ -424,25 +434,27 @@ export function CompanyDetailView({ id }: { id: string }) {
               </DetailItem>
             </dl>
           </Section>
-
-          <Card>
-            <CardHeader
-              title="Evaluación comercial y mensajes"
-              description="Disponible en la Fase 4."
-            />
-            <CardContent className="space-y-2 text-sm text-muted">
-              <p>
-                Esta ficha todavía no calcula compatibilidad, confianza ni
-                mensajes sugeridos. El scoring depende del perfil de producto y
-                del motor de evaluación, que no están implementados.
-              </p>
-              <p>
-                No se muestran valores estimados para no presentar hipótesis
-                como hechos.
-              </p>
-            </CardContent>
-          </Card>
         </div>
+      </div>
+
+      <div id="oportunidad" className="mt-4 scroll-mt-24">
+        <Card>
+          <CardHeader
+            title="Oportunidad comercial"
+            description="Compatibilidad, confianza, mensajes y actividades reales de la base. Los mensajes requieren aprobación humana y nunca se envían solos."
+            action={
+              <Link
+                href="/crm"
+                className="text-xs font-medium text-accent hover:underline"
+              >
+                Ver CRM
+              </Link>
+            }
+          />
+          <CardContent>
+            <OpportunityPanel company={company} />
+          </CardContent>
+        </Card>
       </div>
     </>
   );

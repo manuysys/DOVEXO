@@ -53,3 +53,25 @@ motor determinístico.
 - El worker y la API comparten el mismo esquema de trabajos.
 - Las pruebas unitarias no dependen de internet; los proveedores externos se
   simulan.
+
+## ADR-003 — WhatsApp interno con aprobación humana y modo consola
+
+**Fecha:** 2026-11-27
+**Estado:** aceptada
+
+**Contexto:** el Sales Agent debe contactar empresas para DOVEXO desde el
+teléfono del fundador. Las credenciales de Meta no están disponibles todavía y
+no se deben hacer envíos en frío ni masivos.
+
+**Decisión:** el primer contacto se genera como borrador, requiere aprobación
+humana y se envía por Meta Cloud API cuando las credenciales estén configuradas.
+Sin credenciales se usa un provider de consola que registra el mensaje como
+simulado. El chatbot solo responde a mensajes entrantes y deriva a una persona;
+no inicia conversaciones. El webhook de Meta valida token y firma HMAC y falla
+cerrado. La confirmación de que un teléfono tiene WhatsApp es manual.
+
+**Consecuencias:** el flujo se puede probar localmente sin cuentas pagas y sin
+enviar mensajes reales. La plantilla de primer contacto, el número del fundador y
+la prueba contra Meta quedan como pendientes de configuración. La regla de “sin
+envíos automáticos” se interpreta como prohibición de envíos automáticos en frío
+o masivos; las respuestas a entrantes están permitidas.

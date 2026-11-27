@@ -9,6 +9,7 @@ import {
   useDashboardJobs,
   useDashboardMetrics,
 } from "@/hooks/use-dashboard";
+import { useRecentActivities } from "@/hooks/use-activities";
 import { useProducts } from "@/hooks/use-products";
 import { useCampaigns } from "@/hooks/use-campaigns";
 
@@ -18,6 +19,7 @@ export default function DashboardPage() {
   const jobsQuery = useDashboardJobs();
   const productsQuery = useProducts();
   const campaignsQuery = useCampaigns();
+  const activitiesQuery = useRecentActivities(8);
 
   const listsError =
     (productsQuery.error instanceof Error && productsQuery.error.message) ||
@@ -59,6 +61,20 @@ export default function DashboardPage() {
           void productsQuery.refetch();
           void campaignsQuery.refetch();
         }}
+        activities={activitiesQuery.data ?? []}
+        activitiesStatus={
+          activitiesQuery.isPending
+            ? "loading"
+            : activitiesQuery.isError
+              ? "error"
+              : "ready"
+        }
+        activitiesError={
+          activitiesQuery.error instanceof Error
+            ? activitiesQuery.error.message
+            : null
+        }
+        onRetryActivities={() => void activitiesQuery.refetch()}
         filterSlot={
           <label className="flex items-center gap-2 text-xs text-muted">
             Producto

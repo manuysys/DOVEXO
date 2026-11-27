@@ -8,6 +8,7 @@ import {
   updateCompany,
 } from "@/lib/api/companies";
 import { downloadBlob } from "@/lib/download";
+import { useLeads } from "@/hooks/use-leads";
 import { useSectors } from "@/hooks/use-dashboard";
 import { useProvinces } from "@/hooks/use-provinces";
 import { useSearchRuns } from "@/hooks/use-search-runs";
@@ -33,8 +34,14 @@ vi.mock("@/lib/download", () => ({ downloadBlob: vi.fn() }));
 vi.mock("@/hooks/use-provinces", () => ({ useProvinces: vi.fn() }));
 vi.mock("@/hooks/use-dashboard", () => ({ useSectors: vi.fn() }));
 vi.mock("@/hooks/use-search-runs", () => ({ useSearchRuns: vi.fn() }));
+vi.mock("@/hooks/use-leads", () => ({ useLeads: vi.fn() }));
 
 function mockMeta() {
+  vi.mocked(useLeads).mockReturnValue({
+    data: { items: [], total: 0, limit: 100, offset: 0 },
+    isPending: false,
+    isError: false,
+  } as unknown as ReturnType<typeof useLeads>);
   vi.mocked(useProvinces).mockReturnValue({
     data: [{ code: "AR-S", name: "Santa Fe" }],
     isError: false,

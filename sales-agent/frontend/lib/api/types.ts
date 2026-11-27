@@ -107,6 +107,7 @@ export interface DashboardMetrics {
   companies_total: number;
   companies_new: number;
   companies_enriched: number;
+  leads_total: number;
   leads_pending: number;
   contacts_published: number;
   whatsapp_published: number;
@@ -275,6 +276,15 @@ export interface CompanyUpdateInput {
   sector_slugs?: string[];
 }
 
+/** Alta manual de un contacto de la empresa (`POST /companies/{id}/contacts`). */
+export interface CompanyContactInput {
+  contact_type: string;
+  value: string;
+  label?: string;
+  is_primary?: boolean;
+  verification_status?: string;
+}
+
 /** Fila de la previsualización de importación CSV. */
 export interface ImportPreviewRow {
   row_number: number;
@@ -327,4 +337,211 @@ export interface ImportBatch {
   confirmed_at: string | null;
   errors: ImportRowError[];
   report_url: string | null;
+}
+
+/** Estados de la oportunidad (lead) definidos por el SPEC §14. */
+export type LeadStatus =
+  | "new"
+  | "researched"
+  | "pending_review"
+  | "approved"
+  | "contacted"
+  | "replied"
+  | "interested"
+  | "meeting_scheduled"
+  | "proposal_sent"
+  | "customer"
+  | "not_interested"
+  | "invalid"
+  | "do_not_contact"
+  | "unknown";
+
+/** Factor del desglose de scoring. */
+export interface LeadScoreItem {
+  key: string;
+  label: string;
+  points: number;
+  max_points: number | null;
+}
+
+/** Oportunidad: una empresa por producto. */
+export interface Lead {
+  id: EntityId;
+  company_id: EntityId;
+  company_name: string;
+  company_locality: string | null;
+  company_province: string | null;
+  company_website: string | null;
+  company_phone: string | null;
+  company_email: string | null;
+  company_whatsapp: string | null;
+  product_id: EntityId | null;
+  product_name: string | null;
+  status: LeadStatus;
+  raw_status: string;
+  /** Compatibilidad comercial 0-100 (null = sin evaluar). */
+  score: number | null;
+  /** Confianza de la información 0-100 (null = sin evaluar). */
+  confidence: number | null;
+  reasons: string[];
+  breakdown: LeadScoreItem[];
+  assigned_notes: string;
+  last_activity_at: string | null;
+  next_action_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface LeadFilters {
+  status?: string;
+  product_id?: string;
+  company_id?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface LeadPage {
+  items: Lead[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface LeadUpdateInput {
+  status?: string;
+  assigned_notes?: string;
+}
+
+export interface LeadEvaluation {
+  id: EntityId;
+  lead_id: EntityId;
+  score: number;
+  confidence: number;
+  reasons: string[];
+  breakdown: LeadScoreItem[];
+  evaluation_method: string;
+  model_name: string | null;
+  evaluated_at: string | null;
+}
+
+/** Resultado de `POST /leads/{id}/score`. */
+export interface LeadScoreResult {
+  lead: Lead | null;
+  score: number;
+  confidence: number;
+  reasons: string[];
+  breakdown: LeadScoreItem[];
+  evaluation: LeadEvaluation | null;
+}
+
+export type MessageStatus =
+  | "draft"
+  | "pending_approval"
+  | "approved"
+  | "rejected"
+  | "sent"
+  | "replied"
+  | "archived"
+  | "unknown";
+
+export type MessageType =
+  | "first_contact"
+  | "follow_up"
+  | "demo_invite"
+  | "presentation"
+  | "research"
+  | "meeting_proposal"
+  | "reply_suggestion";
+
+/** Mensaje de outreach de un lead (`/leads/{id}/messages`). */
+export interface OutreachMessage {
+  id: EntityId;
+  lead_id: EntityId | null;
+  channel: string;
+  message_type: string;
+  status: MessageStatus;
+  raw_status: string;
+  text: string;
+  generated_text: string;
+  edited_text: string | null;
+  sent_via: string | null;
+  simulated: boolean;
+  created_at: string | null;
+  approved_at: string | null;
+  sent_at: string | null;
+}
+
+export interface GenerateMessageInput {
+  channel: "whatsapp" | string;
+  message_type: MessageType | string;
+}
+
+/** Estado del proveedor de WhatsApp (`GET /whatsapp/status`). */
+export interface WhatsAppStatus {
+  configured: boolean;
+  mode: string;
+  sender_phone: string | null;
+  founder_phone_set: boolean;
+}
+
+export interface WhatsAppThread {
+  id: EntityId;
+  phone: string;
+  name: string | null;
+  lead_id: EntityId | null;
+  last_message_at: string | null;
+  last_message_text: string;
+  unread: number;
+}
+
+export interface WhatsAppMessage {
+  id: EntityId;
+  thread_id: EntityId | null;
+  direction: "inbound" | "outbound" | "unknown";
+  text: string;
+  created_at: string | null;
+  status: string | null;
+}
+
+export interface WhatsAppThreadDetail {
+  thread: WhatsAppThread | null;
+  messages: WhatsAppMessage[];
+}
+
+export interface SimulatedInbound {
+  thread_id: EntityId | null;
+  text: string | null;
+}
+
+/** Actividad del historial comercial. */
+export interface Activity {
+  id: EntityId;
+  lead_id: EntityId | null;
+  company_id: EntityId | null;
+  company_name: string | null;
+  activity_type: string;
+  description: string;
+  occurred_at: string | null;
+  next_action_at: string | null;
+  metadata: Record<string, unknown>;
+}
+
+export interface ActivityInput {
+  activity_type: string;
+  description: string;
+  next_action_at?: string | null;
+}
+
+/** Entrada de la lista de no contacto. */
+export interface Suppression {
+  id: EntityId;
+  value: string;
+  reason: string;
+  company_id: EntityId | null;
+  created_at: string | null;
+}
+
+export interface SuppressionInput {
+  normalized_contact: string;
+  reason: string;
 }

@@ -12,11 +12,15 @@ class DashboardMetrics(BaseModel):
     companies: int = 0
     new_companies: int = 0
     investigated_companies: int = 0
+    leads: int = 0
+    leads_total: int = 0
+    leads_pending: int = 0
     leads_pending_review: int = 0
     published_contacts: int = 0
     published_whatsapp: int = 0
     approved_leads: int = 0
     contacted_leads: int = 0
+    companies_contacted: int = 0
     responses: int = 0
     meetings: int = 0
     products: int = 0

@@ -144,3 +144,58 @@ Overpass y tardar; es una operación de fondo, no un request. La pausa deja
 terminar la consulta en curso. La base conserva los datos exactos; el apóstrofo
 de neutralización aparece solo en el CSV.
 
+## ADR-S010 — Scoring determinístico y aprobación humana del primer contacto
+
+**Fecha:** 2026-11-27
+**Estado:** aceptada
+
+**Decisión:** el scoring de compatibilidad y confianza es determinístico,
+explicable y persistido; no se presenta una hipótesis como hecho. Cada mensaje
+de primer contacto se genera como borrador, requiere aprobación humana y solo
+después puede enviarse. No se hacen envíos masivos ni en frío. El envío manual
+desde el teléfono del fundador se registra con “Marcar enviado manualmente” y no
+se confunde con un envío del proveedor.
+
+**Consecuencias:** el pipeline conserva la trazabilidad de la evaluación y de la
+aprobación. Una persona sigue siendo responsable del primer contacto. La
+generación automática de texto no implica envío automático.
+
+## ADR-S011 — WhatsApp: consola sin credenciales, Meta con webhook cerrado y bot de entrantes
+
+**Fecha:** 2026-11-27
+**Estado:** aceptada
+
+**Contexto:** el fundador pidió un chatbot que converse con las empresas desde su
+teléfono, pero las credenciales de Meta todavía no están disponibles y el
+producto exige no hacer envíos automáticos en frío.
+
+**Decisión:** sin `WHATSAPP_ACCESS_TOKEN`/`WHATSAPP_PHONE_NUMBER_ID` se usa
+`ConsoleWhatsAppProvider`; los envíos quedan `simulated` y nunca se presentan
+como reales. Con credenciales se usa Meta Cloud API. El webhook verifica token y
+HMAC, falla cerrado sin App Secret y es idempotente. El bot solo responde a
+mensajes **entrantes** de conversaciones existentes, con respuestas
+determinísticas y handoff humano; no inicia conversaciones ni hace envíos en
+frío. La notificación al fundador depende de `FOUNDER_PHONE`. El primer contacto
+sigue requiriendo aprobación humana y, en producción, plantilla aprobada por
+Meta.
+
+**Consecuencias:** se puede probar todo el flujo localmente sin cuentas pagas.
+La prueba real contra Meta y la plantilla de primer contacto quedan pendientes
+hasta recibir credenciales. La regla anterior de “sin envíos automáticos” se
+interpreta como prohibición de envíos automáticos en frío o masivos; las
+respuestas a entrantes están permitidas y auditadas.
+
+## ADR-S012 — Confirmación manual de WhatsApp y lista de no contacto
+
+**Fecha:** 2026-11-27
+**Estado:** aceptada
+
+**Decisión:** un teléfono publicado no se trata como WhatsApp. La persona que
+opera el sistema debe confirmar manualmente el número; se guarda como contacto
+`whatsapp` verificado con etiqueta “Confirmado manualmente”. Los contactos con
+`do_not_contact` o en la lista de supresiones no reciben mensajes. El envío
+requiere aprobación previa y respeta la ventana de atención de Meta.
+
+**Consecuencias:** la base no inventa canales. La confirmación es una acción
+humana explícita y el envío real sigue sujeto a las reglas de Meta.
+

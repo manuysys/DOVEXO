@@ -48,7 +48,13 @@ def get_metrics(db: Session) -> DashboardMetrics:
             db,
             select(func.count()).select_from(Company).where(Company.last_enriched_at.is_not(None)),
         ),
+        leads_total=_count(db, select(func.count()).select_from(Lead)),
+        leads=_count(db, select(func.count()).select_from(Lead)),
         leads_pending_review=_count(
+            db,
+            select(func.count()).select_from(Lead).where(Lead.status == "pending_review"),
+        ),
+        leads_pending=_count(
             db,
             select(func.count()).select_from(Lead).where(Lead.status == "pending_review"),
         ),
@@ -66,6 +72,10 @@ def get_metrics(db: Session) -> DashboardMetrics:
             select(func.count()).select_from(Lead).where(Lead.status.in_(LEAD_APPROVED_STATUSES)),
         ),
         contacted_leads=_count(
+            db,
+            select(func.count()).select_from(Lead).where(Lead.status.in_(LEAD_CONTACTED_STATUSES)),
+        ),
+        companies_contacted=_count(
             db,
             select(func.count()).select_from(Lead).where(Lead.status.in_(LEAD_CONTACTED_STATUSES)),
         ),

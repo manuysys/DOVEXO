@@ -1,4 +1,5 @@
 import type {
+  Activity,
   Campaign,
   CampaignSearchRunRef,
   CampaignStartResult,
@@ -14,13 +15,27 @@ import type {
   ImportPreview,
   ImportPreviewRow,
   ImportRowError,
+  Lead,
+  LeadEvaluation,
+  LeadPage,
+  LeadScoreItem,
+  LeadScoreResult,
+  LeadStatus,
+  MessageStatus,
+  OutreachMessage,
   Product,
   ProvinceOption,
   SearchRun,
   SearchRunStatus,
   Sector,
   SectorRef,
+  SimulatedInbound,
+  Suppression,
   User,
+  WhatsAppMessage,
+  WhatsAppStatus,
+  WhatsAppThread,
+  WhatsAppThreadDetail,
 } from "./types";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
@@ -287,6 +302,7 @@ export function normalizeMetrics(payload: unknown): DashboardMetrics {
       "companies_total",
       "total_companies",
       "companies_count",
+      "companies",
     ]),
     companies_new: read(["companies_new", "new_companies", "discovered"]),
     companies_enriched: read([
@@ -294,6 +310,14 @@ export function normalizeMetrics(payload: unknown): DashboardMetrics {
       "enriched_companies",
       "researched_companies",
       "companies_researched",
+      "investigated_companies",
+      "investigated",
+    ]),
+    leads_total: read([
+      "leads_total",
+      "total_leads",
+      "leads",
+      "opportunities",
     ]),
     leads_pending: read(["leads_pending", "pending_leads", "leads_to_review"]),
     contacts_published: read([
@@ -322,6 +346,7 @@ export function emptyMetrics(): DashboardMetrics {
     companies_total: 0,
     companies_new: 0,
     companies_enriched: 0,
+    leads_total: 0,
     leads_pending: 0,
     contacts_published: 0,
     whatsapp_published: 0,
@@ -848,4 +873,518 @@ export function normalizeImportBatch(payload: unknown): ImportBatch {
 
 export function normalizeImports(payload: unknown): ImportBatch[] {
   return extractItems(payload, ["imports", "batches"]).map(normalizeImportBatch);
+}
+
+const LEAD_STATUSES: LeadStatus[] = [
+  "new",
+  "researched",
+  "pending_review",
+  "approved",
+  "contacted",
+  "replied",
+  "interested",
+  "meeting_scheduled",
+  "proposal_sent",
+  "customer",
+  "not_interested",
+  "invalid",
+  "do_not_contact",
+];
+
+export function normalizeLeadStatus(value: string): LeadStatus {
+  const normalized = value.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  const found = LEAD_STATUSES.find((status) => status === normalized);
+  return found ?? "unknown";
+}
+
+function readOptionalNumber(
+  record: Record<string, unknown>,
+  keys: string[],
+): number | null {
+  const value = readNumber(record, keys, Number.NaN);
+  return Number.isNaN(value) ? null : value;
+}
+
+/** Id que puede llegar como número o cadena (el backend usa enteros). */
+function readEntityId(
+  record: Record<string, unknown>,
+  keys: string[],
+): string | null {
+  const value = pick(record, keys);
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  if (typeof value === "string" && value.trim().length > 0) return value.trim();
+  return null;
+}
+
+const BREAKDOWN_LABELS: Record<string, string> = {
+  sector: "Afinidad del rubro",
+  sector_affinity: "Afinidad del rubro",
+  sector_fit: "Afinidad del rubro",
+  field_work: "Trabajo de campo e instalaciones",
+  installations: "Trabajo de campo e instalaciones",
+  maintenance: "Reparaciones y mantenimiento",
+  operations: "Gestión de presupuestos, visitas o servicios",
+  recurring_customers: "Clientes recurrentes",
+  evidence_quality: "Calidad de la evidencia comercial",
+  contact_quality: "Calidad del contacto",
+};
+
+/**
+ * El desglose puede llegar como objeto de números, objeto de objetos
+ * (`{points, max}`) o arreglo de factores. Se normaliza a una lista.
+ */
+export function normalizeScoreBreakdown(payload: unknown): LeadScoreItem[] {
+  if (Array.isArray(payload)) {
+    return payload
+      .map((item) => {
+        if (!isRecord(item)) return null;
+        const key = readString(item, ["key", "factor", "name", "label"]);
+        const label = readString(item, ["label", "name"], key);
+        const points = readNumber(item, ["points", "score", "value"], 0);
+        const maxPoints = readOptionalNumber(item, [
+          "max_points",
+          "maxPoints",
+          "max",
+          "weight",
+        ]);
+        if (!key && !label) return null;
+        return {
+          key: key || label,
+          label: label || key,
+          points,
+          max_points: maxPoints,
+        };
+      })
+      .filter((item): item is LeadScoreItem => item !== null);
+  }
+
+  if (!isRecord(payload)) return [];
+
+  const items: LeadScoreItem[] = [];
+  for (const [key, value] of Object.entries(payload)) {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      items.push({
+        key,
+        label: BREAKDOWN_LABELS[key] ?? key,
+        points: value,
+        max_points: null,
+      });
+      continue;
+    }
+    if (isRecord(value)) {
+      const points = readNumber(value, ["points", "score", "value"], 0);
+      const maxPoints = readOptionalNumber(value, [
+        "max_points",
+        "maxPoints",
+        "max",
+        "weight",
+      ]);
+      items.push({
+        key,
+        label: readString(value, ["label", "name"], BREAKDOWN_LABELS[key] ?? key),
+        points,
+        max_points: maxPoints,
+      });
+    }
+  }
+  return items;
+}
+
+export function normalizeLead(payload: unknown): Lead {
+  const record = extractObject(payload, ["lead", "data"]);
+  const company = isRecord(record.company) ? record.company : {};
+  const product = isRecord(record.product) ? record.product : {};
+  const evaluation = isRecord(record.latest_evaluation)
+    ? record.latest_evaluation
+    : isRecord(record.evaluation)
+      ? record.evaluation
+      : {};
+
+  const rawStatus = readString(record, ["status", "state"], "new");
+  const reasons = readStringArray(record, ["reasons", "score_reasons"]);
+  const breakdown = normalizeScoreBreakdown(
+    pick(record, ["score_breakdown", "breakdown", "breakdown_json"]) ??
+      pick(evaluation, ["score_breakdown", "breakdown"]),
+  );
+
+  return {
+    id: readId(record),
+    company_id:
+      readEntityId(record, ["company_id", "companyId"]) ?? readId(company),
+    company_name:
+      readNullableString(record, ["company_name", "companyName"]) ??
+      readString(company, ["name"]),
+    company_locality:
+      readNullableString(record, ["company_locality", "locality"]) ??
+      readNullableString(company, ["locality", "city"]),
+    company_province:
+      readNullableString(record, ["company_province", "province"]) ??
+      readNullableString(company, ["province"]),
+    company_website:
+      readNullableString(record, ["company_website", "website"]) ??
+      readNullableString(company, ["website"]),
+    company_phone:
+      readNullableString(record, ["company_phone", "phone"]) ??
+      readNullableString(company, ["primary_phone", "phone"]),
+    company_email:
+      readNullableString(record, ["company_email", "email"]) ??
+      readNullableString(company, ["primary_email", "email"]),
+    company_whatsapp:
+      readNullableString(record, ["company_whatsapp", "whatsapp"]) ??
+      readNullableString(company, ["whatsapp", "primary_whatsapp"]),
+    product_id:
+      readEntityId(record, ["product_id", "productId"]) ??
+      (isRecord(record.product) ? readId(product) : null),
+    product_name:
+      readNullableString(record, ["product_name", "productName"]) ??
+      (isRecord(record.product) ? readString(product, ["name"]) : null),
+    status: normalizeLeadStatus(rawStatus),
+    raw_status: rawStatus,
+    score:
+      readOptionalNumber(record, [
+        "compatibility_score",
+        "compatibilityScore",
+        "score",
+      ]) ?? readOptionalNumber(evaluation, ["score", "compatibility_score"]),
+    confidence:
+      readOptionalNumber(record, [
+        "information_confidence",
+        "informationConfidence",
+        "confidence",
+      ]) ?? readOptionalNumber(evaluation, ["confidence"]),
+    reasons:
+      reasons.length > 0 ? reasons : readStringArray(evaluation, ["reasons"]),
+    breakdown,
+    assigned_notes: readString(record, ["assigned_notes", "assignedNotes", "notes"]),
+    last_activity_at: readNullableString(record, [
+      "last_activity_at",
+      "lastActivityAt",
+    ]),
+    next_action_at: readNullableString(record, [
+      "next_action_at",
+      "nextActionAt",
+    ]),
+    created_at: readNullableString(record, ["created_at", "createdAt"]),
+    updated_at: readNullableString(record, ["updated_at", "updatedAt"]),
+  };
+}
+
+export function normalizeLeads(payload: unknown): Lead[] {
+  return extractItems(payload, ["leads", "items"]).map(normalizeLead);
+}
+
+export function normalizeLeadPage(payload: unknown): LeadPage {
+  const items = normalizeLeads(payload);
+  const record = isRecord(payload) ? payload : {};
+  return {
+    items,
+    total: readNumber(record, ["total", "count"], items.length),
+    limit: readNumber(record, ["limit", "page_size"], items.length),
+    offset: readNumber(record, ["offset", "skip"], 0),
+  };
+}
+
+export function normalizeLeadEvaluation(payload: unknown): LeadEvaluation {
+  const record = extractObject(payload, ["evaluation", "data"]);
+  const score = readNumber(record, ["score", "compatibility_score"], 0);
+  const confidence = readNumber(record, ["confidence"], 0);
+  return {
+    id: readId(record),
+    lead_id:
+      readEntityId(record, ["lead_id", "leadId"]) ??
+      (isRecord(record.lead) ? readId(record.lead) || "" : ""),
+    score,
+    confidence,
+    reasons: readStringArray(record, ["reasons"]),
+    breakdown: normalizeScoreBreakdown(
+      pick(record, ["score_breakdown", "breakdown"]),
+    ),
+    evaluation_method: readString(
+      record,
+      ["evaluation_method", "evaluationMethod", "method"],
+      "deterministic",
+    ),
+    model_name: readNullableString(record, ["model_name", "modelName"]),
+    evaluated_at: readNullableString(record, [
+      "evaluated_at",
+      "evaluatedAt",
+      "created_at",
+    ]),
+  };
+}
+
+export function normalizeLeadEvaluations(payload: unknown): LeadEvaluation[] {
+  return extractItems(payload, ["evaluations", "items"]).map(
+    normalizeLeadEvaluation,
+  );
+}
+
+export function normalizeLeadScoreResult(payload: unknown): LeadScoreResult {
+  const record = isRecord(payload) ? payload : {};
+  const lead = isRecord(record.lead) ? normalizeLead(record.lead) : null;
+  const evaluation = isRecord(record.evaluation)
+    ? normalizeLeadEvaluation(record.evaluation)
+    : null;
+  const source = isRecord(record.evaluation) ? record.evaluation : record;
+  const score =
+    readOptionalNumber(source, ["score", "compatibility_score"]) ??
+    lead?.score ??
+    0;
+  const confidence =
+    readOptionalNumber(source, ["confidence", "information_confidence"]) ??
+    lead?.confidence ??
+    0;
+  const reasons = readStringArray(source, ["reasons"]);
+  const breakdown = normalizeScoreBreakdown(
+    pick(source, ["score_breakdown", "breakdown"]),
+  );
+
+  return {
+    lead,
+    score,
+    confidence,
+    reasons: reasons.length > 0 ? reasons : (lead?.reasons ?? []),
+    breakdown: breakdown.length > 0 ? breakdown : (lead?.breakdown ?? []),
+    evaluation,
+  };
+}
+
+const MESSAGE_STATUSES: MessageStatus[] = [
+  "draft",
+  "pending_approval",
+  "approved",
+  "rejected",
+  "sent",
+  "replied",
+  "archived",
+];
+
+export function normalizeMessageStatus(value: string): MessageStatus {
+  const normalized = value.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  if (normalized === "pending" || normalized === "pending_review") {
+    return "pending_approval";
+  }
+  if (normalized === "manually_sent" || normalized === "marked_sent") {
+    return "sent";
+  }
+  const found = MESSAGE_STATUSES.find((status) => status === normalized);
+  return found ?? "unknown";
+}
+
+export function normalizeMessage(payload: unknown): OutreachMessage {
+  const record = extractObject(payload, ["message", "data"]);
+  const rawStatus = readString(record, ["status", "state"], "draft");
+  const generated = readString(record, [
+    "generated_text",
+    "generatedText",
+    "text",
+    "body",
+  ]);
+  const edited = readNullableString(record, ["edited_text", "editedText"]);
+  const sentVia = readNullableString(record, [
+    "sent_via",
+    "sentVia",
+    "delivery",
+    "provider",
+  ]);
+  const text = (edited ?? "").trim().length > 0 ? (edited ?? "") : generated;
+
+  return {
+    id: readId(record),
+    lead_id: readEntityId(record, ["lead_id", "leadId"]),
+    channel: readString(record, ["channel"], "whatsapp"),
+    message_type: readString(record, [
+      "message_type",
+      "messageType",
+      "type",
+    ], "first_contact"),
+    status: normalizeMessageStatus(rawStatus),
+    raw_status: rawStatus,
+    text,
+    generated_text: generated,
+    edited_text: edited,
+    sent_via: sentVia,
+    simulated:
+      readBoolean(record, ["simulated", "is_simulated"]) ||
+      (sentVia ?? "").trim().toLowerCase() === "console",
+    created_at: readNullableString(record, ["created_at", "createdAt"]),
+    approved_at: readNullableString(record, ["approved_at", "approvedAt"]),
+    sent_at: readNullableString(record, ["sent_at", "sentAt"]),
+  };
+}
+
+export function normalizeMessages(payload: unknown): OutreachMessage[] {
+  return extractItems(payload, ["messages", "items"]).map(normalizeMessage);
+}
+
+export function normalizeWhatsAppStatus(payload: unknown): WhatsAppStatus {
+  const record = extractObject(payload, ["whatsapp", "status", "data"]);
+  return {
+    configured: readBoolean(record, ["configured", "is_configured"]),
+    mode: readString(record, ["mode", "provider"], "unknown").toLowerCase(),
+    sender_phone: readNullableString(record, ["sender_phone", "senderPhone"]),
+    founder_phone_set: readBoolean(record, [
+      "founder_phone_set",
+      "founderPhoneSet",
+    ]),
+  };
+}
+
+export function normalizeWhatsAppThread(payload: unknown): WhatsAppThread {
+  const record = extractObject(payload, ["thread", "data"]);
+  const lastMessage = pick(record, ["last_message", "lastMessage"]);
+  const lastText =
+    typeof lastMessage === "string"
+      ? lastMessage
+      : isRecord(lastMessage)
+        ? readString(lastMessage, ["text", "body", "content"])
+        : "";
+
+  return {
+    id: readId(record),
+    phone: readString(record, ["phone", "normalized_phone", "contact"]),
+    name: readNullableString(record, ["name", "contact_name", "company_name"]),
+    lead_id: readEntityId(record, ["lead_id", "leadId"]),
+    last_message_at: readNullableString(record, [
+      "last_message_at",
+      "lastMessageAt",
+      "updated_at",
+    ]),
+    last_message_text:
+      readString(record, ["last_message_text", "lastMessageText", "preview"]) ||
+      lastText,
+    unread: readNumber(record, ["unread", "unread_count"]),
+  };
+}
+
+export function normalizeWhatsAppThreads(payload: unknown): WhatsAppThread[] {
+  return extractItems(payload, ["threads", "items"]).map(
+    normalizeWhatsAppThread,
+  );
+}
+
+export function normalizeWhatsAppMessage(payload: unknown): WhatsAppMessage {
+  const record = extractObject(payload, ["message", "data"]);
+  const rawDirection = readString(
+    record,
+    ["direction", "type", "kind"],
+    "unknown",
+  ).toLowerCase();
+  const direction =
+    rawDirection === "in" ||
+    rawDirection === "inbound" ||
+    rawDirection === "incoming" ||
+    rawDirection === "received"
+      ? "inbound"
+      : rawDirection === "out" ||
+          rawDirection === "outbound" ||
+          rawDirection === "outgoing" ||
+          rawDirection === "sent"
+        ? "outbound"
+        : "unknown";
+
+  return {
+    id: readId(record),
+    thread_id: readEntityId(record, ["thread_id", "threadId"]),
+    direction,
+    text: readString(record, ["text", "body", "content"]),
+    created_at: readNullableString(record, [
+      "created_at",
+      "createdAt",
+      "sent_at",
+      "occurred_at",
+    ]),
+    status: readNullableString(record, ["status"]),
+  };
+}
+
+export function normalizeWhatsAppThreadDetail(
+  payload: unknown,
+): WhatsAppThreadDetail {
+  const record = isRecord(payload) ? payload : {};
+  const thread = isRecord(record.thread)
+    ? normalizeWhatsAppThread(record.thread)
+    : null;
+  return {
+    thread,
+    messages: extractItems(record, ["messages", "items"]).map(
+      normalizeWhatsAppMessage,
+    ),
+  };
+}
+
+export function normalizeSimulatedInbound(payload: unknown): SimulatedInbound {
+  const record = isRecord(payload) ? payload : {};
+  const thread = isRecord(record.thread) ? record.thread : {};
+  const message = isRecord(record.message) ? record.message : {};
+  return {
+    thread_id:
+      readEntityId(record, ["thread_id", "threadId"]) ??
+      readEntityId(thread, ["id"]),
+    text:
+      readNullableString(message, ["text", "body"]) ??
+      readNullableString(record, ["reply", "text"]),
+  };
+}
+
+export function normalizeActivity(payload: unknown): Activity {
+  const record = extractObject(payload, ["activity", "data"]);
+  const lead = isRecord(record.lead) ? record.lead : {};
+  const company = isRecord(record.company)
+    ? record.company
+    : isRecord(lead.company)
+      ? lead.company
+      : {};
+
+  return {
+    id: readId(record),
+    lead_id:
+      readEntityId(record, ["lead_id", "leadId"]) ??
+      (readId(lead) || null),
+    company_id:
+      readEntityId(record, ["company_id", "companyId"]) ??
+      (readId(company) || null),
+    company_name:
+      readNullableString(record, ["company_name", "companyName"]) ??
+      (readString(company, ["name"]) || null),
+    activity_type: readString(record, ["activity_type", "activityType", "type"], "note"),
+    description: readString(record, ["description", "note", "text"]),
+    occurred_at: readNullableString(record, [
+      "occurred_at",
+      "occurredAt",
+      "created_at",
+    ]),
+    next_action_at: readNullableString(record, [
+      "next_action_at",
+      "nextActionAt",
+    ]),
+    metadata: readRecord(record, ["metadata", "metadata_json"]),
+  };
+}
+
+export function normalizeActivities(payload: unknown): Activity[] {
+  return extractItems(payload, ["activities", "items"]).map(normalizeActivity);
+}
+
+export function normalizeSuppression(payload: unknown): Suppression {
+  const record = extractObject(payload, ["suppression", "data"]);
+  return {
+    id: readId(record),
+    value: readString(record, [
+      "normalized_contact",
+      "normalizedContact",
+      "value",
+      "contact",
+      "phone",
+    ]),
+    reason: readString(record, ["reason"]),
+    company_id: readEntityId(record, ["company_id", "companyId"]),
+    created_at: readNullableString(record, ["created_at", "createdAt"]),
+  };
+}
+
+export function normalizeSuppressions(payload: unknown): Suppression[] {
+  return extractItems(payload, ["suppressions", "items"]).map(
+    normalizeSuppression,
+  );
 }

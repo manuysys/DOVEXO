@@ -5,14 +5,16 @@ CRM. Es multiproducto: DOVEXO es el primer producto configurado.
 
 ## Estado
 
-Fases 0, 1, 2A y 2B completadas y verificadas localmente: login, dashboard,
+Fases 0, 1, 2A, 2B, 4 y 5 completadas y verificadas localmente: login, dashboard,
 productos, campañas, worker persistente, seed de DOVEXO, descubrimiento
 provincial con OpenStreetMap/Overpass, empresas, contactos, alta manual y
 deduplicación, importación CSV, campañas con una corrida por provincia y
 exportación CSV. Una campaña real de Buenos Aires/instalaciones eléctricas
 guardó cinco empresas nuevas.
 
-El enriquecimiento, scoring, mensajes, WhatsApp y CRM son las fases 3-5.
+El enriquecimiento de sitios (fase 3) y la prueba real contra Meta quedan
+pendientes. El scoring, los mensajes, WhatsApp (consola/simulador) y el CRM ya
+están implementados. No se enviaron mensajes reales a terceros.
 
 Ver [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md).
 

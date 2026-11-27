@@ -7,9 +7,10 @@ import {
   useUpdateCompany,
 } from "@/hooks/use-companies";
 import { useSectors } from "@/hooks/use-dashboard";
+import { useLeads } from "@/hooks/use-leads";
 import { useProvinces } from "@/hooks/use-provinces";
 import { useSearchRuns } from "@/hooks/use-search-runs";
-import { makeCompany, makeSector } from "./utils";
+import { makeCompany, makeLead, makeSector } from "./utils";
 
 const { replaceMock } = vi.hoisted(() => ({ replaceMock: vi.fn() }));
 
@@ -24,11 +25,17 @@ vi.mock("@/hooks/use-companies", () => ({
   useUpdateCompany: vi.fn(),
   useExportCompanies: vi.fn(),
 }));
+vi.mock("@/hooks/use-leads", () => ({ useLeads: vi.fn() }));
 vi.mock("@/hooks/use-provinces", () => ({ useProvinces: vi.fn() }));
 vi.mock("@/hooks/use-dashboard", () => ({ useSectors: vi.fn() }));
 vi.mock("@/hooks/use-search-runs", () => ({ useSearchRuns: vi.fn() }));
 
 function mockMeta() {
+  vi.mocked(useLeads).mockReturnValue({
+    data: { items: [], total: 0, limit: 100, offset: 0 },
+    isPending: false,
+    isError: false,
+  } as unknown as ReturnType<typeof useLeads>);
   vi.mocked(useProvinces).mockReturnValue({
     data: [{ code: "AR-S", name: "Santa Fe" }],
     isError: false,
@@ -79,6 +86,25 @@ describe("ProspectsView", () => {
 
   it("lista empresas con enlaces, estado y paginación real", () => {
     mockMeta();
+    vi.mocked(useLeads).mockReturnValue({
+      data: {
+        items: [
+          makeLead({
+            id: "1",
+            company_id: "10",
+            score: 88,
+            confidence: 80,
+            status: "approved",
+            raw_status: "approved",
+          }),
+        ],
+        total: 1,
+        limit: 100,
+        offset: 0,
+      },
+      isPending: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useLeads>);
     vi.mocked(useCompanies).mockReturnValue({
       data: {
         items: [makeCompany()],
@@ -94,6 +120,7 @@ describe("ProspectsView", () => {
 
     render(<ProspectsView />);
 
+    expect(useLeads).toHaveBeenCalledWith({ limit: 100 });
     const nameLink = screen.getByRole("link", { name: "Empresa de prueba" });
     expect(nameLink).toHaveAttribute("href", "/prospects/10");
     const table = screen.getByRole("table");
@@ -101,6 +128,12 @@ describe("ProspectsView", () => {
     expect(within(table).getByText("Rosario")).toBeInTheDocument();
     // Encabezado de columna + badge de estado de la fila.
     expect(within(table).getAllByText("Descubierta")).toHaveLength(2);
+    // Oportunidad del lead 1: compatibilidad/confianza y estado.
+    expect(within(table).getByText("88/80")).toBeInTheDocument();
+    expect(within(table).getByText("Aprobado")).toBeInTheDocument();
+    expect(
+      within(table).getByRole("link", { name: "Preparar contacto" }),
+    ).toHaveAttribute("href", "/prospects/10#oportunidad");
     expect(
       screen.getByRole("link", { name: "empresa-de-prueba.com.ar" }),
     ).toHaveAttribute("href", "https://empresa-de-prueba.com.ar");

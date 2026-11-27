@@ -19,6 +19,7 @@ from app.models.crm import (
 from app.models.job import Job
 from app.models.product import Product, Sector
 from app.models.user import User
+from app.models.whatsapp import WhatsAppMessage, WhatsAppThread
 
 __all__ = [
     "Activity",
@@ -38,4 +39,6 @@ __all__ = [
     "Sector",
     "SuppressionEntry",
     "User",
+    "WhatsAppMessage",
+    "WhatsAppThread",
 ]

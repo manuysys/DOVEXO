@@ -29,6 +29,20 @@
   `7r0gb50fp` Ready; API conectada a GitHub; landing con 19.900/39.900/64.900 y
   login demo `200` contra Vercel + Neon. Rama mergeada a `main`.
 
+## 2026-11-27 — Oportunidades, scoring, WhatsApp y CRM del Sales Agent
+
+- Se implementan oportunidades por empresa+producto, scoring determinístico
+  explicable, mensajes de WhatsApp con aprobación humana, persistencia de
+  conversaciones, respuestas automáticas a entrantes, CRM, actividades,
+  supresiones y métricas reales.
+- El provider de consola permite probar todo el flujo sin credenciales; el
+  webhook de Meta valida token/HMAC y falla cerrado. No se enviaron mensajes
+  reales a terceros.
+- Se verificó localmente: empresa → oportunidad → score 68/80 → mensaje →
+  aprobación → envío simulado → entrante → bot → thread → CRM/dashboard.
+- 106 tests backend, 102 frontend, build de 21 rutas. La plantilla de primer
+  contacto de Meta y el enriquecimiento de sitios quedan pendientes.
+
 ## Producto DOVEXO
 
 El historial detallado de DOVEXO se conserva en

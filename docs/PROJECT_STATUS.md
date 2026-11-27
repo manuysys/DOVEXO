@@ -2,7 +2,7 @@
 
 **Última actualización:** 2026-11-27
 **Fase:** consolidación de la empresa en un monorepo; DOVEXO en producción y
-ARVOKTA Sales Agent en desarrollo.
+ARVOKTA Sales Agent en desarrollo avanzado.
 
 ## Productos
 
@@ -24,18 +24,38 @@ CRM. Es multiproducto: DOVEXO es el primer producto configurado, no código
 hardcodeado. Usa Next.js + FastAPI + SQLite en local, worker con cola persistente
 y fuentes gratuitas (OpenStreetMap/Overpass, CSV y alta manual).
 
-**Fase 2B completada y verificada localmente:** login, dashboard, productos,
-campañas, worker persistente, seed de DOVEXO, descubrimiento provincial con
-OpenStreetMap/Overpass, empresas, contactos, alta manual, deduplicación,
-importación CSV, campañas con una corrida por provincia y exportación CSV.
+**Fases 1, 2A, 2B, 4 y 5 completadas y verificadas localmente:** login,
+dashboard, productos, campañas, worker persistente, seed de DOVEXO,
+descubrimiento provincial con OpenStreetMap/Overpass, empresas, contactos, alta
+manual, deduplicación, importación CSV, campañas con una corrida por provincia,
+exportación CSV, oportunidades, scoring determinístico, mensajes con aprobación
+humana, WhatsApp con provider de consola y simulador, bot de respuestas, CRM,
+actividades, supresiones y métricas reales.
+
 Búsquedas reales: Córdoba/HVAC (5 empresas) y Buenos Aires/instalaciones
-eléctricas (5 empresas nuevas, 0 duplicados). 84 tests backend, 75 frontend y
-build de 20 rutas. La API corre en `localhost:8001` y la web en `localhost:3001`.
-Enriquecimiento, scoring, mensajes, WhatsApp y CRM son las fases 3-5.
+eléctricas (5 empresas nuevas, 0 duplicados). 106 tests backend, 102 frontend y
+build de 21 rutas. La API corre en `localhost:8001` y la web en `localhost:3001`.
+
+El flujo local completo se verificó: empresa → oportunidad → score 68/80 →
+mensaje → aprobación → envío simulado → entrante simulado → respuesta del bot →
+conversación visible en `/messages` → CRM y dashboard actualizados. **No se
+envió ningún mensaje real a terceros.**
+
+Pendientes del Sales Agent:
+
+- Cargar credenciales de Meta/WhatsApp y probar el webhook real con un número
+  autorizado; definir la plantilla de primer contacto.
+- Ejecutar el relevamiento nacional por provincia/rubro y exportar el dataset.
+- Implementar el enriquecimiento de sitios y evidencias (fase 3).
+- Agregar paginación a oportunidades (hoy se muestran hasta 100).
+- `FOUNDER_PHONE` no está configurado; las notificaciones al fundador quedan
+  registradas como no enviadas.
 
 - Especificación: [`sales-agent/docs/SPEC.md`](../sales-agent/docs/SPEC.md)
 - Estado de implementación:
   [`sales-agent/docs/IMPLEMENTATION_STATUS.md`](../sales-agent/docs/IMPLEMENTATION_STATUS.md)
+- Configuración de WhatsApp:
+  [`sales-agent/docs/WHATSAPP_SETUP.md`](../sales-agent/docs/WHATSAPP_SETUP.md)
 
 ## Reestructuración del repositorio (2026-11-27)
 
@@ -60,8 +80,13 @@ Enriquecimiento, scoring, mensajes, WhatsApp y CRM son las fases 3-5.
 - [x] Implementar la Fase 2B del Sales Agent: CSV, campañas con una corrida por
   provincia, revisión de duplicados y exportación CSV (84 tests backend + 75
   frontend; campaña real de Buenos Aires con 5 empresas).
-- [ ] Implementar enriquecimiento, scoring, mensajes, WhatsApp y CRM del Sales
-  Agent (fases 3-5).
+- [x] Implementar scoring, mensajes, WhatsApp (consola/simulador), bot de
+  respuestas y CRM del Sales Agent (106 tests backend + 102 frontend; flujo local
+  verificado; sin envíos reales).
+- [ ] Implementar el enriquecimiento de sitios y evidencias del Sales Agent.
+- [ ] Cargar credenciales Meta/WhatsApp, plantilla de primer contacto y número
+  del fundador; probar un envío real autorizado.
+- [ ] Ejecutar el relevamiento nacional y exportar el dataset de empresas.
 - [ ] Cerrar la auditoría externa de DOVEXO (legal, exportación CSV, soporte,
   backups).
 - [ ] Aplicar la migración de planes de DOVEXO en Neon.

@@ -2,14 +2,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import type {
+  Activity,
   Campaign,
   Company,
   DashboardJob,
   ImportBatch,
   ImportPreview,
+  Lead,
+  OutreachMessage,
   Product,
   SearchRun,
   Sector,
+  WhatsAppMessage,
+  WhatsAppThread,
 } from "@/lib/api/types";
 
 export function createTestQueryClient(): QueryClient {
@@ -222,6 +227,103 @@ export function makeImportBatch(
     confirmed_at: "2026-11-21T09:01:00Z",
     errors: [],
     report_url: null,
+    ...overrides,
+  };
+}
+
+/** Fixture de oportunidad (lead) para pruebas de UI. */
+export function makeLead(overrides: Partial<Lead> = {}): Lead {
+  return {
+    id: "5",
+    company_id: "10",
+    company_name: "Empresa de prueba",
+    company_locality: "Rosario",
+    company_province: "AR-S",
+    company_website: "https://empresa-de-prueba.com.ar",
+    company_phone: null,
+    company_email: "contacto@empresa-de-prueba.com.ar",
+    company_whatsapp: "+5493415550000",
+    product_id: "1",
+    product_name: "DOVEXO",
+    status: "pending_review",
+    raw_status: "pending_review",
+    score: 72,
+    confidence: 64,
+    reasons: ["Ofrece mantenimiento de climatización comercial."],
+    breakdown: [
+      { key: "sector", label: "Afinidad del rubro", points: 24, max_points: 30 },
+    ],
+    assigned_notes: "",
+    last_activity_at: "2026-11-22T10:00:00Z",
+    next_action_at: null,
+    created_at: "2026-11-21T10:00:00Z",
+    updated_at: "2026-11-22T10:00:00Z",
+    ...overrides,
+  };
+}
+
+export function makeMessage(
+  overrides: Partial<OutreachMessage> = {},
+): OutreachMessage {
+  return {
+    id: "31",
+    lead_id: "5",
+    channel: "whatsapp",
+    message_type: "first_contact",
+    status: "draft",
+    raw_status: "draft",
+    text: "Hola, soy Juan Manuel de ARVOKTA.",
+    generated_text: "Hola, soy Juan Manuel de ARVOKTA.",
+    edited_text: null,
+    sent_via: null,
+    simulated: false,
+    created_at: "2026-11-22T10:00:00Z",
+    approved_at: null,
+    sent_at: null,
+    ...overrides,
+  };
+}
+
+export function makeActivity(overrides: Partial<Activity> = {}): Activity {
+  return {
+    id: "41",
+    lead_id: "5",
+    company_id: "10",
+    company_name: "Empresa de prueba",
+    activity_type: "note",
+    description: "Llamada realizada.",
+    occurred_at: "2026-11-22T11:00:00Z",
+    next_action_at: null,
+    metadata: {},
+    ...overrides,
+  };
+}
+
+export function makeWhatsAppThread(
+  overrides: Partial<WhatsAppThread> = {},
+): WhatsAppThread {
+  return {
+    id: "7",
+    phone: "+5493415550000",
+    name: "Empresa de prueba",
+    lead_id: "5",
+    last_message_at: "2026-11-22T12:00:00Z",
+    last_message_text: "Hola, quiero saber más",
+    unread: 1,
+    ...overrides,
+  };
+}
+
+export function makeWhatsAppMessage(
+  overrides: Partial<WhatsAppMessage> = {},
+): WhatsAppMessage {
+  return {
+    id: "71",
+    thread_id: "7",
+    direction: "inbound",
+    text: "Hola, quiero saber más sobre DOVEXO",
+    created_at: "2026-11-22T12:00:00Z",
+    status: "received",
     ...overrides,
   };
 }

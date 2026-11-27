@@ -1,17 +1,18 @@
-import { PhasePlaceholder } from "@/components/layout/phase-placeholder";
+import { Suspense } from "react";
+import { PageHeader } from "@/components/ui/page-header";
+import { LoadingBlock } from "@/components/ui/spinner";
+import { CrmView } from "@/components/crm/crm-view";
 
 export default function CrmPage() {
   return (
-    <PhasePlaceholder
-      title="CRM"
-      phase={5}
-      summary="El pipeline comercial, las actividades y los seguimientos se implementan en la Fase 5 sobre los leads ya aprobados."
-      planned={[
-        "Pipeline por estado: nuevo, contactado, respondió, reunión, propuesta y cliente.",
-        "Cambios de estado accesibles y con historial.",
-        "Notas, próximos seguimientos y responsable.",
-        "Lista de supresión y exportación.",
-      ]}
-    />
+    <>
+      <PageHeader
+        title="CRM"
+        description="Pipeline comercial por estado, notas, seguimientos, historial y lista de no contacto. Cada empresa tiene una oportunidad por producto."
+      />
+      <Suspense fallback={<LoadingBlock label="Cargando CRM…" />}>
+        <CrmView />
+      </Suspense>
+    </>
   );
 }

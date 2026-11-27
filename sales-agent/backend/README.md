@@ -1,10 +1,11 @@
-# ARVOKTA Sales Agent — Backend (Fases 1, 2A y 2B)
+# ARVOKTA Sales Agent — Backend (Fases 1–5)
 
 API interna en FastAPI + SQLite con worker de cola persistente. Incluye login,
 productos, campañas, descubrimiento provincial con OpenStreetMap/Overpass,
-importación y exportación CSV, alta manual, contactos, fuentes y deduplicación.
-El enriquecimiento de sitios oficiales y el scoring quedan para fases
-posteriores.
+importación y exportación CSV, alta manual, contactos, fuentes, deduplicación,
+oportunidades, scoring determinístico, mensajes con aprobación, WhatsApp y CRM.
+El enriquecimiento de sitios oficiales y la IA opcional quedan para más
+adelante.
 
 ## Requisitos
 
@@ -44,6 +45,12 @@ que hay que ejecutar `alembic upgrade head`.
 | `OVERPASS_MAX_RETRIES` | Reintentos ante 429/5xx o error de red. Por defecto 2. |
 | `OVERPASS_REQUEST_DELAY_SECONDS` | Espera entre consultas por rubro. Por defecto 0,5 s. |
 | `OVERPASS_USER_AGENT` | User-Agent identificable enviado a Overpass. |
+| `WHATSAPP_ACCESS_TOKEN` / `WHATSAPP_PHONE_NUMBER_ID` | Credenciales de Meta Cloud API. Si faltan, se usa el provider de consola. |
+| `WHATSAPP_VERIFY_TOKEN` | Token de verificación del webhook. Sin él, `GET /webhooks/whatsapp` responde 503. |
+| `WHATSAPP_APP_SECRET` | Secreto para validar `X-Hub-Signature-256`. Sin él, el webhook responde 503. |
+| `WHATSAPP_SENDER_PHONE` | Número remitente informado por `/whatsapp/status`. |
+| `WHATSAPP_API_VERSION` | Versión de Graph API. Por defecto `v23.0`. |
+| `FOUNDER_PHONE` | Número que recibe aviso de cada WhatsApp entrante. Vacío = sin aviso. |
 
 SQLite se abre con `journal_mode=WAL`, `foreign_keys=ON` y `busy_timeout` para
 que API y worker compartan el archivo con transacciones cortas.
@@ -69,6 +76,15 @@ Todos bajo `/api/v1`, salvo salud. La autenticación usa cookie HttpOnly
   `discovery_status`, `limit`, `offset`), `GET|POST /companies`,
   `GET|PATCH /companies/{id}`, `GET|POST /companies/{id}/contacts`,
   `GET /companies/export.csv` (solo admin)
+- `POST /companies/{id}/leads`, `GET /leads`, `GET|PATCH /leads/{id}`,
+  `POST /leads/{id}/score`, `GET /leads/{id}/evaluations`
+- `GET|POST /leads/{id}/activities`, `GET /activities`
+- `POST /leads/{id}/messages/generate`, `GET /leads/{id}/messages`,
+  `PATCH /messages/{id}`, `POST /messages/{id}/approve|send|mark-sent`
+- `GET|POST /suppressions`, `DELETE /suppressions/{id}`
+- `GET /whatsapp/status`, `POST /whatsapp/simulate/inbound`,
+  `GET /whatsapp/threads`, `GET /whatsapp/threads/{id}` (alias `/threads/{id}`)
+- `GET|POST /webhooks/whatsapp` (público, verificación y firma de Meta)
 - `GET /dashboard/metrics|activity|jobs`
 - `POST /jobs/noop` (solo admin; encola un trabajo de prueba)
 
@@ -146,6 +162,71 @@ contactos principales y fuente. Las celdas que comienzan con `=`, `+`, `-`, `@`,
 tab, CR o LF se prefijan con un apóstrofo para que Excel no las ejecute como
 fórmula; los datos guardados no se modifican.
 
+## Oportunidades, scoring y CRM
+
+`POST /companies/{id}/leads` crea una oportunidad única por empresa y producto;
+sin `product_id` usa DOVEXO. `GET /leads` acepta `status`, `product_id`,
+`company_id`, `limit` y `offset`. `PATCH /leads/{id}` permite estado, notas y
+próximo seguimiento; cada cambio queda en `activities`.
+
+El scoring es determinístico y no usa IA. Toma los factores de
+`product.scoring_config`, evalúa rubros, web, dirección, teléfono/email, fuentes
+y texto disponible, y calcula por separado:
+
+- compatibilidad comercial (0–100), y
+- confianza de la información (0–100).
+
+Cada evaluación guarda `score_breakdown`, razones legibles y las fuentes usadas.
+Una ficha incompleta obtiene menor confianza; no se completan datos faltantes.
+`GET /leads/{id}/evaluations` conserva el historial.
+
+`GET|POST /leads/{id}/activities` y `GET /activities` registran llamadas, notas,
+seguimientos y cambios de estado.
+
+## Mensajes y aprobación
+
+`POST /leads/{id}/messages/generate` genera un texto determinístico para
+WhatsApp (`first_contact`, `follow_up` o `demo_invite`) con el remitente “Juan
+Manuel, de ARVOKTA”, datos guardados de la empresa/producto y una vía de baja
+(“respondé BAJA”). Queda en `pending_approval`; no se envía.
+
+El flujo es: editar (`PATCH /messages/{id}`), aprobar
+(`POST /messages/{id}/approve`), enviar (`POST /messages/{id}/send`) y, si el
+envío se hizo por fuera, marcar manualmente (`POST /messages/{id}/mark-sent`).
+No se puede enviar ni marcar sin aprobación.
+
+Sin credenciales de Meta se usa `ConsoleWhatsAppProvider`: devuelve
+`status = simulated`, guarda `delivery_status`, no marca `sent_at` y no envía
+nada real. Con `WHATSAPP_ACCESS_TOKEN` y `WHATSAPP_PHONE_NUMBER_ID` se usa
+`MetaWhatsAppProvider` contra Graph API. No hay envíos en frío ni masivos.
+
+Los mensajes se bloquean si la empresa, el teléfono o el contacto están en la
+lista de no contacto.
+
+## WhatsApp
+
+`GET /whatsapp/status` indica `configured`, `mode` (`meta` o `console`),
+`sender_phone` y si hay `FOUNDER_PHONE`.
+
+El webhook `GET /webhooks/whatsapp` responde el `hub.challenge` con el token
+configurado. `POST /webhooks/whatsapp` valida `X-Hub-Signature-256` sobre los
+bytes crudos, limita a 1 MB, es idempotente por `wa_message_id`, guarda el
+inbound, actualiza el lead/actividad y responde con un bot breve que agradece,
+pregunta qué servicio se necesita y ofrece handoff humano. Si hay
+`FOUNDER_PHONE`, avisa al fundador. Un remitente desconocido queda en un thread
+sin empresa/contacto; no se inventa una empresa. Los envíos del bot y del aviso
+respetan la lista de no contacto.
+
+`POST /whatsapp/simulate/inbound` (solo admin) prueba el flujo sin Meta. Los
+threads se consultan en `GET /whatsapp/threads` y `GET /whatsapp/threads/{id}`.
+
+## Lista de no contacto
+
+`GET|POST /suppressions` y `DELETE /suppressions/{id}`. Se puede suprimir una
+empresa completa, un teléfono, un email o un contacto normalizado. La supresión
+por empresa se guarda con la clave `company:{id}`. Bloquea generación y envío de
+mensajes y respuestas automáticas de WhatsApp.
+
 ## Descubrimiento con OpenStreetMap (Fase 2A)
 
 El provider consulta Overpass una vez por rubro, filtrando por
@@ -220,6 +301,7 @@ worker deja de persistir resultados.
 
 ## Definiciones del dashboard
 
+- `leads` / `leads_total`: todas las oportunidades.
 - `new_companies`: empresas creadas en los últimos 7 días.
 - `investigated_companies`: empresas con `last_enriched_at`.
 - `published_contacts` / `published_whatsapp`: contactos publicados o
@@ -239,6 +321,7 @@ uv run ruff format --check .
 ```
 
 Las pruebas usan un SQLite temporal y no acceden a internet. Overpass se simula
-con `httpx.MockTransport`; el worker se prueba con un provider fake. La suite
-incluye un test de migración que ejecuta `alembic upgrade head` y
-`downgrade base` sobre una base temporal desde cero.
+con `httpx.MockTransport`; el worker se prueba con un provider fake; WhatsApp se
+prueba con el provider de consola y un fake. La suite incluye un test de
+migración que ejecuta `alembic upgrade head` y `downgrade base` sobre una base
+temporal desde cero.

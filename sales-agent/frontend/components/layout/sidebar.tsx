@@ -68,7 +68,7 @@ export function Sidebar({
         </nav>
 
         <div className="border-t border-white/10 px-5 py-4 text-[11px] leading-relaxed text-slate-400">
-          Uso interno · Fase 2B
+          Uso interno · Fases 1-5
           <br />
           Sin registro público
         </div>

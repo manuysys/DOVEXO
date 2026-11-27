@@ -50,6 +50,14 @@ def test_alembic_upgrade_from_scratch_and_downgrade(tmp_path: Path) -> None:
             "created_by",
             "confirmed_at",
         } <= _table_columns(connection, "import_batches")
+        assert "next_follow_up_at" in _table_columns(connection, "leads")
+        assert {
+            "delivery_status",
+            "provider_message_id",
+            "delivery_error",
+            "metadata",
+        } <= _table_columns(connection, "outreach_messages")
+        assert {"whatsapp_threads", "whatsapp_messages"} <= tables
 
     _alembic(database_url, "downgrade", "base")
 

@@ -10,11 +10,9 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { LoadingBlock, Spinner } from "@/components/ui/spinner";
-import {
-  useCompanies,
-  useExportCompanies,
-  useUpdateCompany,
-} from "@/hooks/use-companies";
+import { useCompanies, useExportCompanies, useUpdateCompany } from "@/hooks/use-companies";
+import { useLeads } from "@/hooks/use-leads";
+import { LEADS_PAGE_LIMIT } from "@/lib/api/leads";
 import { useSectors } from "@/hooks/use-dashboard";
 import { useProvinces } from "@/hooks/use-provinces";
 import { useSearchRuns } from "@/hooks/use-search-runs";
@@ -50,8 +48,15 @@ export function ProspectsView() {
   const provincesQuery = useProvinces();
   const sectorsQuery = useSectors();
   const searchRunsQuery = useSearchRuns();
+  const leadsQuery = useLeads({ limit: LEADS_PAGE_LIMIT });
   const updateCompanyMutation = useUpdateCompany();
   const exportMutation = useExportCompanies();
+
+  const leadsByCompany = new Map(
+    (leadsQuery.data?.items ?? [])
+      .filter((lead) => lead.company_id.length > 0)
+      .map((lead) => [lead.company_id, lead] as const),
+  );
 
   const filters: CompanyFilters = {
     search_run_id: searchRunId || undefined,
@@ -283,6 +288,14 @@ export function ProspectsView() {
         </Alert>
       ) : null}
 
+      {leadsQuery.data && leadsQuery.data.total > LEADS_PAGE_LIMIT ? (
+        <Alert variant="info" className="mb-4">
+          El score y el estado de la oportunidad se muestran para las primeras{" "}
+          {LEADS_PAGE_LIMIT} oportunidades de {leadsQuery.data.total}. Las
+          empresas sin oportunidad cargada aparecen con “—”.
+        </Alert>
+      ) : null}
+
       {exportMutation.isError ? (
         <Alert variant="danger" title="No se pudo exportar el CSV" className="mb-4">
           {getErrorMessage(exportMutation.error)}
@@ -357,6 +370,7 @@ export function ProspectsView() {
         <>
           <ProspectsTable
             companies={companies}
+            leadsByCompany={leadsByCompany}
             onStatusChange={handleStatusChange}
             updatingId={updatingId}
           />

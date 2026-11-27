@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import type {
+  Activity,
   Campaign,
   DashboardJob,
   DashboardMetrics,
   Product,
 } from "@/lib/api/types";
 import { CampaignStatusBadge } from "@/components/campaigns/status-badge";
+import { ActivityList } from "@/components/activities/activity-list";
 import { MetricCard } from "./metric-card";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +28,7 @@ const METRIC_ITEMS: Array<{
   { key: "companies_total", label: "Empresas totales" },
   { key: "companies_new", label: "Empresas nuevas" },
   { key: "companies_enriched", label: "Empresas investigadas" },
+  { key: "leads_total", label: "Oportunidades totales" },
   { key: "leads_pending", label: "Leads por revisar" },
   { key: "contacts_published", label: "Contactos publicados" },
   { key: "whatsapp_published", label: "WhatsApp publicados" },
@@ -49,6 +52,10 @@ export interface DashboardViewProps {
   listsStatus: LoadStatus;
   listsError?: string | null;
   onRetryLists?: () => void;
+  activities?: Activity[];
+  activitiesStatus?: LoadStatus;
+  activitiesError?: string | null;
+  onRetryActivities?: () => void;
   filterSlot?: React.ReactNode;
 }
 
@@ -66,6 +73,10 @@ export function DashboardView({
   listsStatus,
   listsError,
   onRetryLists,
+  activities = [],
+  activitiesStatus = "ready",
+  activitiesError,
+  onRetryActivities,
   filterSlot,
 }: DashboardViewProps) {
   const noCompanies =
@@ -114,14 +125,22 @@ export function DashboardView({
       {metricsStatus === "ready" && noCompanies ? (
         <EmptyState
           title="Todavía no hay empresas ni prospectos"
-          description="El descubrimiento de empresas (OpenStreetMap, CSV y alta manual) se habilita en la Fase 2. Hasta entonces el dashboard muestra cero: no se cargan datos de ejemplo."
+          description="Ejecutá una búsqueda por provincia, importá un CSV o cargá una empresa manualmente. El dashboard muestra cero hasta que existan datos reales: no se cargan ejemplos."
           action={
-            <Link
-              href="/campaigns"
-              className={buttonStyles({ variant: "secondary", size: "sm" })}
-            >
-              Ver campañas
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Link
+                href="/search"
+                className={buttonStyles({ variant: "primary", size: "sm" })}
+              >
+                Buscar empresas
+              </Link>
+              <Link
+                href="/imports"
+                className={buttonStyles({ variant: "secondary", size: "sm" })}
+              >
+                Importar CSV
+              </Link>
+            </div>
           }
         />
       ) : null}
@@ -274,8 +293,8 @@ export function DashboardView({
             </p>
           ) : jobs.length === 0 ? (
             <p className="text-xs text-muted">
-              Sin tareas en ejecución. El worker se inicia aparte y las
-              búsquedas automáticas se habilitan en la Fase 2.
+              Sin tareas en ejecución. El worker se inicia aparte y procesa
+              búsquedas, scoring y enriquecimiento.
             </p>
           ) : (
             <ul className="divide-y divide-line">
@@ -298,11 +317,50 @@ export function DashboardView({
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader
+          title="Actividad reciente"
+          description="Últimos registros comerciales (mensajes, cambios de estado, notas y seguimientos)."
+          action={
+            <Link
+              href="/crm"
+              className="text-xs font-medium text-accent hover:underline"
+            >
+              Ver CRM
+            </Link>
+          }
+        />
+        <CardContent>
+          {activitiesStatus === "loading" ? (
+            <p className="text-xs text-muted">Cargando actividad…</p>
+          ) : activitiesStatus === "error" ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-danger">
+              <span>
+                {activitiesError ?? "No se pudo consultar la actividad reciente."}
+              </span>
+              {onRetryActivities ? (
+                <button
+                  type="button"
+                  onClick={onRetryActivities}
+                  className="font-semibold underline"
+                >
+                  Reintentar
+                </button>
+              ) : null}
+            </div>
+          ) : (
+            <ActivityList
+              activities={activities}
+              emptyMessage="Sin actividad reciente: generá un mensaje o registrá una nota para empezar."
+            />
+          )}
+        </CardContent>
+      </Card>
+
       <p className="text-[11px] text-muted">
         {pluralize(products.length, "producto", "productos")} y{" "}
-        {pluralize(campaigns.length, "campaña", "campañas")} configurados. Los
-        contadores de empresas y prospectos permanecen en cero hasta que exista
-        descubrimiento en la Fase 2.
+        {pluralize(campaigns.length, "campaña", "campañas")} configurados. Todas
+        las métricas salen de la base; los ceros son reales.
       </p>
     </div>
   );

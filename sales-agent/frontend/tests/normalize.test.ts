@@ -30,6 +30,24 @@ describe("normalizeMetrics", () => {
     expect(metrics.leads_approved).toBe(1);
     expect(metrics.responses).toBe(0);
   });
+
+  it("lee las claves reales del backend: companies e investigated_companies", () => {
+    const metrics = normalizeMetrics({
+      companies: 10,
+      investigated_companies: 4,
+      leads: 3,
+      contacted_companies: 2,
+      responses: 1,
+      meetings: 1,
+    });
+
+    expect(metrics.companies_total).toBe(10);
+    expect(metrics.companies_enriched).toBe(4);
+    expect(metrics.leads_total).toBe(3);
+    expect(metrics.companies_contacted).toBe(2);
+    expect(metrics.responses).toBe(1);
+    expect(metrics.meetings).toBe(1);
+  });
 });
 
 describe("normalizeProduct / normalizeCampaign / extractItems", () => {

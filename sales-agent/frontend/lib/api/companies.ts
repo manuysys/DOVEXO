@@ -1,7 +1,13 @@
 import { apiRequest, apiRequestFile } from "./client";
-import { normalizeCompany, normalizeCompanyPage } from "./normalize";
+import {
+  normalizeCompany,
+  normalizeCompanyPage,
+  normalizeContact,
+} from "./normalize";
 import type {
   Company,
+  CompanyContact,
+  CompanyContactInput,
   CompanyFilters,
   CompanyInput,
   CompanyPage,
@@ -86,6 +92,31 @@ export async function updateCompany(
     { method: "PATCH", body: input },
   );
   return normalizeCompany(payload);
+}
+
+/**
+ * Agrega un contacto a la empresa. Se usa para confirmar manualmente un
+ * WhatsApp: el 409 del backend indica que ese contacto ya existe.
+ */
+export async function createCompanyContact(
+  companyId: string,
+  input: CompanyContactInput,
+): Promise<CompanyContact> {
+  const body: Record<string, unknown> = {
+    contact_type: input.contact_type,
+    value: input.value.trim(),
+  };
+  if (input.label) body.label = input.label;
+  if (input.is_primary !== undefined) body.is_primary = input.is_primary;
+  if (input.verification_status) {
+    body.verification_status = input.verification_status;
+  }
+
+  const payload = await apiRequest<unknown>(
+    `/companies/${encodeURIComponent(companyId)}/contacts`,
+    { method: "POST", body },
+  );
+  return normalizeContact(payload);
 }
 
 /** Ruta de exportación con los mismos filtros de la tabla, sin paginación. */

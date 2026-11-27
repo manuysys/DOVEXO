@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -48,3 +50,15 @@ def decode_access_token(token: str) -> dict[str, Any]:
     if payload.get("type") != "access":
         raise jwt.InvalidTokenError("Tipo de token inválido")
     return payload
+
+
+def verify_meta_signature(raw_body: bytes, signature_header: str, app_secret: str) -> bool:
+    if not signature_header.startswith("sha256=") or not app_secret:
+        return False
+    expected = hmac.new(
+        app_secret.encode("utf-8"),
+        raw_body,
+        hashlib.sha256,
+    ).hexdigest()
+    received = signature_header[len("sha256=") :].strip()
+    return hmac.compare_digest(expected, received)

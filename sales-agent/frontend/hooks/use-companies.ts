@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-query";
 import {
   createCompany,
+  createCompanyContact,
   exportCompaniesCsv,
   getCompany,
   listCompanies,
@@ -15,6 +16,7 @@ import {
 } from "@/lib/api/companies";
 import type {
   Company,
+  CompanyContactInput,
   CompanyFilters,
   CompanyInput,
   CompanyUpdateInput,
@@ -81,5 +83,25 @@ export function useUpdateCompany() {
 export function useExportCompanies() {
   return useMutation({
     mutationFn: (filters: CompanyFilters) => exportCompaniesCsv(filters),
+  });
+}
+
+/**
+ * Confirma manualmente un contacto (por ejemplo un WhatsApp) y refresca la
+ * empresa, las oportunidades y el estado de WhatsApp para que `company_whatsapp`
+ * se actualice en toda la UI.
+ */
+export function useCreateCompanyContact(companyId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CompanyContactInput) =>
+      createCompanyContact(companyId, input),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: companyKeys.all }),
+        queryClient.invalidateQueries({ queryKey: ["leads"] }),
+        queryClient.invalidateQueries({ queryKey: ["whatsapp"] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+      ]),
   });
 }
