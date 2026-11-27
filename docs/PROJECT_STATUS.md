@@ -45,8 +45,10 @@ cargan datos ficticios.
 
 ## Pendiente de empresa
 
-- [ ] Actualizar los root directories de Vercel y verificar el deploy de DOVEXO
-  desde la nueva estructura.
+- [x] Actualizar los root directories de Vercel (2026-11-27):
+  `saas-gestion-web` → `products/dovexo/apps/web`;
+  `saas-gestion-api` → `products/dovexo/apps/api`. Falta verificar el deploy
+  desde la rama y mergear.
 - [x] Completar la Fase 1 del Sales Agent: login, dashboard, productos,
   campañas, worker, seed de DOVEXO y tests (33 backend + 29 frontend).
 - [ ] Implementar la Fase 2 del Sales Agent: descubrimiento OSM/Overpass, CSV,

@@ -12,8 +12,10 @@
   Alembic, auth con cookie HttpOnly, productos, campañas, dashboard, worker
   persistente, seed de DOVEXO y frontend Next.js con login, dashboard, productos
   y campañas. 33 tests de backend y 29 de frontend; build de 18 rutas.
-- Pendiente: actualizar los root directories de Vercel y verificar el deploy de
-  DOVEXO desde la nueva estructura.
+- Root directories de Vercel actualizados: `saas-gestion-web` apunta a
+  `products/dovexo/apps/web` y `saas-gestion-api` a
+  `products/dovexo/apps/api`. Falta verificar el deploy desde la rama y mergear
+  a `main`.
 
 ## Producto DOVEXO
 
