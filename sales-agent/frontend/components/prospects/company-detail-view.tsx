@@ -4,6 +4,11 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { useCompany } from "@/hooks/use-companies";
 import type { Company, CompanyContact } from "@/lib/api/types";
+import {
+  contactVerificationLabel,
+  isUnverifiedChannel,
+  isVerifiedContact,
+} from "@/features/prospects/contacts";
 import { getErrorMessage } from "@/lib/errors";
 import { formatDate, formatDateTime, pluralize } from "@/lib/utils";
 import { Alert } from "@/components/ui/alert";
@@ -13,6 +18,8 @@ import { DetailItem } from "@/components/ui/detail-item";
 import { PageHeader } from "@/components/ui/page-header";
 import { LoadingBlock } from "@/components/ui/spinner";
 import { CompanyStatusBadge } from "./company-status-badge";
+import { CompanyEnrichmentPanel } from "./company-enrichment-panel";
+import { CompanyFactsList } from "./company-facts-section";
 import { OpportunityPanel } from "@/components/leads/opportunity-panel";
 import { ConfirmWhatsAppForm } from "@/components/whatsapp/confirm-whatsapp-form";
 
@@ -23,14 +30,6 @@ const CONTACT_LABELS: Record<string, string> = {
   website_form: "Formulario web",
   social: "Red social",
   other: "Otro",
-};
-
-const VERIFICATION_LABELS: Record<string, string> = {
-  unverified: "Sin verificar",
-  pending: "Pendiente",
-  published: "Publicado",
-  verified: "Verificado",
-  invalid: "Inválido",
 };
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -49,6 +48,11 @@ interface ContactRow {
   is_primary: boolean;
   verification_status: string;
   do_not_contact: boolean;
+  source_url: string | null;
+  source_title: string | null;
+  source_collected_at: string | null;
+  source_confidence: number | null;
+  verified_at: string | null;
 }
 
 function externalHref(value: string): string {
@@ -115,6 +119,11 @@ function contactRows(company: Company): ContactRow[] {
     is_primary: contact.is_primary,
     verification_status: contact.verification_status,
     do_not_contact: contact.do_not_contact,
+    source_url: contact.source_url,
+    source_title: contact.source_title,
+    source_collected_at: contact.source_collected_at,
+    source_confidence: contact.source_confidence,
+    verified_at: contact.verified_at,
   }));
 
   const addFromCompany = (type: string, value: string | null) => {
@@ -133,6 +142,11 @@ function contactRows(company: Company): ContactRow[] {
       is_primary: true,
       verification_status: "unverified",
       do_not_contact: false,
+      source_url: null,
+      source_title: null,
+      source_collected_at: null,
+      source_confidence: null,
+      verified_at: null,
     });
   };
 
@@ -143,63 +157,99 @@ function contactRows(company: Company): ContactRow[] {
   return rows;
 }
 
+function verificationVariant(status: string) {
+  const normalized = status.trim().toLowerCase();
+  if (normalized === "verified") return "success" as const;
+  if (normalized === "invalid") return "danger" as const;
+  if (normalized === "pending") return "warning" as const;
+  if (normalized === "published") return "info" as const;
+  return "neutral" as const;
+}
+
 function ContactList({ company }: { company: Company }) {
   const rows = contactRows(company);
 
   if (rows.length === 0) {
     return (
       <p className="text-sm text-muted">
-        No hay contactos guardados todavía. La extracción de contactos públicos
-        corresponde a la Fase 3.
+        No hay contactos guardados todavía. Podés investigar el sitio web de la
+        empresa para detectar canales publicados.
       </p>
     );
   }
 
+  const hasUnverifiedWhatsApp = rows.some(
+    (row) =>
+      row.contact_type.toLowerCase() === "whatsapp" &&
+      isUnverifiedChannel(row.verification_status),
+  );
+
   return (
-    <ul className="divide-y divide-line">
-      {rows.map((row) => (
-        <li
-          key={row.key}
-          className="flex flex-wrap items-center justify-between gap-2 py-2 first:pt-0 last:pb-0"
-        >
-          <div className="min-w-0 space-y-0.5">
-            <p className="text-xs font-medium text-muted">
-              {CONTACT_LABELS[row.contact_type.toLowerCase()] ??
-                row.contact_type}
-              {row.label ? ` · ${row.label}` : ""}
-            </p>
-            <p className="text-sm break-all text-ink">
+    <>
+      <ul className="divide-y divide-line">
+        {rows.map((row) => (
+          <li
+            key={row.key}
+            className="flex flex-wrap items-start justify-between gap-2 py-2 first:pt-0 last:pb-0"
+          >
+            <div className="min-w-0 space-y-0.5">
+              <p className="text-xs font-medium text-muted">
+                {CONTACT_LABELS[row.contact_type.toLowerCase()] ??
+                  row.contact_type}
+                {row.label ? ` · ${row.label}` : ""}
+              </p>
+              <p className="text-sm break-all text-ink">
+                {row.do_not_contact ? (
+                  <span title="Contacto en la lista de no contactar: se muestra solo como referencia.">
+                    {row.value}
+                  </span>
+                ) : (
+                  <ContactAnchor type={row.contact_type} value={row.value} />
+                )}
+              </p>
+              {row.source_url ? (
+                <p className="text-xs break-all text-muted">
+                  Publicado en{" "}
+                  <a
+                    href={externalHref(row.source_url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline"
+                  >
+                    {row.source_url}
+                  </a>
+                  {row.source_title ? ` · ${row.source_title}` : ""}
+                  {row.source_collected_at
+                    ? ` · ${formatDateTime(row.source_collected_at)}`
+                    : ""}
+                </p>
+              ) : null}
+              {isVerifiedContact(row.verification_status) && row.verified_at ? (
+                <p className="text-xs text-muted">
+                  Verificado manualmente el {formatDateTime(row.verified_at)}
+                </p>
+              ) : null}
+            </div>
+            <div className="flex items-center gap-1.5">
               {row.do_not_contact ? (
-                <span title="Contacto en la lista de no contactar: se muestra solo como referencia.">
-                  {row.value}
-                </span>
-              ) : (
-                <ContactAnchor type={row.contact_type} value={row.value} />
-              )}
-            </p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            {row.do_not_contact ? (
-              <Badge variant="danger">No contactar</Badge>
-            ) : null}
-            {row.is_primary ? <Badge variant="info">Principal</Badge> : null}
-            <Badge
-              variant={
-                row.verification_status === "verified" ||
-                row.verification_status === "published"
-                  ? "success"
-                  : row.verification_status === "invalid"
-                    ? "danger"
-                    : "neutral"
-              }
-            >
-              {VERIFICATION_LABELS[row.verification_status] ??
-                row.verification_status}
-            </Badge>
-          </div>
-        </li>
-      ))}
-    </ul>
+                <Badge variant="danger">No contactar</Badge>
+              ) : null}
+              {row.is_primary ? <Badge variant="info">Principal</Badge> : null}
+              <Badge variant={verificationVariant(row.verification_status)}>
+                {contactVerificationLabel(row.verification_status)}
+              </Badge>
+            </div>
+          </li>
+        ))}
+      </ul>
+      {hasUnverifiedWhatsApp ? (
+        <p className="mt-3 border-t border-line pt-3 text-xs leading-relaxed text-muted">
+          Un WhatsApp publicado no confirma que la cuenta exista: el número está
+          en la ficha, pero nadie verificó que esté activo. Confirmalo a mano
+          antes de escribir.
+        </p>
+      ) : null}
+    </>
   );
 }
 
@@ -325,6 +375,24 @@ export function CompanyDetailView({ id }: { id: string }) {
             </dl>
           </Section>
 
+          <div id="investigacion" className="scroll-mt-24">
+            <Section
+              title="Investigación del sitio web"
+              description="Solo admin/owner. Se descarga el sitio público de la empresa y se registra la evidencia de cada dato agregado."
+            >
+              <CompanyEnrichmentPanel company={company} />
+            </Section>
+          </div>
+
+          {company.facts.length > 0 ? (
+            <Section
+              title="Datos extraídos del sitio"
+              description="Servicios, actividades y páginas detectadas en la última investigación. Cada dato conserva su confianza y su fuente."
+            >
+              <CompanyFactsList facts={company.facts} />
+            </Section>
+          ) : null}
+
           <Section
             title="Canales de contacto"
             description="Enlaces de contacto tal como fueron publicados. Abrir un enlace no envía nada."
@@ -431,6 +499,11 @@ export function CompanyDetailView({ id }: { id: string }) {
               </DetailItem>
               <DetailItem label="Contactos guardados">
                 {company.contacts.length}
+              </DetailItem>
+              <DetailItem label="Última investigación del sitio">
+                {company.last_enriched_at
+                  ? formatDateTime(company.last_enriched_at)
+                  : "Sin investigar"}
               </DetailItem>
             </dl>
           </Section>

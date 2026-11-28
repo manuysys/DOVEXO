@@ -5,7 +5,6 @@ su propia carpeta:
 
 - DOVEXO: [`products/dovexo/docs/DECISIONS.md`](../products/dovexo/docs/DECISIONS.md)
 - Sales Agent: [`sales-agent/docs/DECISIONS.md`](../sales-agent/docs/DECISIONS.md)
-  (se crea con las primeras decisiones del producto)
 
 ## ADR-001 — Monorepo ARVOKTA con productos separados
 
@@ -75,3 +74,33 @@ enviar mensajes reales. La plantilla de primer contacto, el número del fundador
 la prueba contra Meta quedan como pendientes de configuración. La regla de “sin
 envíos automáticos” se interpreta como prohibición de envíos automáticos en frío
 o masivos; las respuestas a entrantes están permitidas.
+
+## ADR-004 — Investigación interna con fuentes gratuitas, evidencia y sin APIs pagas
+
+**Fecha:** 2026-11-28
+**Estado:** aceptada
+
+**Contexto:** ARVOKTA investiga empresas para prospección y debe sostener esa
+investigación con fuentes verificables, sin ampliar costos fijos ni presentar
+inferencias como hechos.
+
+**Decisión:** las herramientas internas de investigación (hoy el Sales Agent y su
+Fase 3B) usan fuentes gratuitas y accesibles: OpenStreetMap/Overpass, CSV, alta
+manual y sitios web públicos. No se contratan APIs pagas, pruebas con tarjeta ni
+servicios de scraping agresivo. Cada dato recolectado conserva su fuente (URL),
+fecha y evidencia; los hechos y contactos se distinguen de las hipótesis y de lo
+verificado por una persona. El enriquecimiento web aplica las restricciones de
+seguridad del producto (solo HTTP/HTTPS público, bloqueo de red interna,
+redirecciones y tamaño acotados). El detalle de implementación vive en los ADR
+del producto: ADR-S013 (hechos, procedencia y SSRF) y ADR-S014 (lotes, worker y
+reintentos).
+
+**Consecuencias:**
+
+- La investigación se puede auditar y repetir sin depender de un proveedor pago.
+- Un sitio que bloquea el acceso o depende de JavaScript puede quedar sin datos;
+  se informa el error y no se completa con suposiciones.
+- La cobertura es menor que la de un servicio pago, pero no agrega costos por
+  consulta y la trazabilidad es explícita.
+- Cualquier incorporación futura de una API paga requiere una decisión nueva y
+  autorización explícita.

@@ -5,6 +5,8 @@ import type {
   Activity,
   Campaign,
   Company,
+  CompanyEnrichJob,
+  CompanyFact,
   DashboardJob,
   ImportBatch,
   ImportPreview,
@@ -124,6 +126,11 @@ export function makeCompany(overrides: Partial<Company> = {}): Company {
         is_primary: true,
         verification_status: "published",
         do_not_contact: false,
+        source_url: "https://empresa-de-prueba.com.ar/contacto",
+        source_title: "Contacto",
+        source_collected_at: "2026-11-25T12:00:00Z",
+        source_confidence: 0.9,
+        verified_at: null,
       },
     ],
     primary_phone: null,
@@ -142,6 +149,48 @@ export function makeCompany(overrides: Partial<Company> = {}): Company {
       },
     ],
     created_at: "2026-11-20T12:00:00Z",
+    last_enriched_at: null,
+    facts: [],
+    ...overrides,
+  };
+}
+
+/** Fixture de dato extraído del sitio (no es un dato real). */
+export function makeCompanyFact(
+  overrides: Partial<CompanyFact> = {},
+): CompanyFact {
+  return {
+    id: "1",
+    fact_type: "service",
+    raw_fact_type: "service",
+    value: "Mantenimiento de equipos de refrigeración",
+    normalized_value: "mantenimiento de equipos de refrigeración",
+    source_url: "https://empresa-de-prueba.com.ar/servicios",
+    source_title: "Servicios",
+    evidence_excerpt: null,
+    confidence: 0.8,
+    collected_at: "2026-11-25T12:00:00Z",
+    ...overrides,
+  };
+}
+
+/** Fixture de trabajo de enriquecimiento (no es un trabajo real). */
+export function makeEnrichJob(
+  overrides: Partial<CompanyEnrichJob> = {},
+): CompanyEnrichJob {
+  return {
+    id: "1",
+    company_id: "10",
+    company_name: "Empresa de prueba",
+    status: "pending",
+    raw_status: "pending",
+    attempts: 0,
+    max_attempts: 3,
+    error_message: null,
+    result: null,
+    created_at: "2026-11-27T12:00:00Z",
+    started_at: null,
+    finished_at: null,
     ...overrides,
   };
 }

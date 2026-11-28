@@ -1,5 +1,48 @@
 # Changelog de ARVOKTA
 
+## 2026-11-28 — Enriquecimiento web y relevamiento nacional del Sales Agent
+
+- Se implementa la Fase 3B de ARVOKTA Sales Agent: enriquecimiento de sitios
+  oficiales con hechos y evidencia. Se agregan `POST /companies/{id}/enrich`,
+  `POST /companies/enrich` (lote de hasta 50), los endpoints de jobs
+  `GET /companies/enrich/jobs[/{id}]` y el filtro `GET /companies?has_website=`.
+- La migración `99fc0d443a3e` crea `company_facts` (compatible con SQLite) y
+  queda aplicada en `data/arvokta.db`. Los hechos (`service`, `activity`,
+  `locality`, `coverage`, `contact_page`, `description`) guardan valor, URL,
+  título, extracto, confianza y fecha. Los contactos exponen su procedencia
+  (`source_url`, `source_title`, `source_collected_at`, `source_confidence`,
+  `verified_at`).
+- Seguridad: solo HTTP/HTTPS públicos, bloqueo de loopback/redes
+  privadas/link-local/metadata, redirecciones validadas (máximo 3), timeout de
+  10 s, 1 MB por página, máximo 5 páginas y User-Agent identificable. Sin APIs
+  pagas ni navegador headless. Un WhatsApp solo se registra desde un enlace
+  explícito con teléfono y nunca queda verificado automáticamente.
+- UI `/enrichment` con candidatos, selección de hasta 50, encolado de lotes y
+  jobs con estado, intentos, errores y resultado. La ficha muestra hechos con
+  fuente/confianza/fecha y distingue contactos “Publicado” de “Verificado
+  manualmente”. Verificada en navegador, sin errores de consola.
+- Resultado real del lote: 37 empresas con sitio web, 37 jobs iniciales y 1
+  reenriquecimiento manual; 27 completados y 11 fallidos. 25 empresas con
+  `last_enriched_at`, 24 con hechos/evidencia y 22 con contactos nuevos. Se
+  agregaron 84 contactos (44 teléfonos, 17 emails, 23 WhatsApp); 484 hechos y
+  67 fuentes web. Fallos: 3 HTTP 403, 4 DNS sin resolver, 2 `ConnectError`, 1
+  HTTP 404 y Alpha Clima bloqueada por redirección a `0.0.0.0` (`unsafe`, sin
+  reintento). No se inventaron datos.
+- Baseline antes del enriquecimiento: 212 empresas, 37 con web, 18 emails, 56
+  teléfonos y 6 WhatsApp. Después: 35 emails, 100 teléfonos y 29 WhatsApp;
+  162 contactos publicados y 2 verificados manualmente.
+- Relevamiento nacional: 24 provincias, 7 rubros y 24 búsquedas; 20 completadas
+  y 4 fallidas por HTTP 502 de Overpass. El reintento de Formosa, Jujuy,
+  Mendoza y Tierra del Fuego completó 4/4 (+2, +7, +10 y +9 empresas; +28 en
+  total), con 0 duplicados. Total: 212 empresas, 37 con sitio web.
+- Verificación: 157 tests backend; ruff y format OK; `alembic check` sin drift;
+  158 tests frontend; lint, typecheck y build de 22 rutas.
+- WhatsApp sigue sin credenciales reales (`configured=false`, `mode=console`);
+  el simulador se verificó con un thread de prueba y no se envió nada real. No
+  se activaron credenciales de Meta.
+- No se modificó DOVEXO. Su exportación CSV sigue implementada; la auditoría
+  externa pendiente queda en legal, soporte y backups.
+
 ## 2026-11-27 — Reestructuración a monorepo y comienzo del Sales Agent
 
 - La raíz del repositorio pasa a ser **ARVOKTA**.

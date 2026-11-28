@@ -77,6 +77,27 @@ describe("apiRequest", () => {
     });
   });
 
+  it("traduce 400, 403, 404 y 502 sin cuerpo a mensajes legibles", async () => {
+    const cases: Array<[number, string]> = [
+      [400, "La solicitud no es válida."],
+      [403, "No tenés permisos para realizar esta acción."],
+      [404, "El recurso solicitado no existe."],
+      [502, "La API devolvió un error interno. Revisá los logs del backend."],
+    ];
+
+    for (const [status, message] of cases) {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue(jsonResponse(status, null)),
+      );
+
+      await expect(apiRequest("/companies")).rejects.toMatchObject({
+        status,
+        message,
+      });
+    }
+  });
+
   it("acepta respuestas 204 sin cuerpo", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(204, null)));
 

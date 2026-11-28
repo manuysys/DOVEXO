@@ -7,6 +7,7 @@ para no bloquear la API con SQLite en modo WAL.
 
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
 from datetime import timedelta
 from typing import Any
@@ -14,16 +15,19 @@ from typing import Any
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.models import Job
 from app.providers.discovery import get_discovery_provider
 from app.services.discovery import process_search_run_job
+from app.services.enrichment import get_website_fetcher, process_enrich_company_job
 from app.utils import utcnow
 
 logger = get_logger(__name__)
 
-# En Fase 2A se procesan trabajos `noop` y búsquedas provinciales `search_run`.
-SUPPORTED_JOB_TYPES: tuple[str, ...] = ("noop", "search_run")
+# Trabajos soportados: `noop`, búsquedas provinciales `search_run` y
+# enriquecimiento web `enrich_company`.
+SUPPORTED_JOB_TYPES: tuple[str, ...] = ("noop", "search_run", "enrich_company")
 
 
 def _handle_noop(_db: Session, job: Job) -> dict[str, Any]:
@@ -40,9 +44,20 @@ def _handle_search_run(db: Session, job: Job) -> dict[str, Any]:
     return process_search_run_job(db, payload, provider)
 
 
+def _handle_enrich_company(db: Session, job: Job) -> dict[str, Any]:
+    payload = job.payload or {}
+    result = process_enrich_company_job(db, payload, fetcher=get_website_fetcher())
+    # Una empresa a la vez: pequeña pausa para no martillar sitios externos.
+    delay = get_settings().enrichment_job_delay_seconds
+    if delay > 0:
+        time.sleep(delay)
+    return result
+
+
 HANDLERS: dict[str, Callable[[Session, Job], dict[str, Any]]] = {
     "noop": _handle_noop,
     "search_run": _handle_search_run,
+    "enrich_company": _handle_enrich_company,
 }
 
 

@@ -9,6 +9,7 @@ import {
 import {
   createCompany,
   createCompanyContact,
+  enrichCompany,
   exportCompaniesCsv,
   getCompany,
   listCompanies,
@@ -17,6 +18,7 @@ import {
 import type {
   Company,
   CompanyContactInput,
+  CompanyEnrichResult,
   CompanyFilters,
   CompanyInput,
   CompanyUpdateInput,
@@ -83,6 +85,26 @@ export function useUpdateCompany() {
 export function useExportCompanies() {
   return useMutation({
     mutationFn: (filters: CompanyFilters) => exportCompaniesCsv(filters),
+  });
+}
+
+/**
+ * Investiga el sitio web de la empresa y refresca todo lo que depende de ella:
+ * la ficha (contactos, fuentes y `last_enriched_at`), las oportunidades, el
+ * dashboard y las búsquedas. El resumen se muestra a partir de la respuesta.
+ */
+export function useEnrichCompany(companyId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (): Promise<CompanyEnrichResult> => enrichCompany(companyId),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: companyKeys.all }),
+        queryClient.invalidateQueries({ queryKey: ["leads"] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
+        queryClient.invalidateQueries({ queryKey: ["search-runs"] }),
+        queryClient.invalidateQueries({ queryKey: ["enrichment"] }),
+      ]),
   });
 }
 

@@ -14,6 +14,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/campaigns", label: "Campañas" },
   { href: "/search", label: "Buscar empresas" },
   { href: "/prospects", label: "Prospectos" },
+  { href: "/enrichment", label: "Enriquecimiento" },
   { href: "/approvals", label: "Pendientes de aprobación" },
   { href: "/messages", label: "Mensajes" },
   { href: "/contacts", label: "Contactos", phase: 3 },

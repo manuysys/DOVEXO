@@ -19,6 +19,10 @@ os.environ["INITIAL_ADMIN_EMAIL"] = "admin@arvokta.local"
 os.environ["INITIAL_ADMIN_PASSWORD"] = "Arvokta12345!"
 os.environ["CORS_ORIGINS"] = "http://localhost:3001"
 os.environ["RATE_LIMIT_ENABLED"] = "false"
+# Enriquecimiento: sin pausas artificiales en las pruebas (el fetcher que se
+# inyecta ya usa `page_delay_seconds=0`).
+os.environ["ENRICHMENT_PAGE_DELAY_SECONDS"] = "0"
+os.environ["ENRICHMENT_JOB_DELAY_SECONDS"] = "0"
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

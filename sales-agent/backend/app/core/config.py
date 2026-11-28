@@ -72,6 +72,19 @@ class Settings(BaseSettings):
     overpass_request_delay_seconds: float = 0.5
     overpass_user_agent: str = "ARVOKTA-Sales-Agent/0.1 (internal prospecting tool)"
 
+    # Enriquecimiento web de empresas (Fase 3). Solo HTTP/HTTPS públicos, sin
+    # APIs pagas ni navegador headless.
+    enrichment_user_agent: str = (
+        "ARVOKTA-Sales-Agent/0.1 (internal company research; +https://arvokta.local)"
+    )
+    enrichment_timeout_seconds: float = 10.0
+    enrichment_max_page_bytes: int = 1_048_576
+    enrichment_max_pages: int = 5
+    enrichment_max_redirects: int = 3
+    enrichment_page_delay_seconds: float = 1.0
+    enrichment_job_delay_seconds: float = 1.0
+    enrichment_batch_limit: int = 20
+
     @field_validator("log_level")
     @classmethod
     def _normalize_log_level(cls, value: str) -> str:

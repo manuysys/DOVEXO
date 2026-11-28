@@ -199,3 +199,58 @@ requiere aprobación previa y respeta la ventana de atención de Meta.
 **Consecuencias:** la base no inventa canales. La confirmación es una acción
 humana explícita y el envío real sigue sujeto a las reglas de Meta.
 
+## ADR-S013 — Enriquecimiento web con hechos, procedencia y SSRF cerrado
+
+**Fecha:** 2026-11-28
+**Estado:** aceptada
+
+**Contexto:** la Fase 3B debía extraer servicios, localidades y contactos desde
+los sitios oficiales de las empresas sin inventar información, sin APIs pagas y
+sin abrir el backend a pedidos hacia la red interna.
+
+**Decisión:** cada dato extraído se guarda como un hecho tipado en
+`company_facts` (`service`, `activity`, `locality`, `coverage`, `contact_page`,
+`description`) con valor, URL de origen, título, extracto, confianza y fecha. La
+página se registra además como `CompanySource` de tipo `website`. Los contactos
+conservan su procedencia (`source_url`, `source_title`, `source_collected_at`,
+`source_confidence`, `verified_at`) y se distinguen los publicados de los
+verificados manualmente. Un WhatsApp solo se registra desde un enlace explícito
+`wa.me`, `api.whatsapp.com` o `whatsapp://` con teléfono, y nunca queda
+`verified` de forma automática. El enriquecimiento no pisa contactos manuales,
+verificados ni `do_not_contact`, no degrada evidencia existente y no completa
+datos que el sitio no publica.
+
+El fetcher solo acepta HTTP/HTTPS públicos: bloquea loopback, redes privadas,
+link-local y endpoints de metadata; valida cada redirección (máximo 3); aplica
+timeout de 10 s, 1 MB por página, máximo 5 páginas y un User-Agent
+identificable. No usa navegador headless ni APIs pagas.
+
+**Consecuencias:** cada afirmación de la ficha puede rastrearse hasta la página
+que la publicó. Los sitios que bloquean el acceso, no resuelven por DNS o
+dependen de JavaScript quedan sin datos y el error se informa; no se rellena con
+suposiciones. La lectura de sitios externos queda limitada a HTTP público y no
+puede alcanzar la red interna ni servicios de metadata.
+
+## ADR-S014 — Enriquecimiento por lote acotado y worker secuencial
+
+**Fecha:** 2026-11-28
+**Estado:** aceptada
+
+**Contexto:** enriquecer cientos de sitios dentro de un request HTTP no es
+viable y golpear sitios externos en paralelo aumenta el riesgo de bloqueos y de
+errores transitorios.
+
+**Decisión:** `POST /companies/enrich` acepta `company_ids` o filtros y admite
+como máximo 50 empresas por pedido; el valor por defecto de
+`ENRICHMENT_BATCH_LIMIT` es 20. Solo encola empresas con sitio web y omite las
+que ya tienen un job activo. El worker procesa los jobs `enrich_company` de a
+uno, con una pausa entre empresas. Cada job tiene 3 intentos con backoff
+creciente para errores de lectura; un resultado `unsafe` no se reintenta. La
+API devuelve el estado, los intentos, el error y el resultado por job en
+`GET /companies/enrich/jobs` y `/jobs/{id}`.
+
+**Consecuencias:** el lote es una operación de fondo y no bloquea la API. Los
+fallos quedan visibles y reintentables sin duplicar trabajos. El ritmo es
+deliberadamente conservador; un lote grande tarda más, pero reduce la presión
+sobre los sitios y respeta el límite de 50 por pedido.
+

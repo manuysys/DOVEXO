@@ -5,16 +5,24 @@ CRM. Es multiproducto: DOVEXO es el primer producto configurado.
 
 ## Estado
 
-Fases 0, 1, 2A, 2B, 4 y 5 completadas y verificadas localmente: login, dashboard,
-productos, campañas, worker persistente, seed de DOVEXO, descubrimiento
-provincial con OpenStreetMap/Overpass, empresas, contactos, alta manual y
-deduplicación, importación CSV, campañas con una corrida por provincia y
-exportación CSV. Una campaña real de Buenos Aires/instalaciones eléctricas
-guardó cinco empresas nuevas.
+Fases 0, 1, 2A, 2B, 3B, 4 y 5 completadas y verificadas localmente: login,
+dashboard, productos, campañas, worker persistente, seed de DOVEXO,
+descubrimiento provincial y nacional con OpenStreetMap/Overpass, empresas,
+contactos, alta manual y deduplicación, importación CSV, campañas con una corrida
+por provincia, exportación CSV y enriquecimiento web de sitios oficiales.
 
-El enriquecimiento de sitios (fase 3) y la prueba real contra Meta quedan
-pendientes. El scoring, los mensajes, WhatsApp (consola/simulador) y el CRM ya
-están implementados. No se enviaron mensajes reales a terceros.
+El relevamiento nacional dejó **212 empresas**, de las cuales **37 tienen sitio
+web**. El lote de enriquecimiento del 2026-11-28 procesó 37 jobs iniciales más 1
+reenriquecimiento manual: 27 completados y 11 fallidos; 25 empresas quedaron con
+`last_enriched_at`, 24 con hechos o evidencia y 22 con contactos nuevos. Se
+agregaron 84 contactos (44 teléfonos, 17 emails, 23 WhatsApp).
+
+Scoring, mensajes, WhatsApp y CRM están implementados. WhatsApp sigue en modo
+consola (`configured=false`, `mode=console`): no se envió nada real ni se
+activaron credenciales de Meta.
+
+Tests vigentes: 157 backend y 158 frontend; build de 22 rutas. Los 11 jobs que
+fallaron no se completaron con datos inventados.
 
 Ver [`docs/IMPLEMENTATION_STATUS.md`](docs/IMPLEMENTATION_STATUS.md).
 
@@ -42,14 +50,12 @@ sales-agent/
 
 ## Inicio rápido
 
-Se completa cuando el scaffold de la Fase 1 esté implementado. Los comandos
-previstos son:
-
 ```powershell
 cd sales-agent/backend
 uv sync
 uv run alembic upgrade head
 uv run uvicorn app.main:app --reload --port 8001
+uv run python -m app.workers.runner
 ```
 
 ```powershell
@@ -61,5 +67,5 @@ pnpm dev
 ## Reglas
 
 Leer [`AGENTS.md`](AGENTS.md). No mezclar este producto con DOVEXO. No inventar
-datos de empresas ni contactos. Las fuentes iniciales son gratuitas:
-OpenStreetMap/Overpass, CSV y alta manual.
+datos de empresas ni contactos. Las fuentes son gratuitas: OpenStreetMap/Overpass,
+CSV, alta manual y sitios web públicos. Sin APIs pagas.

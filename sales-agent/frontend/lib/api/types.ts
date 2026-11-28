@@ -195,8 +195,47 @@ export interface CompanyContact {
   value: string;
   label: string | null;
   is_primary: boolean;
+  /**
+   * `published` significa que el dato aparecía publicado en el sitio;
+   * `verified` que una persona lo confirmó a mano. No son equivalentes.
+   */
   verification_status: string;
   do_not_contact: boolean;
+  /** Página de la que salió el contacto cuando lo extrajo el enriquecimiento. */
+  source_url: string | null;
+  source_title: string | null;
+  source_collected_at: string | null;
+  /** Confianza 0-1 informada por el backend; null si no la informa. */
+  source_confidence: number | null;
+  verified_at: string | null;
+}
+
+/**
+ * Tipos de dato que el enriquecimiento puede extraer de un sitio web.
+ * `unknown` es una defensa del normalizador, no un tipo del backend.
+ */
+export type CompanyFactType =
+  | "service"
+  | "activity"
+  | "locality"
+  | "coverage"
+  | "contact_page"
+  | "description"
+  | "unknown";
+
+/** Dato extraído del sitio con su fuente y confianza (`GET /companies/{id}`). */
+export interface CompanyFact {
+  id: EntityId;
+  fact_type: CompanyFactType;
+  raw_fact_type: string;
+  value: string;
+  normalized_value: string | null;
+  source_url: string | null;
+  source_title: string | null;
+  evidence_excerpt: string | null;
+  /** Confianza 0-1; null si el backend no la informa. */
+  confidence: number | null;
+  collected_at: string | null;
 }
 
 /** Fuente que respalda los datos de una empresa. */
@@ -227,7 +266,98 @@ export interface Company {
   whatsapp: string | null;
   source_count: number;
   sources: CompanySource[];
+  /** Datos extraídos del sitio web en la última investigación. */
+  facts: CompanyFact[];
+  /** Última investigación real del sitio web (puede ser null). */
+  last_enriched_at: string | null;
   created_at: string | null;
+}
+
+/**
+ * Resultado de `POST /companies/{id}/enrich`.
+ * `unknown` es solo una defensa del normalizador: el backend responde con
+ * `ok`, `no_website`, `unsafe` o `fetch_error`.
+ */
+export type CompanyEnrichStatus =
+  | "ok"
+  | "no_website"
+  | "unsafe"
+  | "fetch_error"
+  | "unknown";
+
+/** Extracto de evidencia devuelto por la investigación del sitio. */
+export interface CompanyEnrichEvidence {
+  source_url: string;
+  title: string | null;
+  excerpt: string | null;
+}
+
+export interface CompanyEnrichResult {
+  company_id: EntityId | null;
+  status: CompanyEnrichStatus;
+  raw_status: string;
+  fields_updated: string[];
+  contacts_added: number;
+  facts_added: number;
+  sources_added: number;
+  evidence: CompanyEnrichEvidence[];
+  error: string | null;
+}
+
+/** Estados de un trabajo de enriquecimiento en la cola del backend. */
+export type CompanyEnrichJobStatus =
+  | "pending"
+  | "running"
+  | "completed"
+  | "failed"
+  | "unknown";
+
+/** Resultado guardado en el trabajo cuando terminó. */
+export interface CompanyEnrichJobResult {
+  status: CompanyEnrichStatus;
+  raw_status: string;
+  fields_updated: string[];
+  contacts_added: number;
+  facts_added: number;
+  sources_added: number;
+  evidence: CompanyEnrichEvidence[];
+  error: string | null;
+}
+
+/** Trabajo de enriquecimiento (`GET /companies/enrich/jobs`). */
+export interface CompanyEnrichJob {
+  id: EntityId;
+  company_id: EntityId | null;
+  company_name: string | null;
+  status: CompanyEnrichJobStatus;
+  raw_status: string;
+  attempts: number;
+  max_attempts: number;
+  error_message: string | null;
+  result: CompanyEnrichJobResult | null;
+  created_at: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+}
+
+/** Referencia mínima a un trabajo que devuelve el alta por lote. */
+export interface CompanyEnrichJobRef {
+  id: EntityId;
+  company_id: EntityId | null;
+  status: CompanyEnrichJobStatus;
+  raw_status: string;
+}
+
+/**
+ * Resultado de `POST /companies/enrich`.
+ * `candidates` cuenta las empresas recibidas que podían encolarse; el
+ * backend no informa por qué se omitió cada una.
+ */
+export interface CompanyEnrichBatchResult {
+  queued: number;
+  skipped: number;
+  jobs: CompanyEnrichJobRef[];
+  candidates: number;
 }
 
 /** Respuesta paginada de `GET /companies`. */
@@ -244,6 +374,8 @@ export interface CompanyFilters {
   province?: string;
   sector?: string;
   discovery_status?: string;
+  /** `true` para empresas con sitio web (endpoint de enriquecimiento). */
+  has_website?: boolean;
   limit?: number;
   offset?: number;
 }

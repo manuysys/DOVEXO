@@ -1,6 +1,10 @@
 import { apiRequest, apiRequestFile } from "./client";
 import {
   normalizeCompany,
+  normalizeCompanyEnrichBatch,
+  normalizeCompanyEnrichJob,
+  normalizeCompanyEnrichJobs,
+  normalizeCompanyEnrichment,
   normalizeCompanyPage,
   normalizeContact,
 } from "./normalize";
@@ -8,11 +12,17 @@ import type {
   Company,
   CompanyContact,
   CompanyContactInput,
+  CompanyEnrichBatchResult,
+  CompanyEnrichJob,
+  CompanyEnrichResult,
   CompanyFilters,
   CompanyInput,
   CompanyPage,
   CompanyUpdateInput,
 } from "./types";
+
+/** Máximo de empresas que acepta `POST /companies/enrich` por lote. */
+export const ENRICH_BATCH_LIMIT = 50;
 
 function appendFilters(
   params: URLSearchParams,
@@ -26,6 +36,9 @@ function appendFilters(
   if (filters.sector) params.set("sector", filters.sector);
   if (filters.discovery_status) {
     params.set("discovery_status", filters.discovery_status);
+  }
+  if (filters.has_website !== undefined) {
+    params.set("has_website", filters.has_website ? "true" : "false");
   }
 }
 
@@ -117,6 +130,68 @@ export async function createCompanyContact(
     { method: "POST", body },
   );
   return normalizeContact(payload);
+}
+
+/**
+ * Investiga el sitio web de la empresa (`POST /companies/{id}/enrich`).
+ * El backend valida rol admin/owner, la URL y la red; nunca se llama a otra
+ * fuente por nuestra cuenta. La respuesta se normaliza porque puede faltar
+ * algún campo según el estado de la investigación.
+ */
+export async function enrichCompany(id: string): Promise<CompanyEnrichResult> {
+  const payload = await apiRequest<unknown>(
+    `/companies/${encodeURIComponent(id)}/enrich`,
+    { method: "POST" },
+  );
+  return normalizeCompanyEnrichment(payload);
+}
+
+/**
+ * Encola la investigación de varias empresas (`POST /companies/enrich`).
+ * El backend acepta como máximo 50 ids por lote; se valida localmente para no
+ * mandar una solicitud que va a terminar en 422.
+ */
+export async function enrichCompanies(
+  companyIds: readonly string[],
+): Promise<CompanyEnrichBatchResult> {
+  const ids = companyIds.map((value) => Number(value));
+  if (ids.length === 0) {
+    throw new Error("Elegí al menos una empresa para enriquecer.");
+  }
+  if (ids.some((value) => !Number.isInteger(value) || value <= 0)) {
+    throw new Error(
+      "Hay identificadores de empresa inválidos en la selección. Recargá la lista e intentá de nuevo.",
+    );
+  }
+  if (ids.length > ENRICH_BATCH_LIMIT) {
+    throw new Error(
+      `Se pueden enriquecer hasta ${ENRICH_BATCH_LIMIT} empresas por lote.`,
+    );
+  }
+  const payload = await apiRequest<unknown>("/companies/enrich", {
+    method: "POST",
+    body: { company_ids: ids },
+  });
+  return normalizeCompanyEnrichBatch(payload);
+}
+
+/** Trabajos recientes, con el límite que admite `GET /companies/enrich/jobs`. */
+export async function listEnrichJobs(
+  limit: number = ENRICH_BATCH_LIMIT,
+): Promise<CompanyEnrichJob[]> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  const payload = await apiRequest<unknown>(
+    `/companies/enrich/jobs?${params.toString()}`,
+  );
+  return normalizeCompanyEnrichJobs(payload);
+}
+
+/** Detalle de un trabajo (`GET /companies/enrich/jobs/{id}`). */
+export async function getEnrichJob(id: string): Promise<CompanyEnrichJob> {
+  const payload = await apiRequest<unknown>(
+    `/companies/enrich/jobs/${encodeURIComponent(id)}`,
+  );
+  return normalizeCompanyEnrichJob(payload);
 }
 
 /** Ruta de exportación con los mismos filtros de la tabla, sin paginación. */

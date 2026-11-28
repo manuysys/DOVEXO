@@ -26,6 +26,28 @@ class ContactRead(BaseModel):
     is_primary: bool
     verification_status: str
     do_not_contact: bool
+    # Procedencia: de qué página salió el dato y cuándo se recolectó. Un
+    # contacto `published` aparece en el sitio; no está verificado por una
+    # persona salvo que `verification_status` sea `verified`.
+    source_url: str | None = None
+    source_title: str | None = None
+    source_collected_at: datetime | None = None
+    source_confidence: float | None = None
+    verified_at: datetime | None = None
+
+
+class CompanyFactRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    fact_type: str
+    value: str
+    normalized_value: str
+    source_url: str | None
+    source_title: str | None
+    evidence_excerpt: str | None
+    confidence: float | None
+    collected_at: datetime
 
 
 class CompanySourceRead(BaseModel):
@@ -74,6 +96,7 @@ class CompanyDetailRead(CompanyListItem):
     last_enriched_at: datetime | None
     updated_at: datetime
     sources: list[CompanySourceRead]
+    facts: list[CompanyFactRead] = Field(default_factory=list)
 
 
 class CompanyCreate(BaseModel):

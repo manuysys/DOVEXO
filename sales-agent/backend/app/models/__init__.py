@@ -5,7 +5,7 @@ El import de todos los modelos es necesario para que Alembic y
 """
 
 from app.models.campaign import Campaign, SearchRun
-from app.models.company import Company, CompanySector, CompanySource
+from app.models.company import Company, CompanyFact, CompanySector, CompanySource
 from app.models.crm import (
     Activity,
     CampaignLead,
@@ -26,6 +26,7 @@ __all__ = [
     "Campaign",
     "CampaignLead",
     "Company",
+    "CompanyFact",
     "CompanySector",
     "CompanySource",
     "Contact",

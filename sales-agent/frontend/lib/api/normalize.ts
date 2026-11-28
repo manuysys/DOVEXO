@@ -6,6 +6,16 @@ import type {
   CampaignStatus,
   Company,
   CompanyContact,
+  CompanyEnrichBatchResult,
+  CompanyEnrichEvidence,
+  CompanyEnrichJob,
+  CompanyEnrichJobRef,
+  CompanyEnrichJobResult,
+  CompanyEnrichJobStatus,
+  CompanyEnrichResult,
+  CompanyEnrichStatus,
+  CompanyFact,
+  CompanyFactType,
   CompanyPage,
   CompanySource,
   DashboardJob,
@@ -567,6 +577,24 @@ export function normalizeContact(payload: unknown): CompanyContact {
       "unverified",
     ),
     do_not_contact: readBoolean(record, ["do_not_contact", "doNotContact"]),
+    source_url: readNullableString(record, [
+      "source_url",
+      "sourceUrl",
+      "source",
+    ]),
+    source_title: readNullableString(record, ["source_title", "sourceTitle"]),
+    source_collected_at: readNullableString(record, [
+      "source_collected_at",
+      "sourceCollectedAt",
+      "collected_at",
+      "collectedAt",
+    ]),
+    source_confidence: readOptionalNumber(record, [
+      "source_confidence",
+      "sourceConfidence",
+      "confidence",
+    ]),
+    verified_at: readNullableString(record, ["verified_at", "verifiedAt"]),
   };
 }
 
@@ -596,6 +624,93 @@ export function normalizeSources(payload: unknown): CompanySource[] {
   return extractItems(payload, ["sources", "items"]).map(normalizeSource);
 }
 
+const FACT_TYPE_ALIASES: Record<string, CompanyFactType> = {
+  service: "service",
+  services: "service",
+  servicio: "service",
+  servicios: "service",
+  activity: "activity",
+  activities: "activity",
+  actividad: "activity",
+  actividades: "activity",
+  locality: "locality",
+  localities: "locality",
+  localidad: "locality",
+  localidades: "locality",
+  coverage: "coverage",
+  coverage_area: "coverage",
+  area: "coverage",
+  cobertura: "coverage",
+  contact_page: "contact_page",
+  contact_pages: "contact_page",
+  contact: "contact_page",
+  pagina_de_contacto: "contact_page",
+  description: "description",
+  descripcion: "description",
+  about: "description",
+};
+
+/** `service`, `activity`, etc. Tolera variantes en inglés, español y plural. */
+export function normalizeFactType(value: string): CompanyFactType {
+  const normalized = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+  return FACT_TYPE_ALIASES[normalized] ?? "unknown";
+}
+
+/**
+ * Dato extraído del sitio (`GET /companies/{id}` → `facts`).
+ * Un fact sin valor se descarta: no se muestra una fila vacía como si fuera
+ * información encontrada.
+ */
+export function normalizeFact(payload: unknown): CompanyFact | null {
+  if (!isRecord(payload)) return null;
+  const value = readString(payload, ["value", "text", "fact_value", "factValue"]);
+  if (value.trim().length === 0) return null;
+  const rawType = readString(
+    payload,
+    ["fact_type", "factType", "type", "kind"],
+    "unknown",
+  );
+  return {
+    id: readId(payload),
+    fact_type: normalizeFactType(rawType),
+    raw_fact_type: rawType,
+    value,
+    normalized_value: readNullableString(payload, [
+      "normalized_value",
+      "normalizedValue",
+    ]),
+    source_url: readNullableString(payload, [
+      "source_url",
+      "sourceUrl",
+      "url",
+    ]),
+    source_title: readNullableString(payload, ["source_title", "sourceTitle"]),
+    evidence_excerpt: readNullableString(payload, [
+      "evidence_excerpt",
+      "evidenceExcerpt",
+      "excerpt",
+    ]),
+    confidence: readOptionalNumber(payload, ["confidence"]),
+    collected_at: readNullableString(payload, [
+      "collected_at",
+      "collectedAt",
+      "created_at",
+      "createdAt",
+    ]),
+  };
+}
+
+export function normalizeFacts(payload: unknown): CompanyFact[] {
+  return extractItems(payload, ["facts", "items"])
+    .map(normalizeFact)
+    .filter((fact): fact is CompanyFact => fact !== null);
+}
+
 function findContactValue(
   contacts: CompanyContact[],
   types: string[],
@@ -612,6 +727,7 @@ export function normalizeCompany(payload: unknown): Company {
   const record = extractObject(payload, ["company", "data"]);
   const contacts = normalizeContacts(record.contacts ?? []);
   const sources = normalizeSources(record.sources ?? record.company_sources ?? []);
+  const facts = normalizeFacts(record.facts ?? []);
   const rawStatus = readString(
     record,
     ["discovery_status", "discoveryStatus", "status"],
@@ -646,6 +762,13 @@ export function normalizeCompany(payload: unknown): Company {
       findContactValue(contacts, ["whatsapp"]),
     source_count: Number.isNaN(sourceCount) ? sources.length : sourceCount,
     sources,
+    facts,
+    last_enriched_at: readNullableString(record, [
+      "last_enriched_at",
+      "lastEnrichedAt",
+      "enriched_at",
+      "enrichedAt",
+    ]),
     created_at: readNullableString(record, ["created_at", "createdAt"]),
   };
 }
@@ -663,6 +786,254 @@ export function normalizeCompanyPage(payload: unknown): CompanyPage {
   };
 }
 
+const ENRICH_STATUS_ALIASES: Record<string, CompanyEnrichStatus> = {
+  ok: "ok",
+  success: "ok",
+  enriched: "ok",
+  completed: "ok",
+  no_website: "no_website",
+  no_website_found: "no_website",
+  website_missing: "no_website",
+  missing_website: "no_website",
+  unsafe: "unsafe",
+  unsafe_url: "unsafe",
+  blocked: "unsafe",
+  ssrf_blocked: "unsafe",
+  fetch_error: "fetch_error",
+  fetch_failed: "fetch_error",
+  error: "fetch_error",
+  timeout: "fetch_error",
+};
+
+/** `ok`, `no_website`, `unsafe`, `fetch_error` (tolera guiones y mayúsculas). */
+export function normalizeEnrichStatus(value: string): CompanyEnrichStatus {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+  return ENRICH_STATUS_ALIASES[normalized] ?? "unknown";
+}
+
+function normalizeEnrichEvidence(payload: unknown): CompanyEnrichEvidence | null {
+  if (!isRecord(payload)) return null;
+  const sourceUrl = readString(payload, [
+    "source_url",
+    "sourceUrl",
+    "url",
+    "href",
+  ]);
+  const title = readNullableString(payload, ["title", "name", "label"]);
+  const excerpt = readNullableString(payload, [
+    "excerpt",
+    "evidence_excerpt",
+    "evidenceExcerpt",
+    "snippet",
+    "text",
+  ]);
+  if (
+    sourceUrl.trim().length === 0 &&
+    !title &&
+    !excerpt
+  ) {
+    return null;
+  }
+  return { source_url: sourceUrl, title, excerpt };
+}
+
+function normalizeEnrichResultFields(
+  record: Record<string, unknown>,
+): CompanyEnrichJobResult {
+  const rawStatus = readString(
+    record,
+    ["status", "result_status", "resultStatus", "outcome", "state"],
+    "unknown",
+  );
+  const evidence = extractItems(record, ["evidence", "evidences"])
+    .map(normalizeEnrichEvidence)
+    .filter((item): item is CompanyEnrichEvidence => item !== null);
+  return {
+    status: normalizeEnrichStatus(rawStatus),
+    raw_status: rawStatus,
+    fields_updated: readStringArray(record, [
+      "fields_updated",
+      "fieldsUpdated",
+      "updated_fields",
+    ]),
+    contacts_added: readNumber(record, [
+      "contacts_added",
+      "contactsAdded",
+      "new_contacts",
+      "newContacts",
+      "contacts_new",
+    ]),
+    facts_added: readNumber(record, [
+      "facts_added",
+      "factsAdded",
+      "new_facts",
+      "newFacts",
+      "facts_new",
+    ]),
+    sources_added: readNumber(record, [
+      "sources_added",
+      "sourcesAdded",
+      "new_sources",
+      "newSources",
+      "sources_new",
+    ]),
+    evidence,
+    error: readNullableString(record, ["error", "error_detail", "detail"]),
+  };
+}
+
+/**
+ * `POST /companies/{id}/enrich` devuelve el resultado de la investigación.
+ * Se toleran listas envueltas y claves en camelCase; lo que falta queda en
+ * cero o vacío para no inventar contactos, fuentes, facts ni evidencias.
+ */
+export function normalizeCompanyEnrichment(payload: unknown): CompanyEnrichResult {
+  const record = isRecord(payload) ? payload : {};
+  const result = normalizeEnrichResultFields(record);
+  return {
+    company_id: readEntityId(record, ["company_id", "companyId", "id"]),
+    ...result,
+  };
+}
+
+const ENRICH_JOB_STATUS_ALIASES: Record<string, CompanyEnrichJobStatus> = {
+  pending: "pending",
+  queued: "pending",
+  waiting: "pending",
+  scheduled: "pending",
+  running: "running",
+  processing: "running",
+  in_progress: "running",
+  started: "running",
+  completed: "completed",
+  success: "completed",
+  succeeded: "completed",
+  done: "completed",
+  ok: "completed",
+  failed: "failed",
+  failure: "failed",
+  error: "failed",
+  cancelled: "failed",
+  canceled: "failed",
+};
+
+/** Estados de la cola; `unknown` es defensa del normalizador. */
+export function normalizeEnrichJobStatus(
+  value: string,
+): CompanyEnrichJobStatus {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+  return ENRICH_JOB_STATUS_ALIASES[normalized] ?? "unknown";
+}
+
+function normalizeEnrichJobResult(
+  payload: unknown,
+): CompanyEnrichJobResult | null {
+  if (payload === null || payload === undefined) return null;
+  if (typeof payload === "string") {
+    const text = payload.trim();
+    return text.length === 0
+      ? null
+      : {
+          status: "unknown",
+          raw_status: "",
+          fields_updated: [],
+          contacts_added: 0,
+          facts_added: 0,
+          sources_added: 0,
+          evidence: [],
+          error: text,
+        };
+  }
+  if (!isRecord(payload)) return null;
+  if (Object.keys(payload).length === 0) return null;
+  return normalizeEnrichResultFields(payload);
+}
+
+/** Trabajo de enriquecimiento (`GET /companies/enrich/jobs`). */
+export function normalizeCompanyEnrichJob(payload: unknown): CompanyEnrichJob {
+  const record = extractObject(payload, ["job", "data"]);
+  const rawStatus = readString(
+    record,
+    ["status", "state", "job_status", "jobStatus"],
+    "unknown",
+  );
+  return {
+    id: readId(record),
+    company_id: readEntityId(record, ["company_id", "companyId"]),
+    company_name: readNullableString(record, [
+      "company_name",
+      "companyName",
+      "name",
+    ]),
+    status: normalizeEnrichJobStatus(rawStatus),
+    raw_status: rawStatus,
+    attempts: readNumber(record, ["attempts", "attempt"]),
+    max_attempts: readNumber(record, ["max_attempts", "maxAttempts"]),
+    error_message: readNullableString(record, [
+      "error_message",
+      "errorMessage",
+      "error",
+    ]),
+    result: normalizeEnrichJobResult(record.result ?? record.result_data),
+    created_at: readNullableString(record, ["created_at", "createdAt"]),
+    started_at: readNullableString(record, ["started_at", "startedAt"]),
+    finished_at: readNullableString(record, ["finished_at", "finishedAt"]),
+  };
+}
+
+export function normalizeCompanyEnrichJobs(
+  payload: unknown,
+): CompanyEnrichJob[] {
+  return extractItems(payload, ["jobs", "items"]).map(
+    normalizeCompanyEnrichJob,
+  );
+}
+
+function normalizeEnrichJobRef(payload: unknown): CompanyEnrichJobRef | null {
+  if (!isRecord(payload)) return null;
+  const id = readId(payload);
+  if (id.length === 0) return null;
+  const rawStatus = readString(payload, ["status", "state"], "pending");
+  return {
+    id,
+    company_id: readEntityId(payload, ["company_id", "companyId"]),
+    status: normalizeEnrichJobStatus(rawStatus),
+    raw_status: rawStatus,
+  };
+}
+
+function readCandidateCount(record: Record<string, unknown>): number {
+  const value = pick(record, ["candidates", "candidate_count", "candidateCount"]);
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  if (Array.isArray(value)) return value.length;
+  return 0;
+}
+
+/** `POST /companies/enrich` (lote de hasta 50 empresas). */
+export function normalizeCompanyEnrichBatch(
+  payload: unknown,
+): CompanyEnrichBatchResult {
+  const record = isRecord(payload) ? payload : {};
+  const jobs = extractItems(record, ["jobs", "items"])
+    .map(normalizeEnrichJobRef)
+    .filter((job): job is CompanyEnrichJobRef => job !== null);
+  return {
+    queued: readNumber(record, ["queued", "enqueued", "queued_count"]),
+    skipped: readNumber(record, ["skipped", "skipped_count"]),
+    jobs,
+    candidates: readCandidateCount(record),
+  };
+}
 export function normalizeCampaignSearchRunRef(
   payload: unknown,
 ): CampaignSearchRunRef {

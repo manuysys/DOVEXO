@@ -18,8 +18,15 @@ def _company_conditions(
     province: str | None,
     sector: str | None,
     discovery_status: str | None = None,
+    has_website: bool | None = None,
 ) -> list[object]:
     conditions: list[object] = []
+
+    if has_website is True:
+        conditions.append(Company.website.is_not(None))
+        conditions.append(Company.website != "")
+    elif has_website is False:
+        conditions.append(or_(Company.website.is_(None), Company.website == ""))
 
     if discovery_status:
         conditions.append(Company.discovery_status == discovery_status)
@@ -64,6 +71,7 @@ def list_companies(
     province: str | None = None,
     sector: str | None = None,
     discovery_status: str | None = None,
+    has_website: bool | None = None,
     limit: int | None = 20,
     offset: int = 0,
 ) -> tuple[list[Company], int]:
@@ -73,6 +81,7 @@ def list_companies(
         province=province,
         sector=sector,
         discovery_status=discovery_status,
+        has_website=has_website,
     )
 
     total = int(db.scalar(select(func.count()).select_from(Company).where(*conditions)) or 0)

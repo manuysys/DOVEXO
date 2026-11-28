@@ -64,6 +64,48 @@ class CompanySource(Base):
     )
 
 
+class CompanyFact(Base):
+    """Hecho extraído de una fuente, con la evidencia que lo respalda.
+
+    Un mismo valor puede aparecer en varias páginas: cada URL conserva su
+    propia fila porque la evidencia es distinta. `confidence` es orientativa y
+    nunca convierte una hipótesis en dato verificado.
+    """
+
+    __tablename__ = "company_facts"
+    __table_args__ = (
+        UniqueConstraint(
+            "company_id",
+            "fact_type",
+            "normalized_value",
+            "source_url",
+            name="uq_company_facts_company_type_value_url",
+        ),
+        Index("ix_company_facts_company_type", "company_id", "fact_type"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    company_id: Mapped[int] = mapped_column(
+        ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    fact_type: Mapped[str] = mapped_column(String(40), nullable=False)
+    value: Mapped[str] = mapped_column(String(500), nullable=False)
+    normalized_value: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
+    source_id: Mapped[int | None] = mapped_column(
+        ForeignKey("company_sources.id", ondelete="SET NULL"), nullable=True
+    )
+    source_url: Mapped[str] = mapped_column(String(1000), nullable=False)
+    source_title: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    evidence_excerpt: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    collected_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utcnow
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utcnow
+    )
+
+
 class CompanySector(Base):
     __tablename__ = "company_sectors"
     __table_args__ = (

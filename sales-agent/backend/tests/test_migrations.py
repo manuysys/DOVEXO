@@ -58,6 +58,41 @@ def test_alembic_upgrade_from_scratch_and_downgrade(tmp_path: Path) -> None:
             "metadata",
         } <= _table_columns(connection, "outreach_messages")
         assert {"whatsapp_threads", "whatsapp_messages"} <= tables
+        assert "company_facts" in tables
+        assert {
+            "company_id",
+            "fact_type",
+            "value",
+            "normalized_value",
+            "source_id",
+            "source_url",
+            "source_title",
+            "evidence_excerpt",
+            "confidence",
+            "collected_at",
+            "created_at",
+        } <= _table_columns(connection, "company_facts")
+        fact_indexes = {row[1] for row in connection.execute("PRAGMA index_list(company_facts)")}
+        assert "ix_company_facts_normalized_value" in fact_indexes
+        assert "ix_company_facts_company_type" in fact_indexes
+
+    # La migración de hechos es reversible: se puede volver un paso y aplicar
+    # de nuevo sin perder el resto del esquema.
+    _alembic(database_url, "downgrade", "-1")
+    with sqlite3.connect(database_path) as connection:
+        tables = {
+            row[0]
+            for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        assert "company_facts" not in tables
+        assert "companies" in tables
+    _alembic(database_url, "upgrade", "head")
+    with sqlite3.connect(database_path) as connection:
+        tables = {
+            row[0]
+            for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        assert "company_facts" in tables
 
     _alembic(database_url, "downgrade", "base")
 

@@ -58,7 +58,7 @@ LEAD_MEETING_STATUSES: tuple[str, ...] = (
 CAMPAIGN_STATUSES: tuple[str, ...] = ("draft", "active", "paused", "cancelled")
 
 JOB_STATUSES: tuple[str, ...] = ("pending", "running", "completed", "failed", "cancelled")
-JOB_TYPES: tuple[str, ...] = ("noop", "search_run")
+JOB_TYPES: tuple[str, ...] = ("noop", "search_run", "enrich_company")
 
 CONTACT_TYPES: tuple[str, ...] = ("phone", "whatsapp", "email", "website_form", "social", "other")
 CONTACT_VERIFICATION_STATUSES: tuple[str, ...] = (
