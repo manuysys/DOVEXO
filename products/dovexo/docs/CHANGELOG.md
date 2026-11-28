@@ -23,8 +23,10 @@
 - **Verificación en producción (2026-11-27):** los cuatro endpoints respondieron
   200 con `demo@saasgestion.com`, `Content-Disposition` correcto y BOM `EF BB BF`;
   `/settings/export` descargó `clientes-2026-11-27.csv` (573 bytes, 5 líneas) sin
-  errores de consola. El 403 de `viewer`/`technician` y el aislamiento entre
-  tenants están cubiertos solo por tests locales.
+  errores de consola. El 403 de `technician` también se verificó en producción
+  (login `tecnico@saasgestion.com`, rol `technician`, respuesta 403 vacía, sin
+  afectar la descarga del owner). El 403 de `viewer` y el aislamiento entre
+  tenants siguen cubiertos solo por tests locales.
 - **Pendiente:** los demás puntos de la auditoría externa del 2026-11-26 —legal
   con abogado, soporte con tiempos y backup real con restauración probada— no se
   tocaron en esta entrada.

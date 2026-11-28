@@ -55,8 +55,11 @@ web expone `/settings/export` con cuatro tarjetas. Detalle en ADR-028 y en
 Verificado en producción el 2026-11-27 con `demo@saasgestion.com`: los cuatro
 endpoints respondieron 200, con `Content-Disposition` correcto
 (`clientes-2026-11-27.csv`), BOM `EF BB BF` y descarga válida desde la web sin
-errores de consola. El 403 por rol y el aislamiento entre tenants se probaron
-solo en tests locales, no en producción.
+errores de consola. El 403 de `technician` también se verificó en producción: el
+login de `tecnico@saasgestion.com` devolvió rol `technician` y
+`GET /api/v1/exports/customers.csv` respondió 403 con cuerpo vacío, sin afectar
+la descarga del owner. El 403 de `viewer` y el aislamiento entre dos tenants
+siguen verificados solo por tests locales.
 
 **Siguen pendientes**, sin cambios:
 

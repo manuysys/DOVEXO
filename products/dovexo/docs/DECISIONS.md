@@ -762,9 +762,10 @@ abrir una vía de fuga entre tenants.
 - **Exportar no es un borrado seguro:** el CSV queda en la máquina del usuario
   fuera del control del producto. La política de retención y el aviso legal
   siguen abiertos.
-- **Cubierto por tests, no todo por producción:** permisos por rol y aislamiento
-  entre tenants tienen tests locales; en producción solo se verificó la descarga
-  con un owner de la demo.
+- **Cubierto por tests, no todo por producción:** el 403 de `technician` sí se
+  verificó en producción (login `tecnico@saasgestion.com`, rol `technician`,
+  respuesta 403 vacía, sin afectar la descarga del owner). El 403 de `viewer` y el
+  aislamiento entre dos tenants tienen solo tests locales.
 - **Verificación:** backend con 232 pytest y ruff/format/basedpyright OK;
   frontend con 317 tests, lint, typecheck y build OK. En producción (2026-11-27),
   los cuatro endpoints respondieron 200 con `demo@saasgestion.com`,

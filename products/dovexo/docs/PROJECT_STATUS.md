@@ -76,8 +76,14 @@ endpoints respondieron 200, con `Content-Disposition` correcto
 `/settings/export` mostró las cuatro tarjetas y descargó
 `clientes-2026-11-27.csv` (573 bytes, 5 líneas) sin errores de consola.
 
-**No verificado en producción:** el 403 de `viewer`/`technician` y el aislamiento
-entre tenants. Ambos están cubiertos solo por tests locales.
+**Verificado en producción el 2026-11-27:** el 403 de `technician` está
+confirmado. El login de `tecnico@saasgestion.com` devolvió rol `technician` y
+`GET /api/v1/exports/customers.csv` respondió 403 con cuerpo vacío, mientras que
+la misma descarga con owner (`demo@saasgestion.com`) siguió respondiendo 200 y la
+web siguió descargando el archivo.
+
+**Verificado solo por tests locales:** el 403 de `viewer` y el aislamiento entre
+dos tenants. No se probaron contra producción.
 
 ## Precios de lanzamiento v2 y cupos separados (2026-11-24)
 
